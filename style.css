@@ -297,6 +297,10 @@ body {
   display: flex;
   flex-direction: column;
 }
+main {
+  flex: 1;
+}
+
 .footer {
   margin-top: auto;
   padding: 10px 0;
