@@ -47,17 +47,15 @@ function formatDate(isoDate){
   }catch(e){ return isoDate; }
 }
 
-// Pagination state - updated for lazy loading
+// Pagination state
 const state = {
-  allData: [],
+  data: [],
   sortDesc: true,
-  currentPage: 1,
+  page: 1,
   totalPages: 1,
   hitsPerPage: 25,
   query: '',
-  isSearch: false,
-  isLoading: false,
-  hasMore: true
+  isSearch: false
 };
 let pageCache = {};
 const listEl = document.getElementById('list');
@@ -139,19 +137,15 @@ window.addEventListener('resize', handleModeSwitch);
 
 async function loadJson(page = 1){
   if(pageCache[page]){
-    state.allData = state.allData.concat(pageCache[page]);
-    state.currentPage = page;
-    state.hasMore = page < state.totalPages;
-    if(page === 1) render();
-    else appendGroups(pageCache[page]);
+    state.data = pageCache[page];
+    state.page = page;
+    render();
+    renderPagination();
     return;
   }
 
   state.isLoading = true;
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'loading-bottom';
-  loadingDiv.innerHTML = '<div class="loading-spinner"></div><span class="loading-text">Memuat data...</span>';
-  listEl.appendChild(loadingDiv);
+  listEl.innerHTML = '<div class="list-group-item text-center"><div class="loading-spinner"></div><span class="loading-text">Memuat data...</span></div>';
 
   const apiUrl = `https://archive.org/services/search/beta/page_production/?page_type=account_details&page_target=@16_i_gede_ananda_pradnyana&page_elements=[%22uploads%22]&hits_per_page=${state.hitsPerPage}&page=${page}&sort=publicdate:desc`;
   const res = await fetch(apiUrl, { cache: 'no-store' });
@@ -172,19 +166,14 @@ async function loadJson(page = 1){
   });
 
   pageCache[page] = pageData;
-  state.allData = state.allData.concat(pageData);
-  state.currentPage = page;
+  state.data = pageData;
+  state.page = page;
   state.totalPages = Math.ceil(total / state.hitsPerPage);
-  state.hasMore = page < state.totalPages;
   state.isSearch = false;
 
-  listEl.removeChild(loadingDiv);
   state.isLoading = false;
-  if (page === 1) {
-    render();
-  } else {
-    appendGroups(pageData);
-  }
+  render();
+  renderPagination();
 }
 
 async function loadAllJsonForSearch(query) {
@@ -235,14 +224,19 @@ async function loadAllJsonForSearch(query) {
   }
 
   state.allData = filteredData;
-  state.currentPage = 1;
+  state.page = 1;
   state.totalPages = Math.ceil(filteredData.length / state.hitsPerPage);
   state.isSearch = true;
   state.query = query;
-  state.hasMore = false; // No more loading in search mode
-  state.isLoading = false;
 
+  // Set current page data
+  const start = (state.page - 1) * state.hitsPerPage;
+  const end = start + state.hitsPerPage;
+  state.data = filteredData.slice(start, end);
+
+  state.isLoading = false;
   render();
+  renderPagination();
 }
 
 // Helper: extract base date from title (e.g., "VOT-Denpasar_13-10-25" from "VOT-Denpasar_13-10-25-2.mp3")
@@ -252,17 +246,8 @@ function extractBaseDate(title) {
 }
 
 function render(){
-  const q = document.getElementById('q').value.trim().toLowerCase();
-  let items = state.allData.slice();
-  if (state.isSearch) {
-    // data is already filtered, no pagination
-  } else {
-    // normal flow
-    if(!state.sortDesc) items.reverse();
-    if(q){
-      items = items.filter(it => (it.tanggal||'').toLowerCase().includes(q) || (it.url||'').toLowerCase().includes(q));
-    }
-  }
+  let items = state.data.slice();
+  if(!state.sortDesc) items.reverse();
 
   // Grouping by full date (dd-mm-yy)
   const groups = {};
@@ -395,213 +380,105 @@ function render(){
   }
 }
 
-function appendGroups(newItems) {
-  if (newItems.length === 0) return;
-
-  // Grouping by full date (dd-mm-yy)
-  const groups = {};
-  const groupDates = {};
-  for(const it of newItems){
-    const id = getIdentifierFromDetailsUrl(it.url);
-    const tglRaw = it.publicdate ? formatDate(it.publicdate) : it.tanggal;
-    const tglNorm = tglRaw;
-    if(!groups[tglNorm]) groups[tglNorm] = [];
-    groups[tglNorm].push({ ...it, id, tglRaw });
-    if (!groupDates[tglNorm]) {
-      groupDates[tglNorm] = tglRaw;
-    }
-  }
-
-  // Sort group keys
-  let groupKeys = Object.keys(groups);
-  groupKeys.sort((a, b) => {
-    const da = groupDates[a];
-    const db = groupDates[b];
-    function parseTgl(tgl) {
-      const parts = tgl.split('-');
-      if(parts.length === 3) {
-        let year = parts[2];
-        if(year.length === 2) year = '20' + year;
-        return new Date(year, parseInt(parts[1])-1, parseInt(parts[0]));
-      }
-      return new Date(tgl);
-    }
-    const dateA = parseTgl(da);
-    const dateB = parseTgl(db);
-    return state.sortDesc ? dateB - dateA : dateA - dateB;
-  });
-
-  // Find last group date in current list
-  const existingHeaders = listEl.querySelectorAll('.date-group-header');
-  let lastGroupDate = '';
-  if (existingHeaders.length > 0) {
-    const lastHeader = existingHeaders[existingHeaders.length - 1];
-    lastGroupDate = lastHeader.textContent.replace('Tanggal: ', '');
-  }
-
-  for(const tglNorm of groupKeys){
-    const group = groups[tglNorm];
-    let displayTanggal = groupDates[tglNorm];
-
-    // Only add header if different from last
-    if (displayTanggal !== lastGroupDate) {
-      // Container untuk grup tanggal
-      const container = document.createElement('div');
-      container.className = 'date-group-container';
-
-      // Baris tanggal
-      const dateRow = document.createElement('div');
-      dateRow.className = 'date-group-header';
-      dateRow.textContent = 'Tanggal: ' + displayTanggal;
-      container.appendChild(dateRow);
-      lastGroupDate = displayTanggal;
-
-      // Sort items within group
-      function extractDateTimeFromId(id) {
-        if (!id) return '';
-        const match = id.match(/(\d{8}-\d{6})/);
-        return match ? match[1] : '';
-      }
-      group.sort((a,b) => {
-        const dtA = extractDateTimeFromId(a.id);
-        const dtB = extractDateTimeFromId(b.id);
-        return state.sortDesc ? dtB.localeCompare(dtA) : dtA.localeCompare(dtB);
-      });
-
-      for(const it of group){
-        const row = document.createElement('div');
-        row.className = 'list-group-item';
-
-        const img = document.createElement('img');
-        img.src = `https://archive.org/services/img/${it.id}`;
-        img.alt = 'Thumbnail';
-        img.style = 'width:60px; height:60px; margin-right:10px; object-fit:fill; border-radius:4px;';
-
-        const meta = document.createElement('div');
-        meta.className = 'list-meta';
-        meta.innerHTML = `<div class="title">${it.title}</div>`+
-                  `<div><span class="badge-id">${it.id || ''}</span>
-                  <a href="${it.url}" target="_blank">Buka di Archive.org</a></div>`;
-
-        const playBtn = document.createElement('button');
-        playBtn.className = 'btn btn-success';
-        playBtn.textContent = 'Putar';
-        playBtn.onclick = async () => {
-          if(playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
-          row.parentNode.insertBefore(playerEl, row);
-          playerEl.hidden = false;
-          nowTitle.textContent = `${it.title}`;
-          nowSub.textContent = it.id ? it.id : '—';
-          audioEl.removeAttribute('src');
-          audioEl.load();
-          try{
-            const mp3 = it.id ? await resolveMp3Url(it.id) : null;
-            if(!mp3){
-              nowSub.textContent = 'File MP3 tidak ditemukan di item';
-              return;
-            }
-            audioEl.src = mp3;
-            audioEl.play().catch(()=>{});
-            nowSub.innerHTML = `<span>Memainkan: </span><code>${mp3.split('/').pop()}</code>`;
-          }catch(err){
-            nowSub.textContent = 'Gagal memuat audio: ' + err.message;
-          }
-        };
-
-        row.appendChild(img);
-        row.appendChild(meta);
-        row.appendChild(playBtn);
-        container.appendChild(row);
-      }
-
-      listEl.appendChild(container);
-    } else {
-      // If same date, append to existing container
-      const existingContainers = listEl.querySelectorAll('.date-group-container');
-      const lastContainer = existingContainers[existingContainers.length - 1];
-
-      // Sort items within group
-      function extractDateTimeFromId(id) {
-        if (!id) return '';
-        const match = id.match(/(\d{8}-\d{6})/);
-        return match ? match[1] : '';
-      }
-      group.sort((a,b) => {
-        const dtA = extractDateTimeFromId(a.id);
-        const dtB = extractDateTimeFromId(b.id);
-        return state.sortDesc ? dtB.localeCompare(dtA) : dtA.localeCompare(dtB);
-      });
-
-      for(const it of group){
-        const row = document.createElement('div');
-        row.className = 'list-group-item';
-
-        const img = document.createElement('img');
-        img.src = `https://archive.org/services/img/${it.id}`;
-        img.alt = 'Thumbnail';
-        img.style = 'width:60px; height:60px; margin-right:10px; object-fit:fill; border-radius:4px;';
-
-        const meta = document.createElement('div');
-        meta.className = 'list-meta';
-        meta.innerHTML = `<div class="title">${it.title}</div>`+
-                  `<div><span class="badge-id">${it.id || ''}</span>
-                  <a href="${it.url}" target="_blank">Buka di Archive.org</a></div>`;
-
-        const playBtn = document.createElement('button');
-        playBtn.className = 'btn btn-success';
-        playBtn.textContent = 'Putar';
-        playBtn.onclick = async () => {
-          if (isMultiColumnMode()) {
-            // Multi-column: use toast
-            hidePlayerToast(); // Hide any existing toast
-            showPlayerAsToast();
-          } else {
-            // Single-column: insert above row
-            if(playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
-            row.parentNode.insertBefore(playerEl, row);
-            playerEl.hidden = false;
-          }
-          nowTitle.textContent = `${it.title}`;
-          nowSub.textContent = it.id ? it.id : '—';
-          audioEl.removeAttribute('src');
-          audioEl.load();
-          try{
-            const mp3 = it.id ? await resolveMp3Url(it.id) : null;
-            if(!mp3){
-              nowSub.textContent = 'File MP3 tidak ditemukan di item';
-              return;
-            }
-            audioEl.src = mp3;
-            audioEl.play().catch(()=>{});
-            nowSub.innerHTML = `<span>Memainkan: </span><code>${mp3.split('/').pop()}</code>`;
-          }catch(err){
-            nowSub.textContent = 'Gagal memuat audio: ' + err.message;
-          }
-        };
-
-        row.appendChild(img);
-        row.appendChild(meta);
-        row.appendChild(playBtn);
-        lastContainer.appendChild(row);
-      }
-    }
-  }
+function loadSearchPage(page) {
+  if (!state.allData) return;
+  state.page = page;
+  const start = (page - 1) * state.hitsPerPage;
+  const end = start + state.hitsPerPage;
+  state.data = state.allData.slice(start, end);
+  render();
+  renderPagination();
 }
 
-// Scroll listener for lazy loading
-window.addEventListener('scroll', () => {
-  if (state.isLoading || !state.hasMore || state.isSearch) return;
-  const scrollY = window.scrollY;
-  const innerHeight = window.innerHeight;
-  const bodyScrollHeight = document.body.scrollHeight;
-  // Adjust threshold for smaller screens
-  const threshold = innerHeight < 600 ? 50 : 100;
-  if (scrollY + innerHeight >= bodyScrollHeight - threshold) {
-    loadJson(state.currentPage + 1).catch(err => {
-      listEl.innerHTML += `<div class="list-group-item text-center">${err.message}</div>`;
-    });
+function renderPagination(){
+  paginationEl.innerHTML = '';
+
+  const ul = document.createElement('ul');
+  ul.className = 'pagination';
+
+  // Previous button
+  const prevLi = document.createElement('li');
+  prevLi.className = `page-item ${state.page === 1 ? 'disabled' : ''}`;
+  const prevA = document.createElement('a');
+  prevA.className = 'page-link';
+  prevA.href = '#';
+  prevA.innerHTML = '<i class="fa fa-chevron-left"></i> Previous';
+  prevA.onclick = (e) => {
+    e.preventDefault();
+    if(state.page > 1) {
+      if(state.isSearch) loadSearchPage(state.page - 1);
+      else loadJson(state.page - 1);
+    }
+  };
+  prevLi.appendChild(prevA);
+  ul.appendChild(prevLi);
+
+  // Page numbers
+  const startPage = Math.max(1, state.page - 2);
+  const endPage = Math.min(state.totalPages, state.page + 2);
+
+  for(let i = startPage; i <= endPage; i++){
+    const li = document.createElement('li');
+    li.className = `page-item ${i === state.page ? 'active' : ''}`;
+    const a = document.createElement('a');
+    a.className = 'page-link';
+    a.href = '#';
+    a.textContent = i;
+    a.onclick = (e) => {
+      e.preventDefault();
+      if(state.isSearch) loadSearchPage(i);
+      else loadJson(i);
+    };
+    li.appendChild(a);
+    ul.appendChild(li);
   }
-});
+
+  // Next button
+  const nextLi = document.createElement('li');
+  nextLi.className = `page-item ${state.page === state.totalPages ? 'disabled' : ''}`;
+  const nextA = document.createElement('a');
+  nextA.className = 'page-link';
+  nextA.href = '#';
+  nextA.innerHTML = 'Next →';
+  nextA.onclick = (e) => {
+    e.preventDefault();
+    if(state.page < state.totalPages) {
+      if(state.isSearch) loadSearchPage(state.page + 1);
+      else loadJson(state.page + 1);
+    }
+  };
+  nextLi.appendChild(nextA);
+  ul.appendChild(nextLi);
+
+  paginationEl.appendChild(ul);
+
+  // Page input
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = 1;
+  input.max = state.totalPages;
+  input.value = state.page;
+  input.style.width = '60px';
+  input.style.marginLeft = '10px';
+  input.style.display = 'inline-block';
+
+  const goBtn = document.createElement('button');
+  goBtn.textContent = 'Go';
+  goBtn.className = 'btn btn-secondary';
+  goBtn.style.marginLeft = '5px';
+  goBtn.onclick = () => {
+    const page = parseInt(input.value);
+    if (page >= 1 && page <= state.totalPages) {
+      if(state.isSearch) loadSearchPage(page);
+      else loadJson(page);
+    }
+  };
+
+  paginationEl.appendChild(input);
+  paginationEl.appendChild(goBtn);
+}
+
+
 
 // Remove input event listener on search input to prevent search on typing
 // document.getElementById('q').addEventListener('input', render);
@@ -613,12 +490,11 @@ document.querySelector('.search-btn').addEventListener('click', () => {
   listEl.innerHTML = '';
   pageCache = {}; // clear cache to force fresh fetch
   state.allData = [];
-  state.currentPage = 1;
-  state.hasMore = true;
+  state.page = 1;
   if (query) {
     loadAllJsonForSearch(query);
   } else {
-    loadJson(state.currentPage);
+    loadJson(state.page);
   }
 });
 
@@ -630,12 +506,11 @@ document.getElementById('q').addEventListener('keydown', (event) => {
     listEl.innerHTML = '';
     pageCache = {}; // clear cache to force fresh fetch
     state.allData = [];
-    state.currentPage = 1;
-    state.hasMore = true;
+    state.page = 1;
     if (query) {
       loadAllJsonForSearch(query);
     } else {
-      loadJson(state.currentPage);
+      loadJson(state.page);
     }
   }
 });
@@ -645,12 +520,20 @@ document.getElementById('sortBtn').addEventListener('click', () => {
   document.getElementById('sortBtn').textContent = 'Urut: ' + (state.sortDesc ? 'Terbaru' : 'Terlama');
   render();
 });
-document.getElementById('refreshBtn').addEventListener('click', () => { delete pageCache[state.currentPage]; state.allData = []; state.currentPage = 1; state.hasMore = true; loadJson(state.currentPage); });
+document.getElementById('refreshBtn').addEventListener('click', () => { delete pageCache[state.page]; state.allData = []; state.page = 1; loadJson(state.page); });
 
 // Initial load on page load
-loadJson().catch(err => {
-  listEl.innerHTML = `<div class="list-group-item text-center">${err.message}</div>`;
-});
+const urlParams = new URLSearchParams(window.location.search);
+const initialPage = (parseInt(urlParams.get('page')) || 0) + 1;
+const initialQuery = urlParams.get('q');
+state.page = initialPage;
+if (initialQuery) {
+  loadAllJsonForSearch(initialQuery);
+} else {
+  loadJson(initialPage).catch(err => {
+    listEl.innerHTML = `<div class="list-group-item text-center">${err.message}</div>`;
+  });
+}
 
 // Stream player fetch logic
 async function loadStreamPlayer() {

@@ -1,129 +1,129 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <title>Voice of Trisma</title>
-  <meta property="og:site_name" content="Voice of Trisma">
-  <meta name="application-name" content="Voice of Trisma">
-  <meta property="og:title" content="Voice of Trisma">
-  <meta name="description" content="Voice of Trisma adalah platform berbasis web yang menampilkan siaran, arsip, dan dokumentasi kegiatan jurnalistik Madyapadma Denpasar.">
-  <!-- Schema Markup untuk Google Search -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "url": "https://madyapadma-online.com/",
-    "logo": "https://madyapadma-online.com/images/icon/madyapadma.png",
-    "name": "Madyapadma Online",
-    "sameAs": [
-      "https://www.instagram.com/madyapadma",
-      "https://www.youtube.com/@Madyapadmatrisma",
-      "https://github.com/Sparkplugx1904"
-    ]
-  }
-  </script>
-  <meta name="google-site-verification" content="7mjHa2WVudF6PQ6pueDkClMp03F8EjEGRVqzStK7UrE" />
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voice of Trisma</title>
 
-  <link rel="icon" type="image/png" href="https://madyapadma-online.com/images/icon/madyapadma.png">
-  
-  <!-- Bootstrap & Font -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Voice of Trisma adalah platform berbasis web yang menampilkan siaran, arsip, dan dokumentasi kegiatan jurnalistik Madyapadma Denpasar.">
+    <meta property="og:site_name" content="Voice of Trisma">
+    <meta property="og:title" content="Voice of Trisma">
+    <meta name="application-name" content="Voice of Trisma">
+    <meta name="google-site-verification" content="7mjHa2WVudF6PQ6pueDkClMp03F8EjEGRVqzStK7UrE" />
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://madyapadma-online.com/",
+        "logo": "https://madyapadma-online.com/images/icon/madyapadma.png",
+        "name": "Madyapadma Online",
+        "sameAs": [
+            "https://www.instagram.com/madyapadma",
+            "https://www.youtube.com/@Madyapadmatrisma",
+            "https://github.com/Sparkplugx1904"
+        ]
+    }
+    </script>
+
+    <link rel="icon" type="image/png" href="https://madyapadma-online.com/images/icon/madyapadma.png">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Tambahan style minor untuk merapikan layout inline */
+        .header-flex { display: flex; align-items: center; justify-content: flex-end; }
+        .player-container { padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 5px; }
+        .footer-icons img { margin: 0 10px; transition: transform 0.2s; }
+        .footer-icons img:hover { transform: scale(1.1); }
+    </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header id="sp-header">
-    <div class="container">
-      <div class="row" style="align-items:center;">
-        <div class="col-sm-3 col-xs-6 logo-col">
-          <a class="logo" href="https://madyapadma-online.com/">
-            <img src="https://madyapadma-online.com/images/logo-madya-padma.png" alt="Madyapadma Journalistic Park">
-          </a>
-        </div>
+    <header id="sp-header" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+        <div class="container">
+            <div class="row" style="display: flex; align-items: center;">
+                <div class="col-sm-3 col-xs-6">
+                    <a class="logo" href="https://madyapadma-online.com/">
+                        <img src="https://madyapadma-online.com/images/logo-madya-padma.png" alt="Madyapadma Journalistic Park" style="max-height: 50px;">
+                    </a>
+                </div>
 
-        <!-- optional middle area (nav or title) -->
-        <div class="col-sm-6 hidden-xs">
-          <nav style="padding-left:10px;">
-            <!-- tempat untuk navigasi jika ingin ditambahkan -->
-          </nav>
-        </div>
+                <div class="col-sm-6 hidden-xs">
+                    <nav></nav>
+                </div>
 
-        <!-- Clock pada kanan header -->
-        <div class="col-sm-3 col-xs-6 text-right">
-          <div style="display:flex; align-items:center; justify-content:flex-end;">
-            <div id="siteClock" class="site-clock" aria-live="polite" title="Waktu WITA">
-              --:--:--
+                <div class="col-sm-3 col-xs-6 text-right">
+                    <div class="header-flex">
+                        <div id="siteClock" class="site-clock" aria-live="polite" title="Waktu WITA">--:--:--</div>
+                        <button id="toggleModeBtn" class="btn btn-default" style="margin-left: 10px;" title="Ganti Tema">
+                            <i id="modeIcon" class="fa fa-moon-o"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <!-- Toggle dark mode button -->
-            <button id="toggleModeBtn" class="btn btn-default" style="margin-left:10px;" title="Light/Dark Mode">
-              <i id="modeIcon" class="fa fa-moon-o"></i>
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Content -->
-  <div class="container">
-    <!-- Stream Player di atas search bar -->
-    <div id="streamPlayerBox" class="row" style="margin-bottom:18px; margin-top:18px;">
-      <div class="col-xs-12">
-        <div id="streamPlayer" class="player" style="padding:10px; background:#fff; border:1px solid #ddd; border-radius:5px;">
-          <strong>Live Stream:</strong>
-          <span id="streamStatus" style="margin-left:10px;">Memuat stream…</span>
-          <audio id="streamAudio" controls preload="none" style="width:100%; margin-top:8px;" hidden></audio>
+    <main class="container">
+        
+        <div id="streamPlayerBox" class="row" style="margin: 20px 0;">
+            <div class="col-xs-12">
+                <div id="streamPlayer" class="player-container">
+                    <strong><i class="fa fa-rss"></i> Live Stream:</strong>
+                    <span id="streamStatus" style="margin-left: 10px;">Memuat stream…</span>
+                    <audio id="streamAudio" controls preload="none" style="width: 100%; margin-top: 10px;" hidden></audio>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="toolbar row">
-      <div class="col-sm-8">
-        <div class="search-box">
-          <input id="q" type="text" class="form-control" placeholder="Cari tanggal atau ID… (mis. 29-08-25)">
-          <button class="search-btn"><i class="fa fa-search"></i></button>
+        <div class="toolbar row" style="margin-bottom: 20px;">
+            <div class="col-sm-8">
+                <div class="input-group">
+                    <input id="q" type="text" class="form-control" placeholder="Cari tanggal atau ID… (mis. 29-08-25)">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default search-btn" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-4 text-right">
+                <div class="btn-group">
+                    <button class="btn btn-default" id="sortBtn">Urut: Terbaru</button>
+                    <button class="btn btn-primary" id="refreshBtn">Muat Ulang</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-sm-4 text-right">
-        <button class="btn btn-default" id="sortBtn">Urut: Terbaru</button>
-        <button class="btn btn-primary" id="refreshBtn">Muat Ulang</button>
-      </div>
-    </div>
 
-    <div id="list" class="list-group"></div>
-  </div>
+        <div id="list" class="list-group"></div>
+        <!-- Pagination controls -->
+        <div id="pagination" class="text-center" style="margin:20px 0;"></div>
 
-  <script src="script.js"></script>
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container text-center">
-      <!-- Logo GitHub -->
-      <a href="https://github.com/Sparkplugx1904/VOT-Denpasar" target="_blank" title="Repo GitHub">
-        <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png"
-            alt="GitHub" style="width:20px; height:20px; margin:0 10px;">
-      </a>
-      <!-- Logo Madyapadma -->
-      <a href="https://madyapadma-online.com/" target="_blank" title="Madyapadma Online">
-        <img src="https://madyapadma-online.com/images/icon/madyapadma.png"
-            alt="Madyapadma" style="width:33px; height:22px; margin:0 10px; filter: brightness(0) invert(0);">
-      </a>
-      <!-- Logo KBRF Madyapadma -->
-      <a href="https://i.klikhost.com/cp/widgets/player/?p=8502&type=shark" target="_blank" title="Madyapadma Online">
-        <img src="https://madyapadma-online.com/images/icon/KBRF.png"
-            alt="Madyapadma" style="width:20px; margin:0 10px; filter: brightness(0) invert(0);">
-      </a>
-      <!-- Logo Archive.org -->
-      <a href="https://archive.org/details/@16_i_gede_ananda_pradnyana" target="_blank" title="Archive">
-        <img src="data:image/svg+xml,<svg%20height='20'%20viewBox='0%200%2076%2086'%20width='20'%20xmlns='http://www.w3.org/2000/svg'><path%20d='m76%2082v4h-76l.00080851-4zm-3-6v5h-70v-5zm-62.6696277-54%20.8344146.4217275.4176066%206.7436084.4176065%2010.9576581v10.5383496l-.4176065%2013.1364492-.0694681%208.8498268-1.1825531.3523804h-4.17367003l-1.25202116-.3523804-.48627608-8.8498268-.41840503-13.0662957v-10.5375432l.41840503-11.028618.38167482-6.7798947.87034634-.3854412zm60.0004653%200%20.8353798.4217275.4168913%206.7436084.4168913%2010.9576581v10.5383496l-.4168913%2013.1364492-.0686832%208.8498268-1.1835879.3523804h-4.1737047l-1.2522712-.3523804-.4879704-8.8498268-.4168913-13.0662957v-10.5375432l.4168913-11.028618.3833483-6.7798947.8697215-.3854412zm-42.000632%200%20.8344979.4217275.4176483%206.7436084.4176482%2010.9576581v10.5383496l-.4176482%2013.1364492-.0686764%208.8498268-1.1834698.3523804h-4.1740866l-1.2529447-.3523804-.4863246-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8688361-.3854412zm23%200%20.8344979.4217275.4176483%206.7436084.4176482%2010.9576581v10.5383496l-.4176482%2013.1364492-.0686764%208.8498268-1.1834698.3523804h-4.1740866l-1.2521462-.3523804-.4871231-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8696347-.3854412zm21.6697944-9v7h-70v-7zm-35.7200748-13%2036.7200748%208.4088317-1.4720205%202.5911683h-70.32799254l-2.19998696-2.10140371z'%20fill='%232c2c2c'%20fill-rule='evenodd'/></svg>"
-            alt="Archive.org" style="width:20px; height:20px; margin:0 10px; filter: brightness(0) invert(0);">
-      </a>
-      <p>&copy; 2025 VOT Denpasar. All rights reserved.</p>
-    </div>
-  </footer>
+    </main>
 
+    <footer class="footer" style="padding: 30px 0; margin-top: 40px; border-top: 1px solid #eee;">
+        <div class="container text-center footer-icons">
+            <a href="https://github.com/Sparkplugx1904/VOT-Denpasar" target="_blank" title="Repo GitHub">
+                <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="20" height="20">
+            </a>
+            <a href="https://madyapadma-online.com/" target="_blank" title="Madyapadma Online">
+                <img src="https://madyapadma-online.com/images/icon/madyapadma.png" alt="Madyapadma" width="33" height="22">
+            </a>
+            <a href="https://i.klikhost.com/cp/widgets/player/?p=8502&type=shark" target="_blank" title="KBRF Madyapadma">
+                <img src="https://madyapadma-online.com/images/icon/KBRF.png" alt="KBRF" width="20">
+            </a>
+            <a href="https://archive.org/details/@16_i_gede_ananda_pradnyana" target="_blank" title="Archive">
+                <img src="data:image/svg+xml,<svg height='20' viewBox='0 0 76 86' width='20' xmlns='http://www.w3.org/2000/svg'><path d='m76 82v4h-76l.00080851-4zm-3-6v5h-70v-5zm-62.6696277-54 .8344146.4217275.4176066 6.7436084.4176065 10.9576581v10.5383496l-.4176065 13.1364492-.0694681 8.8498268-1.1825531.3523804h-4.17367003l-1.25202116-.3523804-.48627608-8.8498268-.41840503-13.0662957v-10.5375432l.41840503-11.028618.38167482-6.7798947.87034634-.3854412zm60.0004653 0 .8353798.4217275.4168913 6.7436084.4168913 10.9576581v10.5383496l-.4168913 13.1364492-.0686832 8.8498268-1.1835879.3523804h-4.1737047l-1.2522712-.3523804-.4879704-8.8498268-.4168913-13.0662957v-10.5375432l.4168913-11.028618.3833483-6.7798947.8697215-.3854412zm-42.000632 0 .8344979.4217275.4176483 6.7436084.4176482 10.9576581v10.5383496l-.4176482 13.1364492-.0686764 8.8498268-1.1834698.3523804h-4.1740866l-1.2529447-.3523804-.4863246-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8688361-.3854412zm23 0 .8344979.4217275.4176483 6.7436084.4176482 10.9576581v10.5383496l-.4176482 13.1364492-.0686764 8.8498268-1.1834698.3523804h-4.1740866l-1.2521462-.3523804-.4871231-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8696347-.3854412zm21.6697944-9v7h-70v-7zm-35.7200748-13 36.7200748 8.4088317-1.4720205 2.5911683h-70.32799254l-2.19998696-2.10140371z' fill='%232c2c2c' fill-rule='evenodd'/></svg>" alt="Archive.org" width="20" height="20">
+            </a>
+            
+            <p style="margin-top: 15px; color: #777;">&copy; 2025 VOT Denpasar. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

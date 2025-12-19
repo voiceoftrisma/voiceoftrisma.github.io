@@ -302,5 +302,5 @@ body {
   padding: 10px 0;
   background: #f9f9f9; /* opsional, biar jelas */
 }
-#pagination { display: none; }
+
 .loading-bottom { text-align: center; padding: 20px; width: 100%; }
