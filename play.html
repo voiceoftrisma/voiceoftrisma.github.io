@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Radio Player</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000; /* Latar hitam */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        audio {
+            width: 500px;
+            /* Filter dihapus agar warna kembali normal (putih/abu-abu bawaan) */
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="player" controls autoplay>
+        <source src="https://i.klikhost.com:8502/stream" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const player = document.getElementById('player');
+        const url = "https://i.klikhost.com:8502/stream";
+
+        function reconnect() {
+            const timestamp = new Date().getTime();
+            player.src = `${url}?t=${timestamp}`;
+            player.load();
+            player.play().catch(() => {}); 
+        }
+
+        // Reconnect otomatis jika internet bapuk/macet
+        player.addEventListener('stalled', reconnect);
+        player.addEventListener('error', () => setTimeout(reconnect, 3000));
+
+        // Paksa refresh setiap 30 menit agar tetap sinkron/live
+        setInterval(() => {
+            if (!player.paused) {
+                reconnect();
+            }
+        }, 1800000); // 30 menit
+    </script>
+</body>
+</html>

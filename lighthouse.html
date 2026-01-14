@@ -6,7 +6,8 @@
     if (data.streamstatus === 1) {
       console.log("Stream aktif! Mengalihkan...");
       clearInterval(checkInterval);
-      window.location.href = `${audioStream}/stream`;
+      // window.location.href = `${audioStream}stream`;
+      window.location.href = `/play`;
     }
   }
 

@@ -31,7 +31,7 @@
 
   <!-- Badge untuk Archive -->
   <a href="https://voiceoftrisma.github.io/" target="_blank">
-    <img src="https://img.shields.io/badge/Lighthouse-red?style=for-the-badge&logo=github&logoColor=white" alt="Listen Archive"/>
+    <img src="https://img.shields.io/badge/Lighthouse-darkred?style=for-the-badge&logo=github&logoColor=white" alt="Listen Archive"/>
   </a>
 
   <!-- Badge untuk About Madyapadma dengan tanda seru di lingkaran -->
