@@ -6,7 +6,7 @@
     <style>
         body {
             margin: 0;
-            background: #000; /* Latar hitam */
+            background: #000;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -14,7 +14,6 @@
         }
         audio {
             width: 500px;
-            /* Filter dihapus agar warna kembali normal (putih/abu-abu bawaan) */
         }
     </style>
 </head>
@@ -35,16 +34,14 @@
             player.play().catch(() => {}); 
         }
 
-        // Reconnect otomatis jika internet bapuk/macet
         player.addEventListener('stalled', reconnect);
         player.addEventListener('error', () => setTimeout(reconnect, 3000));
 
-        // Paksa refresh setiap 30 menit agar tetap sinkron/live
         setInterval(() => {
             if (!player.paused) {
                 reconnect();
             }
-        }, 1800000); // 30 menit
+        }, 1800000);
     </script>
 </body>
 </html>

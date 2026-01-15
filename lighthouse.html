@@ -1,13 +1,11 @@
 <script>
   const audioStream = "https://i.klikhost.com:8502/"
   function shoutcastCallback(data) {
-    console.log("Status Check:", data.streamstatus === 1 ? "Online" : "Offline");
     
     if (data.streamstatus === 1) {
-      console.log("Stream aktif! Mengalihkan...");
       clearInterval(checkInterval);
       // window.location.href = `${audioStream}stream`;
-      window.location.href = `/play`;
+      window.location.href = `stream`;
     }
   }
 
@@ -19,9 +17,6 @@
     script.id = 'shoutcast-script';
     script.src = `${audioStream}stats?json=1&callback=shoutcastCallback&t=` + new Date().getTime();
     
-    script.onerror = function() {
-      console.error("Gagal memuat status.");
-    };
     document.head.appendChild(script);
   }
   const checkInterval = setInterval(getStats, 1000);
