@@ -1,15 +1,21 @@
+<div id="err-display" style="position: fixed; top: 0; left: 0; font-size: 12px; padding: 1px; z-index: 9999;"></div>
+
 <script>
   const audioStream = "https://i.klikhost.com:8502/"
+  const errDisplay = document.getElementById('err-display');
+
   function shoutcastCallback(data) {
-    
     if (data.streamstatus === 1) {
+      errDisplay.innerText = "HTTP 200: Connected";
       clearInterval(checkInterval);
-      // window.location.href = `${audioStream}stream`;
       window.location.href = `stream`;
+    } else {
+      errDisplay.innerText = "Standby: Stream Offline";
     }
   }
 
   function getStats() {
+    errDisplay.innerText = "Standby: Requesting...";
     const oldScript = document.getElementById('shoutcast-script');
     if (oldScript) oldScript.remove();
 
@@ -17,8 +23,13 @@
     script.id = 'shoutcast-script';
     script.src = `${audioStream}stats?json=1&callback=shoutcastCallback&t=` + new Date().getTime();
     
+    script.onerror = function() {
+      errDisplay.innerText = "HTTP 401: Unauthorized or Connection Failed";
+    };
+    
     document.head.appendChild(script);
   }
-  const checkInterval = setInterval(getStats, 1000);
+
+  const checkInterval = setInterval(getStats, 2000);
   getStats();
 </script>
