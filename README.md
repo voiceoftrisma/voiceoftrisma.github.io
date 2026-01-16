@@ -29,9 +29,9 @@
     <img src="https://img.shields.io/badge/Dengarkan%20Arsip%20Disini-blue?style=for-the-badge&logo=github&logoColor=white" alt="Listen Archive"/>
   </a>
 
-  <!-- Badge untuk Archive -->
-  <a href="https://voiceoftrisma.github.io/" target="_blank">
-    <img src="https://img.shields.io/badge/Lighthouse-darkred?style=for-the-badge&logo=github&logoColor=white" alt="Listen Archive"/>
+  <!-- Badge untuk Lighthouse -->
+  <a href="https://voiceoftrisma.github.io/lighthouse/" target="_blank">
+    <img src="https://img.shields.io/badge/Lighthouse-darkred?style=for-the-badge&logo=github&logoColor=white" alt="Lighthouse"/>
   </a>
 
   <!-- Badge untuk About Madyapadma dengan tanda seru di lingkaran -->
