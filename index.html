@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Voice of Trisma, The Best Online Radio in Bali</title>
-
+    
     <meta name="description" content="“Voice of Trisma atau VOT adalah radio komunitas yang dibentuk oleh Madyapadma Journalistic Park SMA Negeri 3 Denpasar.">
     <meta name="keywords" content="VOT, Voice of Trisma, Radio Trisma, Radio SMA Negeri 3 Denpasar, Trisma Denpasar, Radio Madyapadma">
     <meta property="og:site_name" content="Voice of Trisma">
@@ -27,7 +27,7 @@
     }
     </script>
 
-    <link rel="icon" type="image/png" href="./madyapadma.svg">
+    <link rel="icon" href="./madyapadma.svg" type="image/png">
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -49,7 +49,7 @@
             <div class="row" style="display: flex; align-items: center;">
                 <div class="col-sm-3 col-xs-6">
                     <a class="logo" href="https://madyapadma-online.com/">
-                        <img src="https://madyapadma-online.com/images/logo-madya-padma.png" alt="Madyapadma Journalistic Park" style="max-height: 50px;">
+                        <img src="./madyapadma-voice-of-trisma.svg" alt="Madyapadma Journalistic Park" style="max-height: 100px;">
                     </a>
                 </div>
 
@@ -60,9 +60,54 @@
                 <div class="col-sm-3 col-xs-6 text-right">
                     <div class="header-flex">
                         <div id="siteClock" class="site-clock" aria-live="polite" title="Waktu WITA">--:--:--</div>
+                        <script>
+                            function pad(n){ return String(n).padStart(2, '0'); }
+                            function updateClock(){
+                            const now = new Date();
+                            // Gunakan waktu WITA (UTC+8)
+                            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                            const witaTime = new Date(utc + (8 * 3600000));
+                            const hh = pad(witaTime.getHours());
+                            const mm = pad(witaTime.getMinutes());
+                            const ss = pad(witaTime.getSeconds());
+                            const el = document.getElementById('siteClock');
+                            if(el) el.textContent = hh + ':' + mm + ':' + ss + ' WITA';
+                            }
+                            // Inisialisasi dan timer
+                            updateClock();
+                            setInterval(updateClock, 1000);
+                        </script>
                         <button id="toggleModeBtn" class="btn btn-default" style="margin-left: 10px;" title="Ganti Tema">
                             <i id="modeIcon" class="fa fa-moon-o"></i>
                         </button>
+                        <script>
+                        // Light/Dark mode toggle
+                        const modeBtn = document.getElementById('toggleModeBtn');
+                        const modeIcon = document.getElementById('modeIcon');
+                        function setMode(dark) {
+                        document.body.classList.toggle('dark-mode', dark);
+                        modeIcon.className = dark ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                        modeBtn.title = dark ? 'Switch ke Light Mode' : 'Switch ke Dark Mode';
+                        // Simpan preferensi di localStorage
+                        localStorage.setItem('votdenpasar-darkmode', dark ? '1' : '0');
+                        }
+                        // Cek preferensi awal
+                        (() => {
+                        const pref = localStorage.getItem('votdenpasar-darkmode');
+                        setMode(pref === '1');
+                        })();
+                        modeBtn.onclick = () => {
+                        setMode(!document.body.classList.contains('dark-mode'));
+                        };
+
+                        document.getElementById('sortBtn').addEventListener('click', () => {
+                        state.sortDesc = !state.sortDesc;
+                        document.getElementById('sortBtn').textContent = 'Urut: ' + (state.sortDesc ? 'Terbaru' : 'Terlama');
+                        render();
+                        });
+                        document.getElementById('refreshBtn').addEventListener('click', () => { delete pageCache[state.page]; state.allData = []; state.page = 1; loadJson(state.page); });
+
+                        </script>
                     </div>
                 </div>
             </div>
@@ -115,24 +160,22 @@
                 <img src="./madyapadma.svg" alt="Madyapadma" width="33" style="filter: brightness(0);">
             </a>
             <a href="https://i.klikhost.com/cp/widgets/player/?p=8502&type=shark" target="_blank" title="KBRF Madyapadma">
-                <img src="https://madyapadma-online.com/images/icon/KBRF.png" alt="KBRF" width="20" style="filter: brightness(0);">
+                <img src="./kbrf.svg" alt="KBRF" width="20" style="filter: brightness(0);">
             </a>
-            <a href="https://archive.org/details/@16_i_gede_ananda_pradnyana" target="_blank" title="Archive">
-                <img src="data:image/svg+xml,<svg height='20' viewBox='0 0 76 86' width='20' xmlns='http://www.w3.org/2000/svg'><path d='m76 82v4h-76l.00080851-4zm-3-6v5h-70v-5zm-62.6696277-54 .8344146.4217275.4176066 6.7436084.4176065 10.9576581v10.5383496l-.4176065 13.1364492-.0694681 8.8498268-1.1825531.3523804h-4.17367003l-1.25202116-.3523804-.48627608-8.8498268-.41840503-13.0662957v-10.5375432l.41840503-11.028618.38167482-6.7798947.87034634-.3854412zm60.0004653 0 .8353798.4217275.4168913 6.7436084.4168913 10.9576581v10.5383496l-.4168913 13.1364492-.0686832 8.8498268-1.1835879.3523804h-4.1737047l-1.2522712-.3523804-.4879704-8.8498268-.4168913-13.0662957v-10.5375432l.4168913-11.028618.3833483-6.7798947.8697215-.3854412zm-42.000632 0 .8344979.4217275.4176483 6.7436084.4176482 10.9576581v10.5383496l-.4176482 13.1364492-.0686764 8.8498268-1.1834698.3523804h-4.1740866l-1.2529447-.3523804-.4863246-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8688361-.3854412zm23 0 .8344979.4217275.4176483 6.7436084.4176482 10.9576581v10.5383496l-.4176482 13.1364492-.0686764 8.8498268-1.1834698.3523804h-4.1740866l-1.2521462-.3523804-.4871231-8.8498268-.4168497-13.0662957v-10.5375432l.4168497-11.028618.38331-6.7798947.8696347-.3854412zm21.6697944-9v7h-70v-7zm-35.7200748-13 36.7200748 8.4088317-1.4720205 2.5911683h-70.32799254l-2.19998696-2.10140371z' fill='%232c2c2c' fill-rule='evenodd'/></svg>" alt="Archive.org" width="20" height="20">
+            <a href="https://archive.org/details/@16_i_gede_ananda_pradnyana" target="_blank" title="KBRF Madyapadma">
+                <img src="./archive-org.svg" alt="KBRF" width="20" style="filter: brightness(0);">
             </a>
             
             <p style="margin-top: 15px; color: #777;"> &copy; <script>document.write(new Date().getFullYear())</script> VOT Denpasar. All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="./clock.js"></script>
     <script src="./utils.js"></script>
     <script src="./data.js"></script>
     <script src="./player.js"></script>
     <script src="./render.js"></script>
     <script src="./search.js"></script>
     <script src="./stream.js"></script>
-    <script src="./ui.js"></script>
     <script src="./main.js"></script>
 </body>
 </html>
