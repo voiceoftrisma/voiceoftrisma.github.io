@@ -100,8 +100,10 @@ async function loadAllJsonForSearch(query) {
     filteredData = allData.filter(it => (it.tanggal || '').toLowerCase().includes(query) || (it.url || '').toLowerCase().includes(query));
   }
 
-  state.allData = filteredData;
-  state.page = 1;
+  state.allData = allData.sort((a, b) => {
+      return new Date(b.publicdate) - new Date(a.publicdate);
+  });
+  state.totalPages = Math.ceil(state.allData.length / state.hitsPerPage);
   state.totalPages = Math.ceil(filteredData.length / state.hitsPerPage);
   state.isSearch = true;
   state.query = query;

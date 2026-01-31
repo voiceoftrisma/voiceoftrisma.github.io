@@ -30,7 +30,7 @@
   </a>
 
   <!-- Badge untuk Lighthouse -->
-  <a href="https://voiceoftrisma.github.io/lighthouse/" target="_blank">
+  <a href="https://voiceoftrisma.github.io/lighthouse" target="_blank">
     <img src="https://img.shields.io/badge/Lighthouse-darkred?style=for-the-badge&logo=github&logoColor=white" alt="Lighthouse"/>
   </a>
 

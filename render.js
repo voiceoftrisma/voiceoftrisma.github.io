@@ -1,129 +1,161 @@
-function render(){
-  let items = state.data.slice();
-  if(!state.sortDesc) items.reverse();
+// render.js
 
-  // Grouping by full date (dd-mm-yy)
+function render() {
+  const listEl = document.getElementById('list');
+  if (!listEl) return;
+
+  // 1. Bersihkan kontainer
+  listEl.innerHTML = '';
+  if (playerEl && playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
+  if (playerEl) playerEl.hidden = true;
+
+  // 2. Ambil data dari state
+  let items = state.data.slice();
+
+  // 3. Grouping data berdasarkan tanggal (dd-mm-yy)
   const groups = {};
-  const groupDates = {}; // simpan tanggal asli untuk sorting
-  for(const it of items){
+  const groupDates = {}; 
+  
+  for (const it of items) {
     const id = getIdentifierFromDetailsUrl(it.url);
     const tglRaw = it.publicdate ? formatDate(it.publicdate) : it.tanggal;
-    const tglNorm = tglRaw; // full dd-mm-yy
-    if(!groups[tglNorm]) groups[tglNorm] = [];
-    groups[tglNorm].push({ ...it, id, tglRaw });
-    // Simpan tanggal asli untuk sorting
-    if (!groupDates[tglNorm]) {
-      groupDates[tglNorm] = tglRaw;
-    }
+    if (!groups[tglRaw]) groups[tglRaw] = [];
+    groups[tglRaw].push({ ...it, id, tglRaw });
+    groupDates[tglRaw] = it.publicdate;
   }
 
-  // Sort group keys (tanggal) berdasarkan waktu asli
+  // 4. Urutkan Group (Header Tanggal)
   let groupKeys = Object.keys(groups);
   groupKeys.sort((a, b) => {
-    // Parse ke Date, fallback ke string jika gagal
     const da = groupDates[a];
     const db = groupDates[b];
-    // Format: dd-mm-yy
-    function parseTgl(tgl) {
+    
+    function parseTgl(tgl, iso) {
+      if (iso) return new Date(iso);
       const parts = tgl.split('-');
-      if(parts.length === 3) {
+      if (parts.length === 3) {
         let year = parts[2];
-        if(year.length === 2) year = '20' + year;
-        return new Date(year, parseInt(parts[1])-1, parseInt(parts[0]));
+        if (year.length === 2) year = '20' + year;
+        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
       }
-      return new Date(tgl);
+      return new Date(0);
     }
-    const dateA = parseTgl(da);
-    const dateB = parseTgl(db);
+    
+    const dateA = parseTgl(a, da);
+    const dateB = parseTgl(b, db);
     return state.sortDesc ? dateB - dateA : dateA - dateB;
   });
 
-  listEl.innerHTML = '';
-  if(playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
-  playerEl.hidden = true;
-
-  if(items.length === 0){
-    listEl.innerHTML = `<div class="list-group-item text-center">Tidak ada rekaman atau tidak cocok dengan pencarian.</div>`;
+  if (items.length === 0) {
+    listEl.innerHTML = `<div class="list-group-item text-center">Tidak ada rekaman ditemukan.</div>`;
     return;
   }
 
-  for(const tglNorm of groupKeys){
+  // 5. Render Loop
+  for (const tglNorm of groupKeys) {
     const group = groups[tglNorm];
-    let displayTanggal = groupDates[tglNorm];
-
-    // Container untuk grup tanggal
+    
     const container = document.createElement('div');
     container.className = 'date-group-container';
 
-    // Baris tanggal
     const dateRow = document.createElement('div');
     dateRow.className = 'date-group-header';
-    dateRow.textContent = 'Tanggal: ' + displayTanggal;
+    dateRow.textContent = 'Tanggal: ' + tglNorm;
     container.appendChild(dateRow);
 
-    // Urutkan file dalam grup berdasarkan datetime dari identifier
-    group.sort((a,b) => {
+    // Urutkan item di dalam grup
+    group.sort((a, b) => {
       const dtA = extractDateTimeFromId(a.id);
       const dtB = extractDateTimeFromId(b.id);
       return state.sortDesc ? dtB.localeCompare(dtA) : dtA.localeCompare(dtB);
     });
 
-    for(const it of group){
+    for (const it of group) {
       const row = document.createElement('div');
       row.className = 'list-group-item';
-
-      const img = document.createElement('img');
-      img.src = `https://archive.org/services/img/${it.id}`;
-      img.alt = 'Thumbnail';
-      img.style = 'width:60px; height:60px; margin-right:10px; object-fit:fill; border-radius:4px;';
-
-      const meta = document.createElement('div');
-      meta.className = 'list-meta';
-      meta.innerHTML = `<div class="title">${it.title}</div>`+
-                `<div><span class="badge-id">${it.id || ''}</span>
-                <a href="${it.url}" target="_blank">Buka di Archive.org</a></div>`;
+      row.innerHTML = `
+        <img src="https://archive.org/services/img/${it.id}" style="width:60px; height:60px; margin-right:10px; object-fit:fill; border-radius:4px;">
+        <div class="list-meta">
+          <div class="title">${it.title}</div>
+          <div><span class="badge-id">${it.id || ''}</span> <a href="${it.url}" target="_blank">Archive.org</a></div>
+        </div>
+      `;
 
       const playBtn = document.createElement('button');
       playBtn.className = 'btn btn-success';
       playBtn.textContent = 'Putar';
       playBtn.onclick = async () => {
+        // Logika Player (Toast vs Inline)
         if (isMultiColumnMode()) {
-          // Multi-column: use toast
-          hidePlayerToast(); // Hide any existing toast
+          hidePlayerToast();
           showPlayerAsToast();
         } else {
-          // Single-column: insert above row
-          if(playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
+          if (playerEl.parentNode) playerEl.parentNode.removeChild(playerEl);
           row.parentNode.insertBefore(playerEl, row);
           playerEl.hidden = false;
         }
-        nowTitle.textContent = `${it.title}`;
-        nowSub.textContent = it.id ? it.id : '—';
-        audioEl.removeAttribute('src');
-        audioEl.load();
-        try{
-          const mp3 = it.id ? await resolveMp3Url(it.id) : null;
-          if(!mp3){
-            nowSub.textContent = 'File MP3 tidak ditemukan di item';
-            return;
+        
+        nowTitle.textContent = it.title;
+        nowSub.textContent = 'Menyiapkan...';
+        audioEl.src = '';
+        
+        try {
+          const mp3 = await resolveMp3Url(it.id);
+          if (mp3) {
+            audioEl.src = mp3;
+            audioEl.play();
+            nowSub.innerHTML = `Memainkan: <code>${it.id}</code>`;
           }
-          audioEl.src = mp3;
-          audioEl.play().catch(()=>{});
-          nowSub.innerHTML = `<span>Memainkan: </span><code>${mp3.split('/').pop()}</code>`;
-        }catch(err){
-          nowSub.textContent = 'Gagal memuat audio: ' + err.message;
-        }
+        } catch (e) { nowSub.textContent = 'Error: ' + e.message; }
       };
 
-      row.appendChild(img);
-      row.appendChild(meta);
       row.appendChild(playBtn);
       container.appendChild(row);
     }
-
     listEl.appendChild(container);
   }
 }
+
+// Fungsi untuk membalikkan urutan (Terbaru <-> Terlama)
+window.toggleSort = function() {
+    state.sortDesc = !state.sortDesc; // Balikkan status
+    
+    // Update teks dan ikon tombol secara responsif
+    const sortBtn = document.getElementById('sortBtn');
+    if (sortBtn) {
+        sortBtn.innerHTML = state.sortDesc ? 
+            '<i class="fa fa-sort-amount-desc"></i> Urut: Terbaru' : 
+            '<i class="fa fa-sort-amount-asc"></i> Urut: Terlama';
+    }
+
+    // Jalankan ulang render dengan urutan baru
+    render();
+};
+
+// Fungsi untuk muat ulang data (Refresh)
+window.refreshData = async function() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    // Efek visual: ganti ikon jadi loading
+    const originalContent = refreshBtn.innerHTML;
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<i class="fa fa-refresh fa-spin"></i> Memuat...';
+
+    try {
+        pageCache = {}; // Hapus cache agar ambil data segar dari server
+        if (state.isSearch && state.query) {
+            await loadAllJsonForSearch(state.query);
+        } else {
+            await loadJson(state.page);
+        }
+    } catch (err) {
+        console.error("Gagal refresh:", err);
+    } finally {
+        // Kembalikan tombol ke semula
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = originalContent;
+    }
+};
 
 function renderPagination(){
   paginationEl.innerHTML = '';
