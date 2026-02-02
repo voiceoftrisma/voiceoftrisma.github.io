@@ -29,6 +29,11 @@
     <img src="https://img.shields.io/badge/Dengarkan%20Arsip%20Disini-blue?style=for-the-badge&logo=github&logoColor=white" alt="Listen Archive"/>
   </a>
 
+   <!-- Badge untuk Theme -->
+  <a href="https://github.com/Sparkplugx1904/voiceoftrisma/blob/main/template/THEME.md" target="_blank">
+    <img src="https://img.shields.io/badge/Theme-blue?style=for-the-badge&logo=github&logoColor=white" alt="Theme"/>
+  </a>
+
   <!-- Badge untuk Lighthouse -->
   <a href="https://voiceoftrisma.github.io/lighthouse" target="_blank">
     <img src="https://img.shields.io/badge/Lighthouse-darkred?style=for-the-badge&logo=github&logoColor=white" alt="Lighthouse"/>
