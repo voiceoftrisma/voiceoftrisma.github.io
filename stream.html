@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Radio Player with Auto-Gain</title>
+    <title>Radio Player Active Ping + AGC</title>
     <style>
         body {
             margin: 0;
@@ -13,10 +13,12 @@
             justify-content: center;
             align-items: center;
             color: white;
-            font-family: sans-serif;
+            font-family: monospace;
         }
-        audio { width: 500px; }
-        .status { margin-top: 10px; font-size: 12px; color: #888; }
+        audio { width: 500px; margin-bottom: 20px; }
+        .status { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .ping-status { font-size: 12px; color: #00bcd4; margin-bottom: 5px; }
+        .log { font-size: 10px; color: #666; width: 80%; text-align: center; height: 100px; overflow-y: auto; border-top: 1px solid #333; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -24,101 +26,199 @@
     <audio id="player" crossorigin="anonymous" controls>
         <source src="https://i.klikhost.com:8502/stream" type="audio/mpeg">
     </audio>
-    <div class="status" id="statusText">AGC Active: Menstabilkan Volume...</div>
+    
+    <div class="status" id="statusText">System Ready</div>
+    <div class="ping-status" id="pingStatus">Server Check: Waiting...</div>
+    <div class="log" id="debugLog"></div>
 
     <script>
         const player = document.getElementById('player');
-        const url = "https://i.klikhost.com:8502/stream";
+        const statusText = document.getElementById('statusText');
+        const pingStatus = document.getElementById('pingStatus');
+        const debugLog = document.getElementById('debugLog');
         
-        // Setup Web Audio API
-        let audioCtx;
-        let source;
-        let compressor;
-        let analyzer;
-        let gainNode;
+        // URL Stream Base
+        const streamUrl = "https://i.klikhost.com:8502/stream";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const agcParam = urlParams.get('agc');
+
+        // Logika: Aktif jika parameter ada DAN bukan '0' DAN bukan 'false'
+        const useAGC = agcParam !== null && agcParam !== '0' && agcParam !== 'false';
+
+        // Update UI Text Status AGC
+        if (useAGC) {
+            statusText.innerText = "AGC: ON (Stabilizer Aktif)";
+            statusText.style.color = "#4caf50"; 
+        } else {
+            statusText.innerText = "AGC: OFF";
+            statusText.style.color = "#ff9800"; 
+        }
+
+        // --- FUNGSI LOGGING ---
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            // Tampilkan di div log
+            const p = document.createElement('div');
+            p.innerText = `[${time}] ${msg}`;
+            debugLog.prepend(p);
+            // Batasi log agar tidak penuh memori
+            if (debugLog.children.length > 20) debugLog.lastChild.remove();
+            console.log(`[${time}] ${msg}`);
+        }
+
+        // --- AUDIO ENGINE (AGC LOGIC) ---
+        let audioCtx, source, compressor, analyzer, gainNode, isAudioEngineInit = false;
 
         function initAudioEngine() {
-            if (audioCtx) return;
+            if (!useAGC || isAudioEngineInit) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                source = audioCtx.createMediaElementSource(player);
+                
+                compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.value = -24;
+                compressor.knee.value = 30;
+                compressor.ratio.value = 12;
+                compressor.attack.value = 0.003;
+                compressor.release.value = 0.25;
 
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            source = audioCtx.createMediaElementSource(player);
-            
-            // 1. DynamicsCompressor: Menahan suara yang terlalu keras/meledak
-            compressor = audioCtx.createDynamicsCompressor();
-            compressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
-            compressor.knee.setValueAtTime(30, audioCtx.currentTime);
-            compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
-            compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
-            compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+                gainNode = audioCtx.createGain();
+                analyzer = audioCtx.createAnalyser();
+                analyzer.fftSize = 256;
 
-            // 2. GainNode: Untuk mengangkat volume secara otomatis
-            gainNode = audioCtx.createGain();
-            
-            // 3. Analyzer: Untuk mendeteksi volume secara real-time
-            analyzer = audioCtx.createAnalyser();
-            analyzer.fftSize = 256;
+                source.connect(compressor);
+                compressor.connect(gainNode);
+                gainNode.connect(analyzer);
+                gainNode.connect(audioCtx.destination);
 
-            // Rangkaian: Player -> Compressor -> Gain -> Analyzer -> Speaker
-            source.connect(compressor);
-            compressor.connect(gainNode);
-            gainNode.connect(analyzer);
-            gainNode.connect(audioCtx.destination);
-
-            autoGainLoop();
+                isAudioEngineInit = true;
+                autoGainLoop();
+                log("Audio Engine (AGC) Started.");
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         function autoGainLoop() {
+            if (!isAudioEngineInit) return;
             const bufferLength = analyzer.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             
             function update() {
                 analyzer.getByteFrequencyData(dataArray);
-                
-                // Hitung rata-rata volume saat ini (0 - 255)
                 let sum = 0;
-                for(let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                for(let i = 0; i < bufferLength; i++) sum += dataArray[i];
                 let average = sum / bufferLength;
 
-                // LOGIKA AGC (Automatic Gain Control)
-                const silenceThreshold = 5; // Batas bawah (diam)
-                const targetLevel = 40;     // Level ideal
-
-                if (average > silenceThreshold) {
-                    // Jika ada suara, sesuaikan gain secara perlahan
-                    let factor = targetLevel / (average + 1);
-                    // Batasi agar tidak meledak (max gain 3x)
+                if (average > 5) { // Jika ada suara
+                    let factor = 40 / (average + 1); // Target level 40
                     if (factor > 3) factor = 3; 
-                    
                     gainNode.gain.setTargetAtTime(factor, audioCtx.currentTime, 0.1);
                 } else {
-                    // Jika hening, kembalikan gain ke normal (1) agar tidak mengangkat noise
                     gainNode.gain.setTargetAtTime(1, audioCtx.currentTime, 0.5);
                 }
-
                 requestAnimationFrame(update);
             }
             update();
         }
 
-        // Jalankan audio engine setelah user berinteraksi
         player.onplay = () => {
-            initAudioEngine();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (useAGC) {
+                initAudioEngine();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            }
         };
 
+        // --- LOGIKA RECONNECT ---
+        let isReconnecting = false;
+
         function reconnect() {
+            if (isReconnecting) return; // Cegah spam reconnect
+            isReconnecting = true;
+
+            log("Memicu Reconnect...");
             const timestamp = new Date().getTime();
-            player.src = `${url}?t=${timestamp}`;
+            
+            // Simpan state
+            const wasPaused = player.paused; 
+
+            // Hard reload source
+            player.src = `${streamUrl}?t=${timestamp}`;
             player.load();
-            player.play().catch(() => {}); 
+
+            // Reset flag setelah delay singkat
+            setTimeout(() => { isReconnecting = false; }, 2000);
+
+            if (!wasPaused) {
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        log("Autoplay dicegah browser, menunggu interaksi.");
+                    });
+                }
+            }
         }
 
-        player.addEventListener('stalled', reconnect);
-        player.addEventListener('error', () => setTimeout(reconnect, 3000));
-
+        // --- ACTIVE PING WATCHDOG (Tiap 1 Detik) ---
         setInterval(() => {
-            if (!player.paused) reconnect();
-        }, 1800000);
+            checkServerAndPlayer();
+        }, 1000);
+
+        function checkServerAndPlayer() {
+            // Gunakan HEAD method agar hemat bandwidth (tidak download audio, cuma cek status)
+            // Tambah timestamp agar tidak dicache browser
+            const pingUrl = `${streamUrl}?ping=${Date.now()}`;
+
+            fetch(pingUrl, { method: 'HEAD', mode: 'cors' })
+            .then(response => {
+                if (response.ok) { // Status 200-299
+                    pingStatus.innerText = `Server: UP (${response.status}) | Player: ${player.paused ? 'Paused' : 'Playing'}`;
+                    pingStatus.style.color = "#00bcd4";
+
+                    // LOGIKA UTAMA:
+                    // Jika Server 200 (OK), TAPI player error/stalled/networkNoSource
+                    // Maka paksa Reconnect.
+                    
+                    // Cek jika player error
+                    if (player.error || player.networkState === 3 /* NO_SOURCE */) {
+                        log("Server UP tapi Player Error -> RECONNECT");
+                        reconnect();
+                        return;
+                    }
+
+                    // Cek jika player macet (stalled) tapi seharusnya main
+                    // networkState 2 = Loading, tapi jika loading terlalu lama (misal stuck) bisa kita paksa
+                    if (!player.paused && player.readyState === 0 /* HAVE_NOTHING */) {
+                        log("Server UP tapi Player Stuck -> RECONNECT");
+                        reconnect();
+                    }
+
+                } else {
+                    pingStatus.innerText = `Server: DOWN (${response.status})`;
+                    pingStatus.style.color = "red";
+                }
+            })
+            .catch(error => {
+                // Jika fetch gagal (bisa karena CORS atau Server Mati total)
+                pingStatus.innerText = "Offline (CORS/Network Err)";
+                pingStatus.style.color = "orange";
+                
+                // Fallback: Jika ping gagal, kita tetap cek networkState player
+                // Jika player mendeteksi NO_SOURCE, kita tetap coba reconnect buta
+                if (!player.paused && player.networkState === 3) {
+                    log("Fallback: Network Error detected -> Reconnect");
+                    reconnect();
+                }
+            });
+        }
+
+        // Event listener bawaan sebagai cadangan
+        player.addEventListener('error', () => {
+            log("Event Error tertangkap");
+            setTimeout(reconnect, 500); 
+        });
+
     </script>
 </body>
 </html>
