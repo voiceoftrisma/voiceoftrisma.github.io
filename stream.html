@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <title>Radio Player Active Ping + AGC</title>
+    <title>Radio Player</title>
     <style>
         body {
             margin: 0;
@@ -15,209 +16,193 @@
             color: white;
             font-family: monospace;
         }
-        audio { width: 500px; margin-bottom: 20px; }
-        .status { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
-        .ping-status { font-size: 12px; color: #00bcd4; margin-bottom: 5px; }
-        .log { font-size: 10px; color: #666; width: 80%; text-align: center; height: 100px; overflow-y: auto; border-top: 1px solid #333; padding-top: 10px; }
+
+        audio {
+            width: 500px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .status {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* MODIFIKASI: Log disembunyikan secara default */
+        .log {
+            display: none; /* Hidden by default */
+            font-size: 11px;
+            color: #00ff00;
+            background: #000;
+            width: 80%;
+            font-family: 'Consolas', monospace;
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin-top: 10px;
+        }
+
+        .log div {
+            margin-bottom: 2px;
+            border-bottom: 1px solid #222;
+        }
+
+        #modeIndicator {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            padding: 5px 10px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
     </style>
 </head>
+
 <body>
 
-    <audio id="player" crossorigin="anonymous" controls>
-        <source src="https://i.klikhost.com:8502/stream" type="audio/mpeg">
-    </audio>
+    <audio id="player" crossorigin="anonymous" controls></audio>
+
+    <div class="status" id="statusText">▶ PLAY</div>
     
-    <div class="status" id="statusText">System Ready</div>
-    <div class="ping-status" id="pingStatus">Server Check: Waiting...</div>
     <div class="log" id="debugLog"></div>
+    
+    <div id="modeIndicator">System: IDLE</div>
 
     <script>
+        const streamUrl = "https://i.klikhost.com:8502/stream";
         const player = document.getElementById('player');
         const statusText = document.getElementById('statusText');
-        const pingStatus = document.getElementById('pingStatus');
         const debugLog = document.getElementById('debugLog');
-        
-        // URL Stream Base
-        const streamUrl = "https://i.klikhost.com:8502/stream";
+        const modeIndicator = document.getElementById('modeIndicator');
 
+        let retryInterval = null;
+        let userHasInteracted = false;
+
+        // --- MODIFIKASI: Cek URL Parameter (?debug=1 atau ?debug=true) ---
         const urlParams = new URLSearchParams(window.location.search);
-        const agcParam = urlParams.get('agc');
-
-        // Logika: Aktif jika parameter ada DAN bukan '0' DAN bukan 'false'
-        const useAGC = agcParam !== null && agcParam !== '0' && agcParam !== 'false';
-
-        // Update UI Text Status AGC
-        if (useAGC) {
-            statusText.innerText = "AGC: ON (Stabilizer Aktif)";
-            statusText.style.color = "#4caf50"; 
-        } else {
-            statusText.innerText = "AGC: OFF";
-            statusText.style.color = "#ff9800"; 
+        const debugParam = urlParams.get('debug');
+        
+        if (debugParam === '1' || debugParam === 'true') {
+            debugLog.style.display = 'block'; // Tampilkan jika ada parameter
         }
 
-        // --- FUNGSI LOGGING ---
-        function log(msg) {
+        // --- Logger ---
+        function log(msg, color = '#00ff00') {
+            // Kita tetap menjalankan fungsi log di background walau hidden
+            // supaya jika user inspect element, data tetap ada
             const time = new Date().toLocaleTimeString();
-            // Tampilkan di div log
             const p = document.createElement('div');
-            p.innerText = `[${time}] ${msg}`;
+            p.innerHTML = `<span style="color: #666;">[${time}]</span> <span style="color: ${color};">${msg}</span>`;
             debugLog.prepend(p);
-            // Batasi log agar tidak penuh memori
-            if (debugLog.children.length > 20) debugLog.lastChild.remove();
-            console.log(`[${time}] ${msg}`);
+            if (debugLog.children.length > 50) debugLog.lastChild.remove();
         }
 
-        // --- AUDIO ENGINE (AGC LOGIC) ---
-        let audioCtx, source, compressor, analyzer, gainNode, isAudioEngineInit = false;
+        // --- Fungsi Panic Mode ---
+        function startPanicMode() {
+            if (retryInterval) return;
 
-        function initAudioEngine() {
-            if (!useAGC || isAudioEngineInit) return;
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                source = audioCtx.createMediaElementSource(player);
-                
-                compressor = audioCtx.createDynamicsCompressor();
-                compressor.threshold.value = -24;
-                compressor.knee.value = 30;
-                compressor.ratio.value = 12;
-                compressor.attack.value = 0.003;
-                compressor.release.value = 0.25;
+            log("⚠️ AUDIO MACET! Memulai panggilan berulang ke server...", "red");
+            statusText.innerText = "🔄 RECONNECTING (PANIC MODE)...";
+            statusText.style.color = "red";
+            modeIndicator.innerText = "System: PANIC (Calling Server Loop)";
+            modeIndicator.style.borderColor = "red";
+            modeIndicator.style.color = "red";
 
-                gainNode = audioCtx.createGain();
-                analyzer = audioCtx.createAnalyser();
-                analyzer.fftSize = 256;
+            attemptReconnect();
 
-                source.connect(compressor);
-                compressor.connect(gainNode);
-                gainNode.connect(analyzer);
-                gainNode.connect(audioCtx.destination);
+            retryInterval = setInterval(() => {
+                log("📞 Memanggil server ulang...", "orange");
+                attemptReconnect();
+            }, 2500); 
+        }
 
-                isAudioEngineInit = true;
-                autoGainLoop();
-                log("Audio Engine (AGC) Started.");
-            } catch (e) {
-                console.error(e);
+        function stopPanicMode() {
+            if (retryInterval) {
+                clearInterval(retryInterval);
+                retryInterval = null;
+                log("✅ Audio Lancar Kembali. Stop memanggil server.", "#00ffff");
+                modeIndicator.innerText = "System: STABLE (Silent Monitor)";
+                modeIndicator.style.borderColor = "#4caf50";
+                modeIndicator.style.color = "#4caf50";
             }
         }
 
-        function autoGainLoop() {
-            if (!isAudioEngineInit) return;
-            const bufferLength = analyzer.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            
-            function update() {
-                analyzer.getByteFrequencyData(dataArray);
-                let sum = 0;
-                for(let i = 0; i < bufferLength; i++) sum += dataArray[i];
-                let average = sum / bufferLength;
-
-                if (average > 5) { // Jika ada suara
-                    let factor = 40 / (average + 1); // Target level 40
-                    if (factor > 3) factor = 3; 
-                    gainNode.gain.setTargetAtTime(factor, audioCtx.currentTime, 0.1);
-                } else {
-                    gainNode.gain.setTargetAtTime(1, audioCtx.currentTime, 0.5);
-                }
-                requestAnimationFrame(update);
-            }
-            update();
-        }
-
-        player.onplay = () => {
-            if (useAGC) {
-                initAudioEngine();
-                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            }
-        };
-
-        // --- LOGIKA RECONNECT ---
-        let isReconnecting = false;
-
-        function reconnect() {
-            if (isReconnecting) return; // Cegah spam reconnect
-            isReconnecting = true;
-
-            log("Memicu Reconnect...");
+        function attemptReconnect() {
             const timestamp = new Date().getTime();
+            const newUrl = `${streamUrl}?t=${timestamp}`;
+            const currentVol = player.volume;
             
-            // Simpan state
-            const wasPaused = player.paused; 
-
-            // Hard reload source
-            player.src = `${streamUrl}?t=${timestamp}`;
+            player.src = newUrl;
+            player.volume = currentVol;
             player.load();
-
-            // Reset flag setelah delay singkat
-            setTimeout(() => { isReconnecting = false; }, 2000);
-
-            if (!wasPaused) {
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        log("Autoplay dicegah browser, menunggu interaksi.");
-                    });
-                }
+            
+            const playPromise = player.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {}).catch(error => {
+                    log("❌ Gagal Play: " + error.message, "gray");
+                });
             }
         }
 
-        // --- ACTIVE PING WATCHDOG (Tiap 1 Detik) ---
-        setInterval(() => {
-            checkServerAndPlayer();
-        }, 1000);
-
-        function checkServerAndPlayer() {
-            // Gunakan HEAD method agar hemat bandwidth (tidak download audio, cuma cek status)
-            // Tambah timestamp agar tidak dicache browser
-            const pingUrl = `${streamUrl}?ping=${Date.now()}`;
-
-            fetch(pingUrl, { method: 'HEAD', mode: 'cors' })
-            .then(response => {
-                if (response.ok) { // Status 200-299
-                    pingStatus.innerText = `Server: UP (${response.status}) | Player: ${player.paused ? 'Paused' : 'Playing'}`;
-                    pingStatus.style.color = "#00bcd4";
-
-                    // LOGIKA UTAMA:
-                    // Jika Server 200 (OK), TAPI player error/stalled/networkNoSource
-                    // Maka paksa Reconnect.
-                    
-                    // Cek jika player error
-                    if (player.error || player.networkState === 3 /* NO_SOURCE */) {
-                        log("Server UP tapi Player Error -> RECONNECT");
-                        reconnect();
-                        return;
-                    }
-
-                    // Cek jika player macet (stalled) tapi seharusnya main
-                    // networkState 2 = Loading, tapi jika loading terlalu lama (misal stuck) bisa kita paksa
-                    if (!player.paused && player.readyState === 0 /* HAVE_NOTHING */) {
-                        log("Server UP tapi Player Stuck -> RECONNECT");
-                        reconnect();
-                    }
-
-                } else {
-                    pingStatus.innerText = `Server: DOWN (${response.status})`;
-                    pingStatus.style.color = "red";
-                }
-            })
-            .catch(error => {
-                // Jika fetch gagal (bisa karena CORS atau Server Mati total)
-                pingStatus.innerText = "Offline (CORS/Network Err)";
-                pingStatus.style.color = "orange";
-                
-                // Fallback: Jika ping gagal, kita tetap cek networkState player
-                // Jika player mendeteksi NO_SOURCE, kita tetap coba reconnect buta
-                if (!player.paused && player.networkState === 3) {
-                    log("Fallback: Network Error detected -> Reconnect");
-                    reconnect();
-                }
-            });
-        }
-
-        // Event listener bawaan sebagai cadangan
-        player.addEventListener('error', () => {
-            log("Event Error tertangkap");
-            setTimeout(reconnect, 500); 
+        // --- Event Listeners ---
+        player.addEventListener('playing', () => {
+            userHasInteracted = true;
+            statusText.innerText = "🔊 PLAYING (LIVE)";
+            statusText.style.color = "#4caf50";
+            stopPanicMode();
         });
+
+        player.addEventListener('waiting', () => {
+            if(userHasInteracted) {
+                log("⏳ Buffer terdeteksi...", "yellow");
+                startPanicMode();
+            }
+        });
+
+        player.addEventListener('stalled', () => {
+            if(userHasInteracted) {
+                log("🚫 Stream Stalled", "red");
+                startPanicMode();
+            }
+        });
+
+        player.addEventListener('error', (e) => {
+            if(userHasInteracted) {
+                log("☠️ Error Terjadi", "red");
+                startPanicMode();
+            }
+        });
+
+        player.addEventListener('pause', () => {
+            if (!retryInterval) {
+                statusText.innerText = "⏸ PAUSED";
+                statusText.style.color = "white";
+                log("⏸ User menekan Pause.", "white");
+                stopPanicMode();
+                userHasInteracted = false;
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (player.paused) {
+                    player.play();
+                    userHasInteracted = true;
+                } else {
+                    player.pause();
+                }
+            }
+        });
+
+        player.src = streamUrl;
+        log("Sistem Siap. Klik Play untuk memulai.", "white");
 
     </script>
 </body>
