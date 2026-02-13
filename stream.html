@@ -24,16 +24,34 @@
         }
 
         .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            min-height: 24px;
         }
 
-        /* MODIFIKASI: Log disembunyikan secara default */
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #ff9800;
+            border-radius: 50%;
+            margin-right: 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .log {
-            display: none; /* Hidden by default */
+            display: none;
             font-size: 11px;
             color: #00ff00;
             background: #000;
@@ -68,34 +86,36 @@
 
     <audio id="player" crossorigin="anonymous" controls></audio>
 
-    <div class="status" id="statusText">▶ PLAY</div>
-    
+    <div class="status" id="statusContainer">
+        <div class="spinner" id="loadingSpinner"></div>
+        <span id="statusText">▶ PRESS SPACE TO START</span>
+    </div>
+
     <div class="log" id="debugLog"></div>
-    
+
     <div id="modeIndicator">System: IDLE</div>
 
     <script>
-        const streamUrl = "https://i.klikhost.com:8502/stream";
+        // --- LOGIKA PORT DINAMIS ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const port = urlParams.get('port') || '8502'; // Default ke 8502 jika kosong
+        const streamUrl = `https://i.klikhost.com:${port}/stream`;
+        
         const player = document.getElementById('player');
         const statusText = document.getElementById('statusText');
+        const spinner = document.getElementById('loadingSpinner');
         const debugLog = document.getElementById('debugLog');
         const modeIndicator = document.getElementById('modeIndicator');
 
         let retryInterval = null;
         let userHasInteracted = false;
 
-        // --- MODIFIKASI: Cek URL Parameter (?debug=1 atau ?debug=true) ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const debugParam = urlParams.get('debug');
-        
-        if (debugParam === '1' || debugParam === 'true') {
-            debugLog.style.display = 'block'; // Tampilkan jika ada parameter
+        // Debug mode detection
+        if (urlParams.get('debug') === '1' || urlParams.get('debug') === 'true') {
+            debugLog.style.display = 'block';
         }
 
-        // --- Logger ---
         function log(msg, color = '#00ff00') {
-            // Kita tetap menjalankan fungsi log di background walau hidden
-            // supaya jika user inspect element, data tetap ada
             const time = new Date().toLocaleTimeString();
             const p = document.createElement('div');
             p.innerHTML = `<span style="color: #666;">[${time}]</span> <span style="color: ${color};">${msg}</span>`;
@@ -103,106 +123,124 @@
             if (debugLog.children.length > 50) debugLog.lastChild.remove();
         }
 
-        // --- Fungsi Panic Mode ---
         function startPanicMode() {
             if (retryInterval) return;
 
-            log("⚠️ AUDIO MACET! Memulai panggilan berulang ke server...", "red");
-            statusText.innerText = "🔄 RECONNECTING (PANIC MODE)...";
-            statusText.style.color = "red";
-            modeIndicator.innerText = "System: PANIC (Calling Server Loop)";
-            modeIndicator.style.borderColor = "red";
-            modeIndicator.style.color = "red";
+            userHasInteracted = true;
+            log(`⚠️ SERVER OFFLINE (Port: ${port}). Mencari sinyal...`, "red");
+            
+            spinner.style.display = "block";
+            spinner.style.borderTopColor = "#ff9800";
+            statusText.innerText = "SCANNING SERVER...";
+            statusText.style.color = "#ff9800";
 
-            attemptReconnect();
+            modeIndicator.innerText = `System: SCANNING`;
+            modeIndicator.style.borderColor = "#ff9800";
+            modeIndicator.style.color = "#ff9800";
 
-            retryInterval = setInterval(() => {
-                log("📞 Memanggil server ulang...", "orange");
-                attemptReconnect();
-            }, 2500); 
+            checkServer();
+            retryInterval = setInterval(checkServer, 2000); 
         }
 
         function stopPanicMode() {
             if (retryInterval) {
                 clearInterval(retryInterval);
                 retryInterval = null;
-                log("✅ Audio Lancar Kembali. Stop memanggil server.", "#00ffff");
-                modeIndicator.innerText = "System: STABLE (Silent Monitor)";
-                modeIndicator.style.borderColor = "#4caf50";
-                modeIndicator.style.color = "#4caf50";
+                spinner.style.display = "none";
+                log("🛑 Scan dihentikan.", "white");
             }
         }
 
-        function attemptReconnect() {
+        async function checkServer() {
+            if (!retryInterval) return;
             const timestamp = new Date().getTime();
-            const newUrl = `${streamUrl}?t=${timestamp}`;
-            const currentVol = player.volume;
-            
-            player.src = newUrl;
-            player.volume = currentVol;
+            log(`📡 Ping port ${port}...`, "orange");
+
+            try {
+                await fetch(`${streamUrl}?t=${timestamp}`, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                });
+
+                log(`✅ Port ${port} Merespon!`, "#00ffff");
+                stopPanicMode();
+                playAudio();
+
+            } catch (error) {
+                log(`❌ Port ${port} masih offline.`, "gray");
+            }
+        }
+
+        function playAudio() {
+            const timestamp = new Date().getTime();
+            player.src = `${streamUrl}?t=${timestamp}`;
             player.load();
             
-            const playPromise = player.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {}).catch(error => {
-                    log("❌ Gagal Play: " + error.message, "gray");
-                });
-            }
+            player.play().catch(() => {
+                log("⚠️ Gagal Play otomatis, kembali scan...", "red");
+                startPanicMode();
+            });
         }
 
-        // --- Event Listeners ---
         player.addEventListener('playing', () => {
-            userHasInteracted = true;
-            statusText.innerText = "🔊 PLAYING (LIVE)";
+            spinner.style.display = "none";
+            statusText.innerText = `🔊 PLAYING (PORT: ${port})`;
             statusText.style.color = "#4caf50";
-            stopPanicMode();
+            modeIndicator.innerText = "System: STABLE";
+            modeIndicator.style.borderColor = "#4caf50";
+            modeIndicator.style.color = "#4caf50";
         });
 
-        player.addEventListener('waiting', () => {
-            if(userHasInteracted) {
-                log("⏳ Buffer terdeteksi...", "yellow");
+        player.addEventListener('error', () => {
+            if (userHasInteracted && !player.paused && !retryInterval) {
+                log("☠️ Koneksi Terputus.", "red");
                 startPanicMode();
-            }
-        });
-
-        player.addEventListener('stalled', () => {
-            if(userHasInteracted) {
-                log("🚫 Stream Stalled", "red");
-                startPanicMode();
-            }
-        });
-
-        player.addEventListener('error', (e) => {
-            if(userHasInteracted) {
-                log("☠️ Error Terjadi", "red");
-                startPanicMode();
-            }
-        });
-
-        player.addEventListener('pause', () => {
-            if (!retryInterval) {
-                statusText.innerText = "⏸ PAUSED";
-                statusText.style.color = "white";
-                log("⏸ User menekan Pause.", "white");
-                stopPanicMode();
-                userHasInteracted = false;
             }
         });
 
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                if (player.paused) {
-                    player.play();
-                    userHasInteracted = true;
-                } else {
+
+                if (retryInterval) {
+                    stopPanicMode();
                     player.pause();
+                    userHasInteracted = false; 
+                    statusText.innerText = "⏹ SCAN STOPPED";
+                    statusText.style.color = "white";
+                    modeIndicator.innerText = "System: IDLE";
+                    modeIndicator.style.borderColor = "#333";
+                    modeIndicator.style.color = "#888";
+                    return; 
+                }
+
+                if (!player.paused) {
+                    player.pause();
+                    userHasInteracted = false; 
+                    statusText.innerText = "⏸ PAUSED";
+                    statusText.style.color = "white";
+                    log("⏸ Manual Pause.", "white");
+                } 
+                else {
+                    userHasInteracted = true;
+                    log(`▶ Mencoba koneksi ke port ${port}...`, "white");
+                    
+                    spinner.style.display = "block";
+                    spinner.style.borderTopColor = "#ffffff";
+                    statusText.innerText = "CONNECTING...";
+                    
+                    player.play().catch(() => {
+                        startPanicMode();
+                    });
                 }
             }
         });
 
+        // Initialize source
         player.src = streamUrl;
-        log("Sistem Siap. Klik Play untuk memulai.", "white");
+        modeIndicator.innerText = `System: IDLE (Target Port: ${port})`;
+        log(`Sistem Siap. Target: Port ${port}`, "white");
 
     </script>
 </body>
