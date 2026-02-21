@@ -14,8 +14,8 @@ function render() {
 
   // 3. Grouping data berdasarkan tanggal (dd-mm-yy)
   const groups = {};
-  const groupDates = {}; 
-  
+  const groupDates = {};
+
   for (const it of items) {
     const id = getIdentifierFromDetailsUrl(it.url);
     const tglRaw = it.publicdate ? formatDate(it.publicdate) : it.tanggal;
@@ -29,7 +29,7 @@ function render() {
   groupKeys.sort((a, b) => {
     const da = groupDates[a];
     const db = groupDates[b];
-    
+
     function parseTgl(tgl, iso) {
       if (iso) return new Date(iso);
       const parts = tgl.split('-');
@@ -40,7 +40,7 @@ function render() {
       }
       return new Date(0);
     }
-    
+
     const dateA = parseTgl(a, da);
     const dateB = parseTgl(b, db);
     return state.sortDesc ? dateB - dateA : dateA - dateB;
@@ -54,7 +54,7 @@ function render() {
   // 5. Render Loop
   for (const tglNorm of groupKeys) {
     const group = groups[tglNorm];
-    
+
     const container = document.createElement('div');
     container.className = 'date-group-container';
 
@@ -74,7 +74,7 @@ function render() {
       const row = document.createElement('div');
       row.className = 'list-group-item';
       row.innerHTML = `
-        <img src="https://archive.org/services/img/${it.id}" style="width:60px; height:60px; margin-right:10px; object-fit:fill; border-radius:4px;">
+        <img src="https://archive.org/services/img/${it.id}" style="width:60px; height:60px; margin-right:1px; object-fit:fill; border-radius:4px;">
         <div class="list-meta">
           <div class="title">${it.title}</div>
           <div><span class="badge-id">${it.id || ''}</span> <a href="${it.url}" target="_blank">Archive.org</a></div>
@@ -94,11 +94,11 @@ function render() {
           row.parentNode.insertBefore(playerEl, row);
           playerEl.hidden = false;
         }
-        
+
         nowTitle.textContent = it.title;
         nowSub.textContent = 'Menyiapkan...';
         audioEl.src = '';
-        
+
         try {
           const mp3 = await resolveMp3Url(it.id);
           if (mp3) {
@@ -117,47 +117,47 @@ function render() {
 }
 
 // Fungsi untuk membalikkan urutan (Terbaru <-> Terlama)
-window.toggleSort = function() {
-    state.sortDesc = !state.sortDesc; // Balikkan status
-    
-    // Update teks dan ikon tombol secara responsif
-    const sortBtn = document.getElementById('sortBtn');
-    if (sortBtn) {
-        sortBtn.innerHTML = state.sortDesc ? 
-            '<i class="fa fa-sort-amount-desc"></i> Urut: Terbaru' : 
-            '<i class="fa fa-sort-amount-asc"></i> Urut: Terlama';
-    }
+window.toggleSort = function () {
+  state.sortDesc = !state.sortDesc; // Balikkan status
 
-    // Jalankan ulang render dengan urutan baru
-    render();
+  // Update teks dan ikon tombol secara responsif
+  const sortBtn = document.getElementById('sortBtn');
+  if (sortBtn) {
+    sortBtn.innerHTML = state.sortDesc ?
+      '<i class="fa fa-sort-amount-desc"></i> Urut: Terbaru' :
+      '<i class="fa fa-sort-amount-asc"></i> Urut: Terlama';
+  }
+
+  // Jalankan ulang render dengan urutan baru
+  render();
 };
 
 // Fungsi untuk muat ulang data (Refresh)
-window.refreshData = async function() {
-    const refreshBtn = document.getElementById('refreshBtn');
-    
-    // Efek visual: ganti ikon jadi loading
-    const originalContent = refreshBtn.innerHTML;
-    refreshBtn.disabled = true;
-    refreshBtn.innerHTML = '<i class="fa fa-refresh fa-spin"></i> Memuat...';
+window.refreshData = async function () {
+  const refreshBtn = document.getElementById('refreshBtn');
 
-    try {
-        pageCache = {}; // Hapus cache agar ambil data segar dari server
-        if (state.isSearch && state.query) {
-            await loadAllJsonForSearch(state.query);
-        } else {
-            await loadJson(state.page);
-        }
-    } catch (err) {
-        console.error("Gagal refresh:", err);
-    } finally {
-        // Kembalikan tombol ke semula
-        refreshBtn.disabled = false;
-        refreshBtn.innerHTML = originalContent;
+  // Efek visual: ganti ikon jadi loading
+  const originalContent = refreshBtn.innerHTML;
+  refreshBtn.disabled = true;
+  refreshBtn.innerHTML = '<i class="fa fa-refresh fa-spin"></i> Memuat...';
+
+  try {
+    pageCache = {}; // Hapus cache agar ambil data segar dari server
+    if (state.isSearch && state.query) {
+      await loadAllJsonForSearch(state.query);
+    } else {
+      await loadJson(state.page);
     }
+  } catch (err) {
+    console.error("Gagal refresh:", err);
+  } finally {
+    // Kembalikan tombol ke semula
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = originalContent;
+  }
 };
 
-function renderPagination(){
+function renderPagination() {
   paginationEl.innerHTML = '';
 
   const ul = document.createElement('ul');
@@ -172,8 +172,8 @@ function renderPagination(){
   prevA.innerHTML = '<i class="fa fa-chevron-left"></i> Previous';
   prevA.onclick = (e) => {
     e.preventDefault();
-    if(state.page > 1) {
-      if(state.isSearch) loadSearchPage(state.page - 1);
+    if (state.page > 1) {
+      if (state.isSearch) loadSearchPage(state.page - 1);
       else loadJson(state.page - 1);
     }
   };
@@ -184,7 +184,7 @@ function renderPagination(){
   const startPage = Math.max(1, state.page - 2);
   const endPage = Math.min(state.totalPages, state.page + 2);
 
-  for(let i = startPage; i <= endPage; i++){
+  for (let i = startPage; i <= endPage; i++) {
     const li = document.createElement('li');
     li.className = `page-item ${i === state.page ? 'active' : ''}`;
     const a = document.createElement('a');
@@ -193,7 +193,7 @@ function renderPagination(){
     a.textContent = i;
     a.onclick = (e) => {
       e.preventDefault();
-      if(state.isSearch) loadSearchPage(i);
+      if (state.isSearch) loadSearchPage(i);
       else loadJson(i);
     };
     li.appendChild(a);
@@ -209,8 +209,8 @@ function renderPagination(){
   nextA.innerHTML = 'Next <i class="fa fa-chevron-right"></i>';
   nextA.onclick = (e) => {
     e.preventDefault();
-    if(state.page < state.totalPages) {
-      if(state.isSearch) loadSearchPage(state.page + 1);
+    if (state.page < state.totalPages) {
+      if (state.isSearch) loadSearchPage(state.page + 1);
       else loadJson(state.page + 1);
     }
   };
