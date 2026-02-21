@@ -74,7 +74,7 @@ function render() {
       const row = document.createElement('div');
       row.className = 'list-group-item';
       row.innerHTML = `
-        <img src="https://archive.org/services/img/${it.id}" style="width:60px; height:60px; margin-right:1px; object-fit:fill; border-radius:4px;">
+        <img src="https://archive.org/services/img/${it.id}" style="width:50px; height:50px; margin-right:1px; object-fit:fill; border-radius:4px;">
         <div class="list-meta">
           <div class="title">${it.title}</div>
           <div><span class="badge-id">${it.id || ''}</span> <a href="${it.url}" target="_blank">Archive.org</a></div>
