@@ -75,8 +75,8 @@ body {
 }
 
 .date-group-header {
-  background: #f35e5e;
-  color: #DC2626;
+  background: #e6f7fa;
+  color: #0097b9;
   padding: 7px 12px;
   border-radius: 0;
   margin: 0;
@@ -109,7 +109,7 @@ body {
 }
 
 .badge-id {
-  background: #DC2626;
+  background: #00b9d8;
   color: #fff;
   padding: 3px 8px;
   border-radius: 3px;
@@ -213,8 +213,7 @@ body.dark-mode .list-group-item {
 }
 
 body.dark-mode .badge-id {
-  background: #DC2626;
-  ;
+  background: #0097b9;
   color: #fff;
 }
 
@@ -247,24 +246,13 @@ body.dark-mode .btn-success {
 }
 
 body.dark-mode .btn-primary {
-  background: #277cd6;
+  background: #007bff;
   border-color: #007bff;
 }
 
-.btn-success {
-  background-color: #dc2626 !important;
-  border-color: #bd2020 !important;
-  color: #ffffff !important;
-}
-
 body.dark-mode .btn-success {
-  background: #dc2626;
-  border-color: #dc2626;
-}
-
-.page-link {
-  background: #dc2626;
-
+  background: #00b97b;
+  border-color: #00b97b;
 }
 
 body.dark-mode .pagination>li>a,
@@ -411,13 +399,12 @@ body.dark-mode .footer a img {
 .date-group-header {
   font-weight: 700;
   font-size: 15px;
-  background:
-    #ffffff;
-  color: #353535;
+  background: #e6f7fa;
+  color: #0097b9;
   padding: 7px 12px;
   border-radius: 4px;
   margin: 12px 0 6px 0;
-  border-left: 5px solid #DC2626;
+  border-left: 5px solid #00b9d8;
   /* transition for theme */
   transition: background 0.2s, color 0.2s;
   position: relative;
@@ -425,7 +412,7 @@ body.dark-mode .footer a img {
 
 body.dark-mode .date-group-header {
   background: #232323;
-  color: #ebebeb;
+  color: #80cfff;
   border-bottom-color: #444;
 }
 
