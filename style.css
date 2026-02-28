@@ -172,7 +172,7 @@ main {
   font-size: 16px;
   color: #585757;
   display: inline-block;
-  padding: 9px 10px;
+  padding: 6px 10px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.12);
   min-width: 60px;
@@ -237,15 +237,6 @@ footer p {
 
 /* Responsive tweak */
 @media (max-width: 767px) {
-  .site-clock {
-    font-size: 12px;
-    padding: 6px 4px;
-    min-width: 50px;
-    font-weight: bold;
-    color: #585757;
-    display: inline-block;
-  }
-
   #sp-header .logo img {
     height: 40px;
   }
