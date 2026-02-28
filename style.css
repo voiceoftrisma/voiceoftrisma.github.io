@@ -168,12 +168,13 @@ main {
 }
 
 .site-clock {
-  font-weight: 550;
-  font-size: 18px;
-  color: #504e4e;
+  font-weight: 525;
+  font-size: 16px;
+  color: #585757;
   display: inline-block;
-  padding: 10px 6px;
-  background: none; /* Menghilangkan background kotak abu-abu */
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.12);
   min-width: 60px;
   text-align: center;
 }
