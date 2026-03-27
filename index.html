@@ -2,208 +2,268 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Voice of Trisma, The Best Online Radio in Bali</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice of Trisma</title>
+    <link rel="icon" href="./kbrf.svg" type="image/png">
 
-    <meta name="description"
-        content="“Voice of Trisma atau VOT adalah radio komunitas yang dibentuk oleh Madyapadma Journalistic Park SMA Negeri 3 Denpasar.">
-    <meta name="keywords"
-        content="VOT, Voice of Trisma, Radio Trisma, Radio SMA Negeri 3 Denpasar, Trisma Denpasar, Radio Madyapadma">
-    <meta property="og:site_name" content="Voice of Trisma">
-    <meta property="og:title" content="Voice of Trisma">
-    <meta name="application-name" content="Voice of Trisma">
-    <meta name="google-site-verification" content="7mjHa2WVudF6PQ6pueDkClMp03F8EjEGRVqzStK7UrE" />
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "url": "https://madyapadma-online.com/",
-        "logo": "./madyapadma.svg",
-        "name": "Madyapadma Online",
-        "sameAs": [
-            "https://www.instagram.com/madyapadma",
-            "https://www.youtube.com/@Madyapadmatrisma",
-            "https://github.com/Sparkplugx1904"
-        ]
-    }
-    </script>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-    <link rel="icon" href="./madyapadma.svg" type="image/png">
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* Tambahan style minor untuk merapikan layout inline */
-        .header-flex {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .player-container {
-            padding: 15px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .footer-icons img {
-            margin: 0 10px;
-            transition: transform 0.2s;
-        }
-
-        .footer-icons img:hover {
-            transform: scale(1.1);
-        }
-    </style>
+    <!-- Main Application Stylesheet -->
+    <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
 
-    <header id="sp-header" style="padding: 15px 0; border-bottom: 1px solid #eee;">
-        <div class="container">
-            <div class="row" style="display: flex; align-items: center;">
-                <div class="col-sm-3 col-xs-6">
-                    <a class="logo" href="https://madyapadma-online.com/">
-                        <img src="./madyapadma-voice-of-trisma.svg" alt="Madyapadma Journalistic Park"
-                            style="max-height: 100px;">
-                    </a>
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Layout -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
+        </div>
+        <nav>
+            <a href="index.html" class="active"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
+            <a href="archive.html"><i class="fa-solid fa-box-archive"></i> Archive</a>
+            <a href="about.html"><i class="fa-solid fa-circle-info"></i> About</a>
+
+            <a href="#" id="themeToggleBtn" style="margin-top: auto;"><i class="fa-solid fa-moon"></i> Ganti Tema</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2026 Madyapadma</p>
+            <p>Voice of Trisma v2.0</p>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="main-content">
+        <div class="navbar-main">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fa fa-search search-icon"></i>
+                    <input type="text" id="q" placeholder="Cari tanggal atau ID... (mis. 29-08-25)">
+                    <button type="button" class="search-btn">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-sm-6 hidden-xs">
-                    <nav></nav>
+        <!-- Animated Hero Section -->
+        <div class="hero-section glass-panel">
+            <div class="live-badge" id="liveBadge">
+                <span class="pulse"></span> LIVE NOW
+            </div>
+            <h1>Radio Siaran Madyapadma</h1>
+            <p>Rasakan pengalaman antarmuka pengguna yang modern, mulus, dan responsif. Menggabungkan estetika mode
+                gelap dengan elegan glassmorphism.</p>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <i class="fa-solid fa-headphones"></i>
+                    <span>2.4k Mendengarkan</span>
                 </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-music"></i>
+                    <span>Kualitas HD 320kbps</span>
+                </div>
+            </div>
+        </div>
+        <!-- Static Cards Removed as requested -->
 
-                <div class="col-sm-3 col-xs-6 text-right">
-                    <div class="header-flex">
-                        <div id="siteClock" class="site-clock" aria-live="polite" title="Waktu WITA">--:--:--</div>
-                        <script>
-                            function pad(n) { return String(n).padStart(2, '0'); }
-                            function updateClock() {
-                                const now = new Date();
-                                // Gunakan waktu WITA (UTC+8)
-                                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                                const witaTime = new Date(utc + (8 * 3600000));
-                                const hh = pad(witaTime.getHours());
-                                const mm = pad(witaTime.getMinutes());
-                                const ss = pad(witaTime.getSeconds());
-                                const el = document.getElementById('siteClock');
-                                if (el) el.textContent = hh + ':' + mm + ':' + ss + ' WITA';
-                            }
-                            // Inisialisasi dan timer
-                            updateClock();
-                            setInterval(updateClock, 1000);
-                        </script>
-                        <script>
-                            // Light/Dark mode toggle
-                            const modeBtn = document.getElementById('toggleModeBtn');
-                            const modeIcon = document.gtetElementById('modeIcon');
-                            function setMode(dark) {
-                                document.body.classList.toggle('dark-mode', dark);
-                                modeIcon.className = dark ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                                modeBtn.title = dark ? 'Switch ke Light Mode' : 'Switch ke Dark Mode';
-                                // Simpan preferensi di localStorage
-                                localStorage.setItem('votdenpasar-darkmode', dark ? '1' : '0');
-                            }
-                            // Cek preferensi awal
-                            (() => {
-                                const pref = localStorage.getItem('votdenpasar-darkmode');
-                                setMode(pref === '1');
-                            })();
-                            modeBtn.onclick = () => {
-                                setMode(!document.body.classList.contains('dark-mode'));
-                            };
+        <!-- Audio Player Bar (Glassmorphism + Neon) -->
+        <div class="audio-player-bar">
+            <!-- Progress bar hidden for stream -->
+            <input type="range" class="progress-bar-top" style="display: none;" min="0" max="100" value="45">
 
-                            document.getElementById('sortBtn').addEventListener('click', () => {
-                                state.sortDesc = !state.sortDesc;
-                                document.getElementById('sortBtn').textContent = 'Urut: ' + (state.sortDesc ? 'Terbaru' : 'Terlama');
-                                render();
-                            });
-                            document.getElementById('refreshBtn').addEventListener('click', () => { delete pageCache[state.page]; state.allData = []; state.page = 1; loadJson(state.page); });
-
-                        </script>
+            <div class="player-center player-info">
+                <div class="img-thumb-container">
+                    <div class="img-thumb glass-panel pulse-soft">
+                        <i class="fa-solid fa-music"></i>
                     </div>
                 </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="container">
-
-        <div id="streamPlayerBox" class="row" style="margin: 20px 0;">
-            <div class="col-xs-12">
-                <div id="streamPlayer" class="player-container">
-                    <strong><i class="fa fa-rss"></i> Live Stream:</strong>
-                    <span id="streamStatus" style="margin-left: 10px;">Memuat stream…</span>
-                    <audio id="streamAudio" controls preload="none"
-                        style="width: 100%; height: 45px; margin-top: 10px; display: block;" hidden></audio>
+                <div class="song-title-wrapper">
+                    <div class="song-title">Siaran Langsung KBRF</div>
+                    <div class="song-artist">Madyapadma Voice of Trisma</div>
                 </div>
             </div>
-        </div>
 
-        <div class="toolbar row" style="margin-bottom: 20px;">
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <input id="q" type="text" class="form-control" placeholder="Cari tanggal atau ID… (mis. 29-08-25)">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default search-btn" type="button">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </span>
-                </div>
-            </div>
-            <div class="col-sm-4 text-right">
-                <div class="btn-group">
-                    <button class="btn btn-default" id="sortBtn" onclick="toggleSort()">
-                        <i class="fa fa-sort"></i> Urut: Terbaru
+            <div class="player-controls">
+                <!-- Volume Slider moved to the left of backward step -->
+                <div class="volume-container">
+                    <button class="icon-btn" id="volumeBtn" title="Volume">
+                        <i class="fa-solid fa-volume-high"></i>
                     </button>
-                    <button class="btn btn-primary" id="refreshBtn" onclick="refreshData()">
-                        <i class="fa fa-refresh"></i> Muat Ulang
-                    </button>
+                    <div class="volume-slider-wrapper glass-panel" id="volumeSliderWrapper">
+                        <input type="range" class="volume-slider" min="0" max="100" value="100">
+                    </div>
                 </div>
+
+                <button class="icon-btn" title="Mundur 10 Detik">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button class="play-pause-btn" id="playPauseBtn" title="Play/Pause">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path class="morph-path" fill="#ffffff" d="M 8 5 L 19 12 L 8 19 Z" />
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Maju 10 Detik">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+
+                <!-- Archive Link moved to the right of forward step -->
+                <a href="archive.html" class="icon-btn" title="Arsip Siaran"
+                    style="display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-box-archive"></i>
+                </a>
+            </div>
+
+            <div class="player-tools">
+                <!-- Time text hidden for stream -->
             </div>
         </div>
 
-        <div id="list" class="list-group"></div>
-        <!-- Pagination controls -->
-        <div id="pagination" class="text-center" style="margin:20px 0;"></div>
+        <!-- Hidden Audio Element for Live Stream -->
+        <audio id="mainAudio" src="http://i.klikhost.com:8502/stream" preload="none" style="display: none;"></audio>
 
-    </main>
+        <script>
+            // Logika Sidebar
+            function toggleSidebar() {
+                document.body.classList.toggle('sidebar-toggled');
+            }
 
-    <footer class="footer" style="padding: 15px 0; margin-top: 20px; border-top: 1px solid #eee;">
-        <div class="container text-center footer-icons">
-            <a href="https://github.com/Sparkplugx1904/VOT-Denpasar" target="_blank" title="Repo GitHub">
-                <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="20" height="20">
-            </a>
-            <a href="https://madyapadma-online.com/" target="_blank" title="Madyapadma Online">
-                <img src="./madyapadma.svg" alt="Madyapadma" width="33" style="filter: brightness(0);">
-            </a>
-            <a href="https://i.klikhost.com/cp/widgets/player/?p=8502&type=shark" target="_blank"
-                title="KBRF Madyapadma">
-                <img src="./kbrf.svg" alt="KBRF" width="20" style="filter: brightness(0);">
-            </a>
-            <a href="https://archive.org/details/@16_i_gede_ananda_pradnyana" target="_blank" title="KBRF Madyapadma">
-                <img src="./archive-org.svg" alt="KBRF" width="20" style="filter: brightness(0);">
-            </a>
+            // Logika untuk tombol Play / Pause (Live Stream)
+            const mainAudio = document.getElementById('mainAudio');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const morphPath = document.querySelector('.morph-path');
+            const playerThumb = document.querySelector('.img-thumb');
+            let isPlaying = false;
 
-            <p style="margin-top: 15px; color: #777;"> &copy;
-                <script>document.write(new Date().getFullYear())</script> VOT Denpasar. All rights reserved.
-            </p>
-        </div>
-    </footer>
+            function updatePlayPauseIcon() {
+                if (isPlaying) {
+                    morphPath.setAttribute('d', 'M 6 5 L 10 5 L 10 19 L 6 19 Z M 14 5 L 18 5 L 18 19 L 14 19 Z');
+                    playPauseBtn.classList.add('playing');
+                    playerThumb.classList.add('pulse-soft');
+                } else {
+                    morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
+                    playPauseBtn.classList.remove('playing');
+                    playerThumb.classList.remove('pulse-soft');
+                }
+            }
 
-    <script src="./utils.js"></script>
-    <script src="./data.js"></script>
-    <script src="./player.js"></script>
-    <script src="./render.js"></script>
-    <script src="./search.js"></script>
-    <script src="./stream.js"></script>
-    <script src="./main.js"></script>
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    mainAudio.pause();
+                    // To stop stream buffering, we reset src
+                    mainAudio.src = '';
+                    isPlaying = false;
+                    updatePlayPauseIcon();
+                } else {
+                    // Re-attach src to get latest live stream buffer
+                    mainAudio.src = 'http://i.klikhost.com:8502/stream?' + new Date().getTime();
+                    mainAudio.play().then(() => {
+                        isPlaying = true;
+                        updatePlayPauseIcon();
+                    }).catch(e => {
+                        console.error("Autoplay blocked or stream offline", e);
+                    });
+                }
+            });
+
+            // Logika untuk menampilkan / menyembunyikan popup volume
+            const volumeBtn = document.getElementById('volumeBtn');
+            const volumeSliderWrapper = document.getElementById('volumeSliderWrapper');
+            const volumeSlider = document.querySelector('.volume-slider');
+
+            volumeBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                volumeSliderWrapper.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!volumeSliderWrapper.contains(event.target) && !volumeBtn.contains(event.target)) {
+                    volumeSliderWrapper.classList.remove('show');
+                }
+            });
+
+            volumeSliderWrapper.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
+            volumeSlider.addEventListener('input', function (e) {
+                mainAudio.volume = e.target.value / 100;
+            });
+
+            // Theme Toggle Logic
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = themeToggleBtn.querySelector('i');
+
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+
+            themeToggleBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.body.classList.toggle('light-theme');
+
+                if (document.body.classList.contains('light-theme')) {
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.replace('fa-moon', 'fa-sun');
+                } else {
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.replace('fa-sun', 'fa-moon');
+                }
+            });
+
+            // Live/Offline Ping Logic
+            const liveBadge = document.getElementById('liveBadge');
+            function checkStatus() {
+                // Menggunakan no-cors untuk mengecek ketersediaan port, menangkap penolakan fetch jika down
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                fetch('http://i.klikhost.com:8502/stats?json=1&t=' + Date.now(), { method: 'GET', mode: 'no-cors', signal: controller.signal })
+                    .then(res => {
+                        liveBadge.innerHTML = '<span class="pulse"></span> LIVE NOW';
+                        liveBadge.className = 'live-badge online';
+                        clearTimeout(timeoutId);
+                    })
+                    .catch(err => {
+                        liveBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="margin-right: 5px;"></i> OFFLINE';
+                        liveBadge.className = 'live-badge offline';
+                    });
+            }
+
+            // Cek status cukup sekali saat muat halaman atau setelah refresh
+            checkStatus();
+
+            // Progress bar visual only for live stream (hidden but kept for API safety)
+            const progressTop = document.querySelector('.progress-bar-top');
+            progressTop.addEventListener('input', function () {
+                this.style.setProperty('--val', this.value + '%');
+            });
+            progressTop.style.setProperty('--val', progressTop.value + '%');
+        </script>
 </body>
 
 </html>

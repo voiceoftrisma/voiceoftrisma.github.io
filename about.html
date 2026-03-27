@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice of Trisma - Tentang Kami</title>
+    <link rel="icon" href="./kbrf.svg" type="image/png">
+
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Main Application Stylesheets -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="about.css">
+</head>
+
+<body>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Layout -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
+        </div>
+        <nav>
+            <a href="index.html"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
+            <a href="archive.html"><i class="fa-solid fa-box-archive"></i> Archive</a>
+            <a href="about.html" class="active"><i class="fa-solid fa-circle-info"></i> About</a>
+            
+            <a href="#" id="themeToggleBtn" style="margin-top: auto;"><i class="fa-solid fa-moon"></i> Ganti Tema</a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <p>&copy; 2026 Madyapadma</p>
+            <p>Voice of Trisma v2.0</p>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="main-content">
+        <div class="navbar-main">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fa fa-search search-icon"></i>
+                    <input type="text" id="q" placeholder="Cari di About...">
+                    <button type="button" class="search-btn">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Header -->
+        <div class="hero-section glass-panel" style="min-height: auto; padding-bottom: 30px;">
+            <h1>Tentang Kami</h1>
+            <p>Madyapadma Journalistic Park - Sebening Embun, Setajam Pena</p>
+        </div>
+        
+        <div class="grid-content" style="grid-template-columns: 1fr; gap: 0;">
+            <div class="card glass-panel" style="padding: 20px 30px;">
+                <article style="line-height: 1.6; color: var(--text-color);">
+                    <h2 style="margin-bottom: 20px; font-size: 1.5rem; color: var(--primary-color);">Sejarah dan Filosofi</h2>
+                    
+                    <p style="margin-bottom: 20px; text-indent: 30px; text-align: justify;">
+                        Madyapadma atau yang lebih sering disebut dengan MP sebenarnya adalah kependekan nama dari Madyapadma Journalistic Park. Sebelum nama Madyapadma tercetus, nama Widya Stana yang merupakan nama awal dari ekstra jurnalistik di Trisma. Keberadaan Widya Stana sudah ada sejak awal Trisma berdiri. Hanya saja karena satu dan lain hal Widya Stana berganti nama menjadi Madyapadma pada angkatan III Trisma. Konon pergantian nama tersebut disebabkan oleh sebuah pemberitaan dari redaksinya sendiri yang menyinggung suatu pihak yang berujung pada pemberedelan Widya Stana.
+                    </p>
+                    
+                    <p style="margin-bottom: 20px; text-indent: 30px; text-align: justify;">
+                        Pemilihan nama Madyapadma sebagai pengganti dari Widya Stana bukanlah tanpa suatu pertimbangan. Dibalik nama tersebut ternyata tersimpan sebuah filosofi sederhana namun sangat dalam. Madyapadma sendiri tersusun dari dua kata indah yaitu <strong>Madya</strong> dan <strong>Padma</strong>. <em>Madya</em> berarti tengah dan <em>Padma</em> berarti teratai. 
+                    </p>
+
+                    <p style="margin-bottom: 20px; text-indent: 30px; text-align: justify;">
+                        Seperti yang kita ketahui, teratai merupakan sebuah tumbuhan yang dapat hidup di tiga tempat sekaligus. Akarnya menancap kuat nan kokoh di tanah, batangnya menjulang tegak dan kuat hingga sampai di permukaan, daun serta bunganya pun tumbuh cantik menghiasi permukaan air. Sebuah mahakarya sederhana yang dapat memberikan pembelajaran bagi warga yang bernaung di payung Madyapadma tentang bagaimana menjadi pers yang mampu menyelami berbagai kalangan mulai dari kalangan bawah, menengah, hingga atas. Sementara kata Madya berarti tengah. Menggambarkan Madyapadma sebagai pers yang berada ditengah-tengah teratai. Menuntut Madyapadma untuk menjadi pers yang adil, tidak memihak dan bisa menjadi penengah dalam berbagai situasi. Yang dengan segala kemampuannya juga menunjukkan sikap independen dalam setiap pemberitaannya.
+                    </p>
+
+                    <hr style="border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 30px 0;">
+
+                    <h2 style="margin-bottom: 20px; font-size: 1.5rem; color: var(--primary-color);">Lebih Dari Sekadar Jurnalistik</h2>
+
+                    <p style="margin-bottom: 20px; text-indent: 30px; text-align: justify;">
+                        Madyapadma Journalistic Park adalah sebuah kelompok jurnalistik yang tak hanya fokus pada bidang redaksional saja tetapi juga banyak bidang lain seperti fotografi, perfilman, penyiaran radio (Voice of Trisma), dan lain-lain. Bagi Madyapadma bidang-bidang baru tesebut merupakan suatu penyegaran untuk membuat Madyapadma menjadi lebih hidup dan aktif. Sekaligus sebagai sebuah ciri dari Madyapadma yang membedakannya dari ekstra jurnalistik putih abu lainnya.
+                    </p>
+
+                    <p style="margin-bottom: 20px; text-indent: 30px; text-align: justify;">
+                        Untuk takaran sebuah ciri tentunya sesuatu itu haruslah dikuasai dan dimiliki secara penuh. Hal ini membuat Madyapadma gencar memantapkan segala bidang dengan jalan pelatihan di luar jam ekstra kurikuler sekolah. Adapun bentuk dari pelatihan itu seperti: pelatihan radio, film bahkan pelatihan kepemimpinan yang memberikan dampak tak langsung bagi warga Madyapadma dalam menjalankan kesehariannya sebagai seorang jurnalis yang tangguh.
+                    </p>
+
+                </article>
+            </div>
+        </div>
+        
+        <!-- Footer info for padding -->
+        <div style="height: 120px;"></div>
+    </div>
+
+    <!-- Audio Player Bar (Glassmorphism + Neon) -->
+    <div class="audio-player-bar">
+        <!-- Progress bar hidden for stream -->
+        <input type="range" class="progress-bar-top" style="display: none;" min="0" max="100" value="45">
+
+        <div class="player-center player-info">
+            <div class="img-thumb-container">
+                <div class="img-thumb glass-panel pulse-soft">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+            </div>
+            <div class="song-title-wrapper">
+                <div class="song-title">Siaran Langsung KBRF</div>
+                <div class="song-artist">Madyapadma Voice of Trisma</div>
+            </div>
+        </div>
+
+        <div class="player-controls">
+            <!-- Volume Slider moved to the left of backward step -->
+            <div class="volume-container">
+                <button class="icon-btn" id="volumeBtn" title="Volume">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <div class="volume-slider-wrapper glass-panel" id="volumeSliderWrapper">
+                    <input type="range" class="volume-slider" min="0" max="100" value="100">
+                </div>
+            </div>
+
+            <button class="icon-btn" title="Mundur 10 Detik">
+                <i class="fa-solid fa-backward-step"></i>
+            </button>
+            <button class="play-pause-btn" id="playPauseBtn" title="Play/Pause">
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path class="morph-path" fill="#ffffff" d="M 8 5 L 19 12 L 8 19 Z" />
+                </svg>
+            </button>
+            <button class="icon-btn" title="Maju 10 Detik">
+                <i class="fa-solid fa-forward-step"></i>
+            </button>
+
+            <!-- Archive Link moved to the right of forward step -->
+            <a href="archive.html" class="icon-btn" title="Arsip Siaran" style="display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-box-archive"></i>
+            </a>
+        </div>
+
+        <div class="player-tools">
+            <!-- Time text hidden for stream -->
+        </div>
+    </div>
+
+    <!-- Hidden Audio Element for Live Stream -->
+    <audio id="mainAudio" src="http://i.klikhost.com:8502/stream" preload="none" style="display: none;"></audio>
+
+    <!-- Base UI Scripts -->
+    <script>
+        // Logika Sidebar
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-toggled');
+        }
+
+        // Logika untuk tombol Play / Pause (Live Stream)
+        const mainAudio = document.getElementById('mainAudio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const morphPath = document.querySelector('.morph-path');
+        const playerThumb = document.querySelector('.img-thumb');
+        let isPlaying = false;
+
+        function updatePlayPauseIcon() {
+            if (isPlaying) {
+                morphPath.setAttribute('d', 'M 6 5 L 10 5 L 10 19 L 6 19 Z M 14 5 L 18 5 L 18 19 L 14 19 Z');
+                playPauseBtn.classList.add('playing');
+                playerThumb.classList.add('pulse-soft');
+            } else {
+                morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
+                playPauseBtn.classList.remove('playing');
+                playerThumb.classList.remove('pulse-soft');
+            }
+        }
+
+        playPauseBtn.addEventListener('click', function () {
+            if (isPlaying) {
+                mainAudio.pause();
+                // To stop stream buffering, we reset src
+                mainAudio.src = '';
+                isPlaying = false;
+                updatePlayPauseIcon();
+            } else {
+                // Re-attach src to get latest live stream buffer
+                mainAudio.src = 'http://i.klikhost.com:8502/stream?' + new Date().getTime();
+                mainAudio.play().then(() => {
+                    isPlaying = true;
+                    updatePlayPauseIcon();
+                }).catch(e => {
+                    console.error("Autoplay blocked or stream offline", e);
+                });
+            }
+        });
+
+        // Logika untuk menampilkan / menyembunyikan popup volume
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeSliderWrapper = document.getElementById('volumeSliderWrapper');
+        const volumeSlider = document.querySelector('.volume-slider');
+
+        volumeBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            volumeSliderWrapper.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!volumeSliderWrapper.contains(event.target) && !volumeBtn.contains(event.target)) {
+                volumeSliderWrapper.classList.remove('show');
+            }
+        });
+
+        volumeSliderWrapper.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+        
+        volumeSlider.addEventListener('input', function(e) {
+            mainAudio.volume = e.target.value / 100;
+        });
+        
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = themeToggleBtn.querySelector('i');
+        
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        themeToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.classList.toggle('light-theme');
+            
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+        
+        // Progress bar visual only
+        const progressTop = document.querySelector('.progress-bar-top');
+        progressTop.addEventListener('input', function() {
+            this.style.setProperty('--val', this.value + '%');
+        });
+        progressTop.style.setProperty('--val', progressTop.value + '%');
+    </script>
+    
+    <!-- Page Specific Script -->
+    <script src="about.js"></script>
+</body>
+
+</html>
