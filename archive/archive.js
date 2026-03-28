@@ -181,12 +181,11 @@ function openRepo(date, items) {
             playItem(btn.dataset.id, btn.dataset.title, btn.dataset.url, btn);
         });
     });
-    document.querySelectorAll('.repofile-name').forEach(name => {
-        name.addEventListener('click', (e) => {
+    document.querySelectorAll('.repofile-row').forEach(row => {
+        row.addEventListener('click', (e) => {
             e.stopPropagation();
-            const row = name.closest('.repofile-row');
             const btn = row.querySelector('.repofile-play-btn');
-            playItem(name.dataset.id, name.dataset.title, name.dataset.url, btn);
+            playItem(btn.dataset.id, btn.dataset.title, btn.dataset.url, btn);
         });
     });
     
@@ -241,18 +240,27 @@ function renderReadme(data) {
     if (data.programs && data.programs.length > 0) {
         data.programs.forEach((prog, idx) => {
             const tsSeconds = parseTimestamp(prog.timestamp);
-            const tsDisplay = formatTs(tsSeconds);
+            const tsDisplay = formatTime(tsSeconds);
             const div = document.createElement('div');
-            div.style.cssText = "background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; margin-bottom: 10px;";
+            
+            div.style.cssText = "position: relative; padding-left: 20px; border-left: 2px solid var(--primary-color); margin-bottom: 25px;";
             div.innerHTML = `
-                <div style="display: flex; gap: 15px; align-items: flex-start;">
-                    <button class="prog-ts-btn" data-seconds="${tsSeconds}" style="cursor: pointer; background: var(--primary-color); border: none; color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
-                        <i class="fa-solid fa-forward-step"></i> ${tsDisplay}
-                    </button>
-                    <div style="flex: 1;">
-                        <h5 style="margin: 0 0 5px 0; font-size: 1.1rem;">${prog.program || 'Segmen '+(idx+1)} ${prog.announcer ? `<span style="font-size: 0.8rem; background: rgba(225,29,72,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: var(--primary-color);">@${prog.announcer}</span>` : ''}</h5>
-                        <p style="margin: 0 0 10px 0; font-size: 0.9rem; opacity: 0.7;"><strong>Topik:</strong> ${prog.topic || '-'}</p>
-                        <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; opacity: 0.9;">${prog.description || ''}</p>
+                <!-- Timeline Dot -->
+                <div style="position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; background: var(--bg-color); border: 2px solid var(--primary-color); border-radius: 50%; box-shadow: 0 0 8px rgba(225, 29, 72, 0.5);"></div>
+                
+                <div class="glass-panel" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap;">
+                        <button class="prog-ts-btn" data-seconds="${tsSeconds}" style="flex-shrink: 0; cursor: pointer; background: var(--primary-color); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-family: monospace; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4); transition: all 0.2s;" onmouseover="this.style.background='#c9133c'" onmouseout="this.style.background='var(--primary-color)'">
+                            <i class="fa-solid fa-play"></i> Munculkan di ${tsDisplay}
+                        </button>
+                        <div style="flex: 1; min-width: 250px;">
+                            <h5 style="margin: 0 0 8px 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                ${prog.program || 'Segmen '+(idx+1)}
+                                ${prog.announcer ? `<span style="font-size: 0.75rem; background: rgba(225,29,72,0.15); padding: 3px 8px; border-radius: 20px; color: var(--primary-color); border: 1px solid rgba(225,29,72,0.3);"><i class="fa-solid fa-microphone-lines"></i> ${prog.announcer}</span>` : ''}
+                            </h5>
+                            ${prog.topic ? `<p style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--accent);"><i class="fa-solid fa-hashtag" style="opacity: 0.7;"></i> <strong>Topik:</strong> ${prog.topic}</p>` : ''}
+                            <p style="margin: 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-muted);">${prog.description || ''}</p>
+                        </div>
                     </div>
                 </div>
             `;
