@@ -5,18 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice of Trisma - Arsip Siaran</title>
-    <link rel="icon" href="./kbrf.svg" type="image/png">
+    <link rel="icon" href="./../assets/kbrf.svg" type="image/png">
 
     <!-- External Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Main Application Stylesheets -->
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="../index.css">
     <link rel="stylesheet" href="archive.css">
 </head>
 
@@ -32,16 +33,16 @@
                 <span></span>
                 <span></span>
             </div>
-            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
+            <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
         </div>
         <nav>
-            <a href="index.html"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
-            <a href="archive.html" class="active"><i class="fa-solid fa-box-archive"></i> Archive</a>
-            <a href="about.html"><i class="fa-solid fa-circle-info"></i> About</a>
-            
+            <a href="/"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
+            <a href="../archive" class="active"><i class="fa-solid fa-box-archive"></i> Archive</a>
+            <a href="../about"><i class="fa-solid fa-circle-info"></i> About</a>
+
             <a href="#" id="themeToggleBtn" style="margin-top: auto;"><i class="fa-solid fa-moon"></i> Ganti Tema</a>
         </nav>
-        
+
         <div class="sidebar-footer">
             <p>&copy; 2026 Madyapadma</p>
             <p>Voice of Trisma v2.0</p>
@@ -56,7 +57,7 @@
                 <span></span>
                 <span></span>
             </div>
-            <img src="madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
+            <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
             <div class="search-container">
                 <div class="search-box">
                     <i class="fa fa-search search-icon"></i>
@@ -67,25 +68,29 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Animated Hero Section -->
         <div class="hero-section glass-panel" style="min-height: auto; padding-bottom: 30px;">
             <h1>Arsip Siaran</h1>
             <p>Koleksi rekaman siaran VOT Radio Denpasar dari Archive.org</p>
-            
+
             <div class="stats-row" style="margin-top: 20px;">
-                <button class="icon-btn glass-panel" id="sortBtn" onclick="toggleSort()" style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem;">
+                <button class="icon-btn glass-panel" id="sortBtn" onclick="toggleSort()"
+                    style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem;">
                     <i class="fa-solid fa-sort"></i> Terbaru
                 </button>
-                <button class="icon-btn glass-panel" id="refreshBtn" onclick="doRefresh()" style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem;">
+                <button class="icon-btn glass-panel" id="refreshBtn" onclick="doRefresh()"
+                    style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem;">
                     <i class="fa-solid fa-rotate-right"></i> Refresh
                 </button>
             </div>
         </div>
 
-        <div class="search-indicator" id="searchIndicator" style="display: none; align-items: center; justify-content: space-between; padding: 15px 20px; margin-bottom: 20px; border-radius: 12px; background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.3);">
+        <div class="search-indicator" id="searchIndicator"
+            style="display: none; align-items: center; justify-content: space-between; padding: 15px 20px; margin-bottom: 20px; border-radius: 12px; background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.3);">
             <span><i class="fa-solid fa-magnifying-glass"></i> Hasil pencarian: <strong id="searchQ"></strong></span>
-            <button class="icon-btn" onclick="clearSearch()" style="width: 30px; height: 30px;"><i class="fa-solid fa-xmark"></i></button>
+            <button class="icon-btn" onclick="clearSearch()" style="width: 30px; height: 30px;"><i
+                    class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="count-tag" style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem;">
@@ -95,25 +100,29 @@
         <!-- The List Grid -->
         <div id="listContainer">
             <div id="list" class="grid-content"></div>
-            
+
             <!-- Pagination -->
-            <div class="pagination-wrap" id="pagination" style="display: flex; gap: 10px; justify-content: center; margin-top: 40px; flex-wrap: wrap;"></div>
+            <div class="pagination-wrap" id="pagination"
+                style="display: flex; gap: 10px; justify-content: center; margin-top: 40px; flex-wrap: wrap;"></div>
         </div>
 
         <!-- Repo Detail View (Hidden by default) -->
         <div id="repoView" style="display: none; padding-top: 10px; padding-bottom: 50px;">
-            <button class="icon-btn glass-panel" onclick="closeRepo()" style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 20px;">
+            <button class="icon-btn glass-panel" onclick="closeRepo()"
+                style="width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 20px;">
                 <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
             </button>
-            
+
             <div class="card glass-panel" style="padding: 30px; margin-bottom: 20px;">
                 <h2 id="repoTitle" style="font-size: 1.8rem; margin-bottom: 10px;">Arsip: Tanggal</h2>
                 <p id="repoSub" style="opacity: 0.7; margin-bottom: 25px;">Memuat data repository...</p>
-                
+
                 <!-- File List / Commits (Like Github) -->
                 <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
-                    <div style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <i class="fa-solid fa-folder-open" style="color: var(--primary-color);"></i> Files in this repository
+                    <div
+                        style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <i class="fa-solid fa-folder-open" style="color: var(--primary-color);"></i> Files in this
+                        repository
                     </div>
                     <div id="repoFilesList" style="display: flex; flex-direction: column;">
                         <!-- File rows go here -->
@@ -123,21 +132,24 @@
 
             <!-- Readme / Description.json -->
             <div class="card glass-panel" id="repoReadme" style="display: none; padding: 0; overflow: hidden;">
-                <div style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;">
+                <div
+                    style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;">
                     <i class="fa-solid fa-book-open" style="color: var(--primary-color);"></i> README.md
                 </div>
                 <div style="padding: 30px;" id="repoDescContent">
                     <h3 id="readmeTitle" style="font-size: 1.5rem; margin-bottom: 15px;">—</h3>
                     <p id="readmeText" style="line-height: 1.8; opacity: 0.8; margin-bottom: 30px;">—</p>
-                    
-                    <h4 style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Segmen Program</h4>
+
+                    <h4
+                        style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        Segmen Program</h4>
                     <div id="readmePrograms" style="display: flex; flex-direction: column; gap: 15px;">
                         <!-- Programs list -->
                     </div>
                 </div>
             </div>
         </div>
-        
+
     </div>
 
     <!-- Hidden Audio Element for playing archive tracks -->
@@ -184,7 +196,8 @@
             </button>
 
             <!-- Archive Link moved to the right of forward step -->
-            <a href="#" class="icon-btn" id="archiveLink" title="Buka di Archive.org" target="_blank" style="display: flex; align-items: center; justify-content: center;">
+            <a href="#" class="icon-btn" id="archiveLink" title="Buka di Archive.org" target="_blank"
+                style="display: flex; align-items: center; justify-content: center;">
                 <i class="fa-solid fa-external-link-alt"></i>
             </a>
         </div>
@@ -204,16 +217,16 @@
         // Theme Toggle Logic
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = themeToggleBtn.querySelector('i');
-        
+
         if (localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
             themeIcon.classList.replace('fa-moon', 'fa-sun');
         }
 
-        themeToggleBtn.addEventListener('click', function(e) {
+        themeToggleBtn.addEventListener('click', function (e) {
             e.preventDefault();
             document.body.classList.toggle('light-theme');
-            
+
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
                 themeIcon.classList.replace('fa-moon', 'fa-sun');
@@ -222,7 +235,7 @@
                 themeIcon.classList.replace('fa-sun', 'fa-moon');
             }
         });
-        
+
         // Volume Popup Logic
         const volumeBtn = document.getElementById('volumeBtn');
         const volumeSliderWrapper = document.getElementById('volumeSliderWrapper');
@@ -242,7 +255,7 @@
             event.stopPropagation();
         });
     </script>
-    
+
     <!-- Page Specific Script -->
     <script src="archive.js"></script>
 </body>
