@@ -886,9 +886,9 @@ body.sidebar-toggled .audio-player-bar {
         left: 0;
         width: 100%;
         height: auto;
-        padding: 20px;
+        padding: 15px 20px;
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
     }
     
     .player-info {
@@ -900,17 +900,17 @@ body.sidebar-toggled .audio-player-bar {
     .player-controls {
         flex: unset;
         width: 100%;
+        justify-content: center;
     }
     
     .player-tools {
-        position: absolute;
-        top: 20px;
-        right: 20px;
         flex: unset;
+        width: 100%;
+        justify-content: center;
     }
     
     .time-text {
-        display: none; /* Hide time to save space */
+        font-size: 12px;
     }
 }
 

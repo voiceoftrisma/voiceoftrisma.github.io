@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Radio Player</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: monospace;
+        }
+
+        audio {
+            width: 500px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-height: 24px;
+        }
+
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #ff9800;
+            border-radius: 50%;
+            margin-right: 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .log {
+            display: none;
+            font-size: 11px;
+            color: #00ff00;
+            background: #000;
+            width: 80%;
+            font-family: 'Consolas', monospace;
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin-top: 10px;
+        }
+
+        .log div {
+            margin-bottom: 2px;
+            border-bottom: 1px solid #222;
+        }
+
+        #modeIndicator {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            padding: 5px 10px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+
+        /* Overlay hint yang muncul sebelum interaksi pertama */
+        #clickHint {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            font-size: 22px;
+            letter-spacing: 3px;
+            color: #ff9800;
+            pointer-events: none;
+            animation: pulse 1.5s ease-in-out infinite;
+            z-index: 999;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Overlay hint -->
+    <div id="clickHint">🖱 KLIK DI MANA SAJA UNTUK MULAI</div>
+
+    <audio id="player" crossorigin="anonymous" controls></audio>
+
+    <div class="status" id="statusContainer">
+        <div class="spinner" id="loadingSpinner"></div>
+        <span id="statusText">▶ PRESS SPACE / KLIK UNTUK MULAI</span>
+    </div>
+
+    <div class="log" id="debugLog"></div>
+
+    <div id="modeIndicator">System: IDLE</div>
+
+    <script>
+        // --- LOGIKA PORT DINAMIS ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const port = urlParams.get('port') || '8502';
+        const streamUrl = `https://i.klikhost.com:${port}/stream`;
+        
+        const player        = document.getElementById('player');
+        const statusText    = document.getElementById('statusText');
+        const spinner       = document.getElementById('loadingSpinner');
+        const debugLog      = document.getElementById('debugLog');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const clickHint     = document.getElementById('clickHint');
+
+        let retryInterval     = null;
+        let userHasInteracted = false;
+
+        // Debug mode
+        if (urlParams.get('debug') === '1' || urlParams.get('debug') === 'true') {
+            debugLog.style.display = 'block';
+        }
+
+        function log(msg, color = '#00ff00') {
+            const time = new Date().toLocaleTimeString();
+            const p = document.createElement('div');
+            p.innerHTML = `<span style="color:#666;">[${time}]</span> <span style="color:${color};">${msg}</span>`;
+            debugLog.prepend(p);
+            if (debugLog.children.length > 50) debugLog.lastChild.remove();
+        }
+
+        function startPanicMode() {
+            if (retryInterval) return;
+
+            userHasInteracted = true;
+            log(`⚠️ SERVER OFFLINE (Port: ${port}). Mencari sinyal...`, "red");
+            
+            spinner.style.display   = "block";
+            spinner.style.borderTopColor = "#ff9800";
+            statusText.innerText    = "SCANNING SERVER...";
+            statusText.style.color  = "#ff9800";
+
+            modeIndicator.innerText      = `System: SCANNING`;
+            modeIndicator.style.borderColor = "#ff9800";
+            modeIndicator.style.color    = "#ff9800";
+
+            checkServer();
+            retryInterval = setInterval(checkServer, 2000); 
+        }
+
+        function stopPanicMode() {
+            if (retryInterval) {
+                clearInterval(retryInterval);
+                retryInterval = null;
+                spinner.style.display = "none";
+                log("🛑 Scan dihentikan.", "white");
+            }
+        }
+
+        async function checkServer() {
+            if (!retryInterval) return;
+            const timestamp = new Date().getTime();
+            log(`📡 Ping port ${port}...`, "orange");
+
+            try {
+                await fetch(`${streamUrl}?t=${timestamp}`, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                });
+
+                log(`✅ Port ${port} Merespon!`, "#00ffff");
+                stopPanicMode();
+                playAudio();
+
+            } catch (error) {
+                log(`❌ Port ${port} masih offline.`, "gray");
+            }
+        }
+
+        function playAudio() {
+            const timestamp = new Date().getTime();
+            player.src = `${streamUrl}?t=${timestamp}`;
+            player.load();
+            
+            player.play().catch(() => {
+                log("⚠️ Gagal Play otomatis, kembali scan...", "red");
+                startPanicMode();
+            });
+        }
+
+        // ─── AUTO-PLAY SAAT KLIK DI MANA SAJA ────────────────────────────────
+        function handleFirstClick() {
+            // Hapus overlay hint
+            clickHint.style.display = 'none';
+
+            // Hanya mulai play jika belum pernah berinteraksi
+            if (!userHasInteracted && player.paused) {
+                userHasInteracted = true;
+                log(`▶ Klik terdeteksi – koneksi ke port ${port}...`, "white");
+
+                spinner.style.display  = "block";
+                spinner.style.borderTopColor = "#ffffff";
+                statusText.innerText   = "CONNECTING...";
+                statusText.style.color = "white";
+
+                player.play().catch(() => {
+                    startPanicMode();
+                });
+            }
+
+            // Setelah interaksi pertama, lepas listener agar tidak ganggu klik berikutnya
+            document.removeEventListener('click', handleFirstClick);
+        }
+
+        document.addEventListener('click', handleFirstClick);
+        // ─────────────────────────────────────────────────────────────────────
+
+        player.addEventListener('playing', () => {
+            clickHint.style.display = 'none';
+            spinner.style.display   = "none";
+            statusText.innerText    = `🔊 PLAYING (PORT: ${port})`;
+            statusText.style.color  = "#4caf50";
+            modeIndicator.innerText = "System: STABLE";
+            modeIndicator.style.borderColor = "#4caf50";
+            modeIndicator.style.color       = "#4caf50";
+        });
+
+        player.addEventListener('error', () => {
+            if (userHasInteracted && !player.paused && !retryInterval) {
+                log("☠️ Koneksi Terputus.", "red");
+                startPanicMode();
+            }
+        });
+
+        // ─── SPACE BAR CONTROL ────────────────────────────────────────────────
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+
+                if (retryInterval) {
+                    stopPanicMode();
+                    player.pause();
+                    userHasInteracted      = false; 
+                    statusText.innerText   = "⏹ SCAN STOPPED";
+                    statusText.style.color = "white";
+                    modeIndicator.innerText      = "System: IDLE";
+                    modeIndicator.style.borderColor = "#333";
+                    modeIndicator.style.color    = "#888";
+                    return; 
+                }
+
+                if (!player.paused) {
+                    player.pause();
+                    userHasInteracted      = false; 
+                    statusText.innerText   = "⏸ PAUSED";
+                    statusText.style.color = "white";
+                    log("⏸ Manual Pause.", "white");
+                } else {
+                    userHasInteracted = true;
+                    log(`▶ Mencoba koneksi ke port ${port}...`, "white");
+                    
+                    spinner.style.display  = "block";
+                    spinner.style.borderTopColor = "#ffffff";
+                    statusText.innerText   = "CONNECTING...";
+                    
+                    player.play().catch(() => {
+                        startPanicMode();
+                    });
+                }
+            }
+        });
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Initialize
+        player.src = streamUrl;
+        modeIndicator.innerText = `System: IDLE (Target Port: ${port})`;
+        log(`Sistem Siap. Target: Port ${port}`, "white");
+    </script>
+</body>
+</html>

@@ -163,20 +163,31 @@ function openRepo(date, items) {
     
     // Render file list immediately
     repoFilesList.innerHTML = items.map((it, idx) => `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-            <div style="display: flex; align-items: center; gap: 12px; font-family: monospace;">
-                <i class="fa-solid fa-file-audio" style="color: var(--muted-color); font-size: 1.1rem;"></i>
-                <a href="${it.url}" target="_blank" style="color: var(--text-color); text-decoration: none;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--text-color)'">${it.title}</a>
+        <div class="repofile-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+            <div style="display: flex; align-items: center; gap: 12px; font-family: monospace; min-width: 0; flex: 1;">
+                <i class="fa-solid fa-file-audio" style="color: var(--text-muted); font-size: 1.1rem; flex-shrink: 0;"></i>
+                <span class="repofile-name" data-id="${it.id}" data-title="${it.title.replace(/"/g,'&quot;')}" data-url="${it.url}" style="color: var(--text-main); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-main)'">${it.title}</span>
             </div>
-            <button class="icon-btn repofile-play-btn" data-id="${it.id}" data-title="${it.title.replace(/"/g,'&quot;')}" data-url="${it.url}" style="width: 32px; height: 32px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 5px;">
+            <button class="icon-btn repofile-play-btn" data-id="${it.id}" data-title="${it.title.replace(/"/g,'&quot;')}" data-url="${it.url}" style="width: 32px; height: 32px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 5px; flex-shrink: 0; margin-left: 10px;">
                 <i class="fa-solid fa-play"></i>
             </button>
         </div>
     `).join('');
     
-    // Add play events
+    // Add play events for both filename clicks and play button clicks
     document.querySelectorAll('.repofile-play-btn').forEach(btn => {
-        btn.addEventListener('click', () => playItem(btn.dataset.id, btn.dataset.title, btn.dataset.url, btn));
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playItem(btn.dataset.id, btn.dataset.title, btn.dataset.url, btn);
+        });
+    });
+    document.querySelectorAll('.repofile-name').forEach(name => {
+        name.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const row = name.closest('.repofile-row');
+            const btn = row.querySelector('.repofile-play-btn');
+            playItem(name.dataset.id, name.dataset.title, name.dataset.url, btn);
+        });
     });
     
     // Fetch description.json from the first item
