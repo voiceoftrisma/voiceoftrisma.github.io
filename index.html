@@ -249,10 +249,9 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                const targetUrl = encodeURIComponent('http://i.klikhost.com:8502/stats?json=1&t=' + Date.now());
-                const proxyUrl = 'https://api.allorigins.win/raw?url=' + targetUrl;
+                const targetUrl = 'https://gist.githubusercontent.com/Sparkplugx1904/0d0b5d5e6f1184cadd7da69c74b753c9/raw/voiceoftrisma-server-status.json?t=' + Date.now();
 
-                fetch(proxyUrl, { signal: controller.signal })
+                fetch(targetUrl, { signal: controller.signal })
                     .then(res => {
                         clearTimeout(timeoutId);
                         if (!res.ok) throw new Error('HTTP ' + res.status);
