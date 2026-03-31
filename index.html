@@ -249,8 +249,8 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                const targetUrl = 'https://gist.githubusercontent.com/Sparkplugx1904/0d0b5d5e6f1184cadd7da69c74b753c9/raw/voiceoftrisma-server-status.json?t=' + Date.now();
-
+                // const targetUrl = 'https://gist.githubusercontent.com/Sparkplugx1904/0d0b5d5e6f1184cadd7da69c74b753c9/raw/voiceoftrisma-server-status.json?t=' + Date.now();
+                const targetUrl = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev/' + Date.now();
                 fetch(targetUrl, { signal: controller.signal })
                     .then(res => {
                         clearTimeout(timeoutId);
