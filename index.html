@@ -80,7 +80,7 @@
             <div class="stats-row">
                 <div class="stat-item">
                     <i class="fa-solid fa-headphones"></i>
-                    <span id="streamHitsCount"><i class="fa-solid fa-circle-notch fa-spin"></i> Mendengarkan</span>
+                    <span id="peakListenersCount"><i class="fa-solid fa-circle-notch fa-spin"></i> Mendengarkan</span>
                 </div>
                 <div class="stat-item">
                     <i class="fa-solid fa-music"></i>
@@ -235,9 +235,9 @@
                 }
             });
 
-            // Satu request untuk live status + streamhits
+            // Satu request untuk live status + peaklisteners
             const liveBadge = document.getElementById('liveBadge');
-            const streamHitsEl = document.getElementById('streamHitsCount');
+            const peakListenersEl = document.getElementById('peakListenersCount');
 
             function formatNumber(n) {
                 if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
@@ -267,14 +267,14 @@
                             liveBadge.className = 'live-badge offline';
                         }
                         // Stream hits
-                        if (data.streamhits !== undefined) {
-                            streamHitsEl.textContent = formatNumber(data.streamhits) + ' Mendengarkan';
+                        if (data.peaklisteners !== undefined) {
+                            peakListenersEl.textContent = formatNumber(data.peaklisteners) + ' Mendengarkan';
                         }
                     })
                     .catch(() => {
                         liveBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="margin-right: 5px;"></i> OFFLINE';
                         liveBadge.className = 'live-badge offline';
-                        streamHitsEl.textContent = '— Mendengarkan';
+                        peakListenersEl.textContent = '— Mendengarkan';
                     });
             })();
 
