@@ -32,10 +32,10 @@
                 <span></span>
                 <span></span>
             </div>
-            <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
+            <img src="./assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
         </div>
         <nav>
-            <a href="/" class="active"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
+            <a href="./" class="active"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
             <a href="archive"><i class="fa-solid fa-box-archive"></i> Archive</a>
             <a href="about"><i class="fa-solid fa-circle-info"></i> About</a>
 
@@ -56,7 +56,7 @@
                 <span></span>
                 <span></span>
             </div>
-            <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
+            <img src="./assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
             <div class="search-container">
                 <div class="search-box">
                     <i class="fa fa-search search-icon"></i>
@@ -179,7 +179,7 @@
                     updatePlayPauseIcon();
                 } else {
                     // Re-attach src to get latest live stream buffer
-                    mainAudio.src = 'http://i.klikhost.com:8502/stream?' + new Date().getTime();
+                    mainAudio.src = 'http://i.klikhost.com:8502/stream?' + 't=' + new Date().getTime();
                     mainAudio.play().then(() => {
                         isPlaying = true;
                         updatePlayPauseIcon();
@@ -250,7 +250,7 @@
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
                 // const targetUrl = 'https://gist.githubusercontent.com/Sparkplugx1904/0d0b5d5e6f1184cadd7da69c74b753c9/raw/voiceoftrisma-server-status.json?t=' + Date.now();
-                const targetUrl = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev/' + Date.now();
+                const targetUrl = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev?' + 't=' + Date.now();
                 fetch(targetUrl, { signal: controller.signal })
                     .then(res => {
                         clearTimeout(timeoutId);
