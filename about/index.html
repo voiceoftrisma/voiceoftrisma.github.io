@@ -27,7 +27,6 @@
             font-size: 1.4rem;
             color: var(--primary-color);
             margin: 40px 0 15px 0;
-            /* Menggantikan fungsi <hr> dengan whitespace */
             font-weight: 600;
         }
 
@@ -41,7 +40,47 @@
             text-align: justify;
         }
 
-        /* Grid untuk 14 Program agar tidak memanjang ke bawah */
+        /* ----- Gaya Khusus Gambar (Rounded Corners) ----- */
+        .article-image {
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            display: block;
+            height: auto;
+            object-fit: cover;
+            margin: 25px 0;
+        }
+
+        .img-landscape {
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .img-portrait {
+            width: 100%;
+            max-width: 280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Supaya gambar portrait sejajar dengan teks di layar komputer/tablet */
+        @media (min-width: 768px) {
+            .float-right {
+                float: right;
+                margin: 5px 0 20px 30px;
+            }
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* ----------------------------------------------- */
+
+        /* Grid untuk 14 Program */
         .programs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -154,18 +193,22 @@
                 jurnalistik radio, <em>public speaking</em>, dan manajemen penyiaran.
             </p>
 
-            <h2>Masa Vakum: Berselancar di Tengah Badai</h2>
-            <p>
-                Perjalanan di jalur FM tidak selamanya mulus. Menginjak tahun keempat mengudara, VoT terpaksa
-                menghentikan siarannya. Kendala utama yang dihadapi adalah masalah teknis terkait sinyal dan
-                regulasi frekuensi yang terlalu berdekatan (bentrok) dengan stasiun radio lain.
-            </p>
-            <p>
-                Masa-masa penuh tantangan, transisi format, dan upaya bangkit dari masa vakum ini menjadi momen
-                bersejarah yang diabadikan dalam sebuah buku berjudul <em><strong>"Voice of Trisma: Berselancar
-                        di Tengah Badai"</strong></em>. Buku tersebut menjadi simbol perjuangan radio komunitas
-                pendidikan ini untuk tetap bertahan.
-            </p>
+            <div class="clearfix">
+                <h2>Masa Vakum: Berselancar di Tengah Badai</h2>
+                <img src="../assets/berselancar-ditengah-badai.jpg" alt="Buku Berselancar di Tengah Badai"
+                    class="article-image img-portrait float-right">
+                <p>
+                    Perjalanan di jalur FM tidak selamanya mulus. Menginjak tahun keempat mengudara, VoT terpaksa
+                    menghentikan siarannya. Kendala utama yang dihadapi adalah masalah teknis terkait sinyal dan
+                    regulasi frekuensi yang terlalu berdekatan (bentrok) dengan stasiun radio lain.
+                </p>
+                <p>
+                    Masa-masa penuh tantangan, transisi format, dan upaya bangkit dari masa vakum ini menjadi momen
+                    bersejarah yang diabadikan dalam sebuah buku berjudul <em><strong>"Voice of Trisma: Berselancar
+                            di Tengah Badai"</strong></em>. Buku tersebut menjadi simbol perjuangan radio komunitas
+                    pendidikan ini untuk tetap bertahan.
+                </p>
+            </div>
 
             <h2>Lahirnya Radio Online dan KBRF (2014)</h2>
             <p>
@@ -183,6 +226,8 @@
             </p>
 
             <h2>Semangat "Masih Ada Asa" (2016)</h2>
+            <img src="../assets/ameliadwinda.webp" alt="Penyiar Voice of Trisma Tahun 2016"
+                class="article-image img-landscape">
             <p>
                 Pada tahun 2016, sistem <em>live-streaming</em> internet VoT semakin dihidupkan dengan
                 mengusung slogan penyemangat: <em><strong>"Voice of Trisma: Masih Ada Asa"</strong></em>. Di
@@ -192,6 +237,8 @@
                 <strong>"VOICE OF TRISMA THE BEST ONLINE RADIO IN BALI"</strong>. Jejak digital mereka juga
                 terus diperluas, salah satunya melalui publikasi konten audio di platform SoundCloud.
             </p>
+            <img src="../assets/masihadaasa-balebengong.jpg" alt="Voice of Trisma Masih Ada Asa"
+                class="article-image img-landscape">
 
             <h2>Identitas dan Karakter VoT Saat Ini</h2>
             <p>Melewati berbagai rintangan tersebut, VoT kini berdiri tegak dengan identitas yang kuat:</p>
