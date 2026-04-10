@@ -74,8 +74,9 @@
                 <span class="pulse"></span> LIVE NOW
             </div>
             <h1>Radio Siaran Voice of Trisma</h1>
-            <p>Rasakan pengalaman antarmuka pengguna yang modern, mulus, dan responsif. Menggabungkan estetika mode
-                gelap dengan elegan glassmorphism.</p>
+            <p>Radio Voice of Trisma (VoT) adalah radio komunitas sekolah yang berbasis di SMA Negeri 3 Denpasar.
+                Dikelola oleh siswa-siswi Madyapadma Journalistic Park, VoT menjadi wadah kreatif untuk siaran,
+                dokumentasi, dan pengembangan media di lingkungan sekolah.</p>
 
             <div class="stats-row">
                 <div class="stat-item">
@@ -235,7 +236,7 @@
                 }
             });
 
-            // Satu request untuk live status + peaklisteners
+            // Satu request untuk live status + currentlisteners
             const liveBadge = document.getElementById('liveBadge');
             const peakListenersEl = document.getElementById('peakListenersCount');
 
@@ -267,8 +268,8 @@
                             liveBadge.className = 'live-badge offline';
                         }
                         // Stream hits
-                        if (data.peaklisteners !== undefined) {
-                            peakListenersEl.textContent = formatNumber(data.peaklisteners) + ' Mendengarkan';
+                        if (data.currentlisteners !== undefined) {
+                            peakListenersEl.textContent = formatNumber(data.currentlisteners) + ' Mendengarkan';
                         }
                     })
                     .catch(() => {
