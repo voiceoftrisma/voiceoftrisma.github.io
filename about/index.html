@@ -40,35 +40,64 @@
             text-align: justify;
         }
 
-        /* ----- Gaya Khusus Gambar (Rounded Corners) ----- */
+        /* ----- Gaya Khusus Gambar & Caption ----- */
         .article-image {
             border-radius: 12px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
             display: block;
             height: auto;
             object-fit: cover;
-            margin: 25px 0;
+            /* Margin diatur di container pembungkus agar lebih rapi */
+            margin: 0 0 10px 0;
+            width: 100%;
         }
 
         .img-landscape {
-            width: 100%;
             max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .img-portrait {
-            width: 100%;
             max-width: 280px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        /* Supaya gambar portrait sejajar dengan teks di layar komputer/tablet */
+        /* Container untuk gambar dan caption */
+        .image-container {
+            margin-bottom: 25px;
+            /* Jarak bawah default */
+            margin-top: 15px;
+            margin-left: auto;
+            /* Memusatkan di layar kecil */
+            margin-right: auto;
+            /* Memusatkan di layar kecil */
+        }
+
+        /* Gaya Card khusus untuk Teks URL/Caption */
+        .caption-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .caption-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+        }
+
+        /* Pengaturan Layout untuk Layar Komputer/Tablet (Desktop) */
         @media (min-width: 768px) {
             .float-right {
                 float: right;
                 margin: 5px 0 20px 30px;
+            }
+
+            .float-left {
+                float: left;
+                margin: 5px 30px 20px 0;
             }
         }
 
@@ -195,8 +224,17 @@
 
             <div class="clearfix">
                 <h2>Masa Vakum: Berselancar di Tengah Badai</h2>
-                <img src="../assets/berselancar-ditengah-badai.jpg" alt="Buku Berselancar di Tengah Badai"
-                    class="article-image img-portrait float-right">
+
+                <div class="image-container float-right img-portrait">
+                    <img src="../assets/berselancar-ditengah-badai.jpg" alt="Buku Berselancar di Tengah Badai"
+                        class="article-image">
+                    <div class="caption-card">
+                        <a href="https://www.madyapadma-pustaka.com/book/detail/25" target="_blank">
+                            Buku Berselancar di Tengah Badai
+                        </a>
+                    </div>
+                </div>
+
                 <p>
                     Perjalanan di jalur FM tidak selamanya mulus. Menginjak tahun keempat mengudara, VoT terpaksa
                     menghentikan siarannya. Kendala utama yang dihadapi adalah masalah teknis terkait sinyal dan
@@ -225,20 +263,39 @@
                 di Bali.
             </p>
 
-            <h2>Semangat "Masih Ada Asa" (2016)</h2>
-            <img src="../assets/ameliadwinda.webp" alt="Penyiar Voice of Trisma Tahun 2016"
-                class="article-image img-landscape">
-            <p>
-                Pada tahun 2016, sistem <em>live-streaming</em> internet VoT semakin dihidupkan dengan
-                mengusung slogan penyemangat: <em><strong>"Voice of Trisma: Masih Ada Asa"</strong></em>. Di
-                fase ini, para pengelola yang berstatus pelajar menghadapi tantangan membagi waktu, latihan,
-                dan menguasai alat-alat siaran digital secara otodidak. Kerja keras ini membuahkan kebanggaan
-                internal yang melahirkan <em>station call</em> ikonis mereka:
-                <strong>"VOICE OF TRISMA THE BEST ONLINE RADIO IN BALI"</strong>. Jejak digital mereka juga
-                terus diperluas, salah satunya melalui publikasi konten audio di platform SoundCloud.
-            </p>
-            <img src="../assets/masihadaasa-balebengong.jpg" alt="Voice of Trisma Masih Ada Asa"
-                class="article-image img-landscape">
+            <div class="clearfix">
+                <h2>Semangat "Masih Ada Asa" (2016)</h2>
+
+                <div class="image-container float-left img-landscape" style="max-width: 450px;">
+                    <img src="../assets/ameliadwinda.webp" alt="Penyiar Voice of Trisma Tahun 2016"
+                        class="article-image">
+                    <div class="caption-card">
+                        <a href="https://www.madyapadma-pustaka.com/book/detail/25" target="_blank">
+                            Ameliadwinda: Setahun bersama Madyapadma
+                        </a>
+                    </div>
+                </div>
+
+                <p>
+                    Pada tahun 2016, sistem <em>live-streaming</em> internet VoT semakin dihidupkan dengan
+                    mengusung slogan penyemangat: <em><strong>"Voice of Trisma: Masih Ada Asa"</strong></em>. Di
+                    fase ini, para pengelola yang berstatus pelajar menghadapi tantangan membagi waktu, latihan,
+                    dan menguasai alat-alat siaran digital secara otodidak. Kerja keras ini membuahkan kebanggaan
+                    internal yang melahirkan <em>station call</em> ikonis mereka:
+                    <strong>"VOICE OF TRISMA THE BEST ONLINE RADIO IN BALI"</strong>. Jejak digital mereka juga
+                    terus diperluas, salah satunya melalui publikasi konten audio di platform SoundCloud.
+                </p>
+            </div>
+
+            <div class="image-container img-landscape">
+                <img src="../assets/masihadaasa-balebengong.jpg" alt="Voice of Trisma Masih Ada Asa"
+                    class="article-image">
+                <div class="caption-card">
+                    <a href="https://www.madyapadma-pustaka.com/book/detail/25" target="_blank">
+                        Voice of Trisma: Masih Ada Asa
+                    </a>
+                </div>
+            </div>
 
             <h2>Identitas dan Karakter VoT Saat Ini</h2>
             <p>Melewati berbagai rintangan tersebut, VoT kini berdiri tegak dengan identitas yang kuat:</p>
