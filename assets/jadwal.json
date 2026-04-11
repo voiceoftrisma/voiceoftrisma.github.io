@@ -1,0 +1,124 @@
+{
+    "jadwal": [
+        {
+            "hari": "Senin",
+            "program": [
+                {
+                    "waktu": "17.00 - 18.00",
+                    "acara": "Info Science",
+                    "penyiar": "Vita"
+                },
+                {
+                    "waktu": "18.00",
+                    "acara": "Tri Sandhya",
+                    "penyiar": "-"
+                }
+            ]
+        },
+        {
+            "hari": "Selasa",
+            "program": [
+                {
+                    "waktu": "17.00 - 17.15",
+                    "acara": "Berita Umum",
+                    "penyiar": "Nia"
+                },
+                {
+                    "waktu": "17.15 - 18.00",
+                    "acara": "info IPTEK",
+                    "penyiar": "Vita"
+                },
+                {
+                    "waktu": "18.00",
+                    "acara": "Tri Sandhya",
+                    "penyiar": "-"
+                }
+            ]
+        },
+        {
+            "hari": "Rabu",
+            "program": [
+                {
+                    "waktu": "17.00 - 17.30",
+                    "acara": "T. Kupas Kording",
+                    "penyiar": "Nia"
+                },
+                {
+                    "waktu": "17.30 - 18.00",
+                    "acara": "Conveito",
+                    "penyiar": "Vita"
+                },
+                {
+                    "waktu": "18.00",
+                    "acara": "Tri Sandhya",
+                    "penyiar": "-"
+                }
+            ]
+        },
+        {
+            "hari": "Kamis",
+            "program": [
+                {
+                    "waktu": "17.00 - 18.00",
+                    "acara": "Tau Gak Sih?",
+                    "penyiar": "Deya"
+                },
+                {
+                    "waktu": "18.00",
+                    "acara": "Tri Sandhya",
+                    "penyiar": "-"
+                }
+            ]
+        },
+        {
+            "hari": "Jumat",
+            "program": [
+                {
+                    "waktu": "16.00 - 16.30",
+                    "acara": "T. (Profil Siswa Berprestasi)",
+                    "penyiar": "Nia"
+                },
+                {
+                    "waktu": "16.30 - 17.30",
+                    "acara": "Nonstop Music",
+                    "penyiar": "Deya"
+                },
+                {
+                    "waktu": "17.30 - 18.00",
+                    "acara": "Conveito",
+                    "penyiar": "Vita"
+                },
+                {
+                    "waktu": "18.00",
+                    "acara": "Tri Sandhya",
+                    "penyiar": "-"
+                }
+            ]
+        },
+        {
+            "hari": "Sabtu",
+            "program": [
+                {
+                    "waktu": "16.00 - 16.45",
+                    "acara": "All about Movie",
+                    "penyiar": "Deya"
+                },
+                {
+                    "waktu": "16.45 - 17.15",
+                    "acara": "Tangga Lagu Barat",
+                    "penyiar": "Vita"
+                },
+                {
+                    "waktu": "17.15 - 17.30",
+                    "acara": "Kilas Trisma",
+                    "penyiar": "Deya"
+                },
+                {
+                    "waktu": "17.30 - 18.00",
+                    "acara": "Tangga Lagu Indonesia",
+                    "penyiar": "Nia"
+                }
+            ]
+        }
+    ]
+}

@@ -47,7 +47,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .log {
@@ -62,7 +64,7 @@
             border: 1px solid #333;
             padding: 10px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             margin-top: 10px;
         }
 
@@ -97,15 +99,21 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Overlay hint -->
     <div id="clickHint">🖱 KLIK DI MANA SAJA UNTUK MULAI</div>
 
     <audio id="player" crossorigin="anonymous" controls></audio>
@@ -124,16 +132,43 @@
         const urlParams = new URLSearchParams(window.location.search);
         const port = urlParams.get('port') || '8502';
         const streamUrl = `https://i.klikhost.com:${port}/stream`;
-        
-        const player        = document.getElementById('player');
-        const statusText    = document.getElementById('statusText');
-        const spinner       = document.getElementById('loadingSpinner');
-        const debugLog      = document.getElementById('debugLog');
-        const modeIndicator = document.getElementById('modeIndicator');
-        const clickHint     = document.getElementById('clickHint');
 
-        let retryInterval     = null;
+        const player = document.getElementById('player');
+        const statusText = document.getElementById('statusText');
+        const spinner = document.getElementById('loadingSpinner');
+        const debugLog = document.getElementById('debugLog');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const clickHint = document.getElementById('clickHint');
+
+        let retryInterval = null;
         let userHasInteracted = false;
+
+        // --- WAKE LOCK (ALWAYS ON DISPLAY) ---
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    log('💡 Layar Always On: AKTIF', '#ffff00');
+
+                    wakeLock.addEventListener('release', () => {
+                        log('🌙 Layar Always On: NONAKTIF', '#ff9800');
+                    });
+                } catch (err) {
+                    log(`❌ Gagal Wake Lock: ${err.name}, ${err.message}`, 'red');
+                }
+            } else {
+                log('⚠️ Browser tidak mendukung Wake Lock API', 'orange');
+            }
+        }
+
+        // Jika user pindah tab dan kembali, Wake Lock akan terputus. Kita perlu memintanya lagi.
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible' && !player.paused) {
+                await requestWakeLock();
+            }
+        });
 
         // Debug mode
         if (urlParams.get('debug') === '1' || urlParams.get('debug') === 'true') {
@@ -153,18 +188,18 @@
 
             userHasInteracted = true;
             log(`⚠️ SERVER OFFLINE (Port: ${port}). Mencari sinyal...`, "red");
-            
-            spinner.style.display   = "block";
-            spinner.style.borderTopColor = "#ff9800";
-            statusText.innerText    = "SCANNING SERVER...";
-            statusText.style.color  = "#ff9800";
 
-            modeIndicator.innerText      = `System: SCANNING`;
+            spinner.style.display = "block";
+            spinner.style.borderTopColor = "#ff9800";
+            statusText.innerText = "SCANNING SERVER...";
+            statusText.style.color = "#ff9800";
+
+            modeIndicator.innerText = `System: SCANNING`;
             modeIndicator.style.borderColor = "#ff9800";
-            modeIndicator.style.color    = "#ff9800";
+            modeIndicator.style.color = "#ff9800";
 
             checkServer();
-            retryInterval = setInterval(checkServer, 2000); 
+            retryInterval = setInterval(checkServer, 2000);
         }
 
         function stopPanicMode() {
@@ -201,7 +236,7 @@
             const timestamp = new Date().getTime();
             player.src = `${streamUrl}?t=${timestamp}`;
             player.load();
-            
+
             player.play().catch(() => {
                 log("⚠️ Gagal Play otomatis, kembali scan...", "red");
                 startPanicMode();
@@ -210,17 +245,18 @@
 
         // ─── AUTO-PLAY SAAT KLIK DI MANA SAJA ────────────────────────────────
         function handleFirstClick() {
-            // Hapus overlay hint
             clickHint.style.display = 'none';
 
-            // Hanya mulai play jika belum pernah berinteraksi
             if (!userHasInteracted && player.paused) {
                 userHasInteracted = true;
                 log(`▶ Klik terdeteksi – koneksi ke port ${port}...`, "white");
 
-                spinner.style.display  = "block";
+                // Panggil Wake Lock saat interaksi pertama
+                requestWakeLock();
+
+                spinner.style.display = "block";
                 spinner.style.borderTopColor = "#ffffff";
-                statusText.innerText   = "CONNECTING...";
+                statusText.innerText = "CONNECTING...";
                 statusText.style.color = "white";
 
                 player.play().catch(() => {
@@ -228,7 +264,6 @@
                 });
             }
 
-            // Setelah interaksi pertama, lepas listener agar tidak ganggu klik berikutnya
             document.removeEventListener('click', handleFirstClick);
         }
 
@@ -237,12 +272,12 @@
 
         player.addEventListener('playing', () => {
             clickHint.style.display = 'none';
-            spinner.style.display   = "none";
-            statusText.innerText    = `🔊 PLAYING (PORT: ${port})`;
-            statusText.style.color  = "#4caf50";
+            spinner.style.display = "none";
+            statusText.innerText = `🔊 PLAYING (PORT: ${port})`;
+            statusText.style.color = "#4caf50";
             modeIndicator.innerText = "System: STABLE";
             modeIndicator.style.borderColor = "#4caf50";
-            modeIndicator.style.color       = "#4caf50";
+            modeIndicator.style.color = "#4caf50";
         });
 
         player.addEventListener('error', () => {
@@ -260,29 +295,41 @@
                 if (retryInterval) {
                     stopPanicMode();
                     player.pause();
-                    userHasInteracted      = false; 
-                    statusText.innerText   = "⏹ SCAN STOPPED";
+                    userHasInteracted = false;
+                    statusText.innerText = "⏹ SCAN STOPPED";
                     statusText.style.color = "white";
-                    modeIndicator.innerText      = "System: IDLE";
+                    modeIndicator.innerText = "System: IDLE";
                     modeIndicator.style.borderColor = "#333";
-                    modeIndicator.style.color    = "#888";
-                    return; 
+                    modeIndicator.style.color = "#888";
+
+                    if (wakeLock) {
+                        wakeLock.release().then(() => wakeLock = null);
+                    }
+                    return;
                 }
 
                 if (!player.paused) {
                     player.pause();
-                    userHasInteracted      = false; 
-                    statusText.innerText   = "⏸ PAUSED";
+                    userHasInteracted = false;
+                    statusText.innerText = "⏸ PAUSED";
                     statusText.style.color = "white";
                     log("⏸ Manual Pause.", "white");
+
+                    // Lepaskan Wake Lock jika di-pause manual
+                    if (wakeLock) {
+                        wakeLock.release().then(() => wakeLock = null);
+                    }
                 } else {
                     userHasInteracted = true;
                     log(`▶ Mencoba koneksi ke port ${port}...`, "white");
-                    
-                    spinner.style.display  = "block";
+
+                    // Panggil Wake Lock saat play via Spacebar
+                    requestWakeLock();
+
+                    spinner.style.display = "block";
                     spinner.style.borderTopColor = "#ffffff";
-                    statusText.innerText   = "CONNECTING...";
-                    
+                    statusText.innerText = "CONNECTING...";
+
                     player.play().catch(() => {
                         startPanicMode();
                     });
@@ -297,4 +344,5 @@
         log(`Sistem Siap. Target: Port ${port}`, "white");
     </script>
 </body>
+
 </html>
