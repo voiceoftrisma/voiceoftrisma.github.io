@@ -757,7 +757,7 @@ body.sidebar-toggled .audio-player-bar {
     margin-bottom: 2px;
 }
 
-.song-artist {
+.song-program {
     font-size: 12px;
     color: var(--text-muted);
 }
@@ -981,4 +981,71 @@ body.sidebar-toggled .audio-player-bar {
         flex-direction: column;
         gap: 15px;
     }
+}
+
+/* Efek Denyut Merah untuk Thumbnail (Online) */
+@keyframes pulse-red-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
+        background-color: rgba(255, 0, 0, 0.1);
+        border-color: rgba(255, 0, 0, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        background-color: rgba(255, 0, 0, 0.4);
+        border-color: rgba(255, 0, 0, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
+        background-color: rgba(255, 0, 0, 0.1);
+        border-color: rgba(255, 0, 0, 0.3);
+    }
+}
+
+.thumb-online {
+    animation: pulse-red-glow 2.5s infinite alternate ease-in-out !important;
+    color: #ff4444 !important;
+    /* Warna ikon menjadi merah */
+}
+
+/* State Offline untuk Thumbnail */
+.thumb-offline {
+    background-color: #2a2a2a !important;
+    border-color: #444 !important;
+    color: #777 !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+/* Efek Denyut untuk Teks Jadwal Sekarang */
+@keyframes text-pulse-glow {
+    0% {
+        opacity: 0.7;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+
+    100% {
+        opacity: 0.7;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+}
+
+.text-pulse {
+    animation: text-pulse-glow 2.5s infinite ease-in-out;
+    font-weight: 600;
+}
+
+/* Styling untuk Jadwal Selanjutnya */
+.next-program {
+    font-size: 0.75rem;
+    color: #aaaaaa;
+    margin-top: 2px;
+    font-weight: 400;
 }

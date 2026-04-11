@@ -17,7 +17,7 @@
         rel="stylesheet">
 
     <!-- Main Application Stylesheet -->
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -74,9 +74,8 @@
                 <span class="pulse"></span> LIVE NOW
             </div>
             <h1>Radio Siaran Voice of Trisma</h1>
-            <p>Radio Voice of Trisma (VoT) adalah radio komunitas sekolah yang berbasis di SMA Negeri 3 Denpasar.
-                Dikelola oleh siswa-siswi Madyapadma Journalistic Park, VoT menjadi wadah kreatif untuk siaran,
-                dokumentasi, dan pengembangan media di lingkungan sekolah.</p>
+            <p>Radio Voice of Trisma adalah sebuah radio komunitas yang berbasis di SMA Negeri 3 Denpasar.
+                Dikelola oleh siswa-siswi Madyapadma Journalistic Park.</p>
 
             <div class="stats-row">
                 <div class="stat-item">
@@ -98,13 +97,14 @@
 
             <div class="player-center player-info">
                 <div class="img-thumb-container">
-                    <div class="img-thumb glass-panel pulse-soft">
-                        <i class="fa-solid fa-music"></i>
+                    <div class="img-thumb glass-panel thumb-offline" id="playerThumb">
+                        <img src="./assets/madyapadma.svg" alt="Logo Madyapadma" width="30">
                     </div>
                 </div>
                 <div class="song-title-wrapper">
                     <div class="song-title">Siaran Langsung Voice of Trisma</div>
-                    <div class="song-artist">Madyapadma</div>
+                    <div class="song-program" id="currentProgram">Sedang Offline...</div>
+                    <div class="next-program" id="nextProgram" style="display: none;"></div>
                 </div>
             </div>
 
@@ -146,146 +146,8 @@
         <!-- Hidden Audio Element for Live Stream -->
         <audio id="mainAudio" src="http://i.klikhost.com:8502/stream" preload="none" style="display: none;"></audio>
 
-        <script>
-            // Logika Sidebar
-            function toggleSidebar() {
-                document.body.classList.toggle('sidebar-toggled');
-            }
-
-            // Logika untuk tombol Play / Pause (Live Stream)
-            const mainAudio = document.getElementById('mainAudio');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const morphPath = document.querySelector('.morph-path');
-            const playerThumb = document.querySelector('.img-thumb');
-            let isPlaying = false;
-
-            function updatePlayPauseIcon() {
-                if (isPlaying) {
-                    morphPath.setAttribute('d', 'M 6 5 L 10 5 L 10 19 L 6 19 Z M 14 5 L 18 5 L 18 19 L 14 19 Z');
-                    playPauseBtn.classList.add('playing');
-                    playerThumb.classList.add('pulse-soft');
-                } else {
-                    morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
-                    playPauseBtn.classList.remove('playing');
-                    playerThumb.classList.remove('pulse-soft');
-                }
-            }
-
-            playPauseBtn.addEventListener('click', function () {
-                if (isPlaying) {
-                    mainAudio.pause();
-                    // To stop stream buffering, we reset src
-                    mainAudio.src = '';
-                    isPlaying = false;
-                    updatePlayPauseIcon();
-                } else {
-                    // Re-attach src to get latest live stream buffer
-                    mainAudio.src = 'http://i.klikhost.com:8502/stream?' + 't=' + new Date().getTime();
-                    mainAudio.play().then(() => {
-                        isPlaying = true;
-                        updatePlayPauseIcon();
-                    }).catch(e => {
-                        console.error("Autoplay blocked or stream offline", e);
-                    });
-                }
-            });
-
-            // Logika untuk menampilkan / menyembunyikan popup volume
-            const volumeBtn = document.getElementById('volumeBtn');
-            const volumeSliderWrapper = document.getElementById('volumeSliderWrapper');
-            const volumeSlider = document.querySelector('.volume-slider');
-
-            volumeBtn.addEventListener('click', function (event) {
-                event.stopPropagation();
-                volumeSliderWrapper.classList.toggle('show');
-            });
-
-            document.addEventListener('click', function (event) {
-                if (!volumeSliderWrapper.contains(event.target) && !volumeBtn.contains(event.target)) {
-                    volumeSliderWrapper.classList.remove('show');
-                }
-            });
-
-            volumeSliderWrapper.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-
-            volumeSlider.addEventListener('input', function (e) {
-                mainAudio.volume = e.target.value / 100;
-            });
-
-            // Theme Toggle Logic
-            const themeToggleBtn = document.getElementById('themeToggleBtn');
-            const themeIcon = themeToggleBtn.querySelector('i');
-
-            if (localStorage.getItem('theme') === 'light') {
-                document.body.classList.add('light-theme');
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-            }
-
-            themeToggleBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.body.classList.toggle('light-theme');
-
-                if (document.body.classList.contains('light-theme')) {
-                    localStorage.setItem('theme', 'light');
-                    themeIcon.classList.replace('fa-moon', 'fa-sun');
-                } else {
-                    localStorage.setItem('theme', 'dark');
-                    themeIcon.classList.replace('fa-sun', 'fa-moon');
-                }
-            });
-
-            // Satu request untuk live status + currentlisteners
-            const liveBadge = document.getElementById('liveBadge');
-            const peakListenersEl = document.getElementById('peakListenersCount');
-
-            function formatNumber(n) {
-                if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
-                if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-                return n.toString();
-            }
-
-            (function checkStatus() {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-                // const targetUrl = 'https://gist.githubusercontent.com/Sparkplugx1904/0d0b5d5e6f1184cadd7da69c74b753c9/raw/voiceoftrisma-server-status.json?t=' + Date.now();
-                const targetUrl = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev?' + 't=' + Date.now();
-                fetch(targetUrl, { signal: controller.signal })
-                    .then(res => {
-                        clearTimeout(timeoutId);
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        // Live badge
-                        if (data.streamstatus === 1) {
-                            liveBadge.innerHTML = '<span class="pulse"></span> LIVE NOW';
-                            liveBadge.className = 'live-badge online';
-                        } else {
-                            liveBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="margin-right: 5px;"></i> OFFLINE';
-                            liveBadge.className = 'live-badge offline';
-                        }
-                        // Stream hits
-                        if (data.currentlisteners !== undefined) {
-                            peakListenersEl.textContent = formatNumber(data.currentlisteners) + ' Mendengarkan';
-                        }
-                    })
-                    .catch(() => {
-                        liveBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="margin-right: 5px;"></i> OFFLINE';
-                        liveBadge.className = 'live-badge offline';
-                        peakListenersEl.textContent = '— Mendengarkan';
-                    });
-            })();
-
-            // Progress bar visual only for live stream (hidden but kept for API safety)
-            const progressTop = document.querySelector('.progress-bar-top');
-            progressTop.addEventListener('input', function () {
-                this.style.setProperty('--val', this.value + '%');
-            });
-            progressTop.style.setProperty('--val', progressTop.value + '%');
-        </script>
+        <script src="script.js"></script>
+</body>
 </body>
 
 </html>

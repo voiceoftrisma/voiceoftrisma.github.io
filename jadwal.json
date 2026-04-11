@@ -1,0 +1,130 @@
+{
+    "jadwal": {
+        "1": [
+            {
+                "hari": "Senin",
+                "waktu_mulai": "17:00",
+                "waktu_selesai": "18:00",
+                "acara": "Info Science",
+                "penyiar": "Vita"
+            },
+            {
+                "waktu_mulai": "18:00",
+                "waktu_selesai": null,
+                "acara": "Tri Sandhya",
+                "penyiar": "-"
+            }
+        ],
+        "2": [
+            {
+                "hari": "Selasa",
+                "waktu_mulai": "17:00",
+                "waktu_selesai": "17:15",
+                "acara": "Berita Umum",
+                "penyiar": "Nia"
+            },
+            {
+                "waktu_mulai": "17:15",
+                "waktu_selesai": "18:00",
+                "acara": "info IPTEK",
+                "penyiar": "Vita"
+            },
+            {
+                "waktu_mulai": "18:00",
+                "waktu_selesai": null,
+                "acara": "Tri Sandhya",
+                "penyiar": "-"
+            }
+        ],
+        "3": [
+            {
+                "hari": "Rabu",
+                "waktu_mulai": "17:00",
+                "waktu_selesai": "17:30",
+                "acara": "T. Kupas Kording",
+                "penyiar": "Nia"
+            },
+            {
+                "waktu_mulai": "17:30",
+                "waktu_selesai": "18:00",
+                "acara": "Conveito",
+                "penyiar": "Vita"
+            },
+            {
+                "waktu_mulai": "18:00",
+                "waktu_selesai": null,
+                "acara": "Tri Sandhya",
+                "penyiar": "-"
+            }
+        ],
+        "4": [
+            {
+                "hari": "Kamis",
+                "waktu_mulai": "17:00",
+                "waktu_selesai": "18:00",
+                "acara": "Tau Gak Sih?",
+                "penyiar": "Deya"
+            },
+            {
+                "waktu_mulai": "18:00",
+                "waktu_selesai": null,
+                "acara": "Tri Sandhya",
+                "penyiar": "-"
+            }
+        ],
+        "5": [
+            {
+                "hari": "Jumat",
+                "waktu_mulai": "16:00",
+                "waktu_selesai": "16:30",
+                "acara": "T. (Profil Siswa Berprestasi)",
+                "penyiar": "Nia"
+            },
+            {
+                "waktu_mulai": "16:30",
+                "waktu_selesai": "17:30",
+                "acara": "Nonstop Music",
+                "penyiar": "Deya"
+            },
+            {
+                "waktu_mulai": "17:30",
+                "waktu_selesai": "18:00",
+                "acara": "Conveito",
+                "penyiar": "Vita"
+            },
+            {
+                "waktu_mulai": "18:00",
+                "waktu_selesai": null,
+                "acara": "Tri Sandhya",
+                "penyiar": "-"
+            }
+        ],
+        "6": [
+            {
+                "hari": "Sabtu",
+                "waktu_mulai": "16:00",
+                "waktu_selesai": "16:45",
+                "acara": "All about Movie",
+                "penyiar": "Deya"
+            },
+            {
+                "waktu_mulai": "16:45",
+                "waktu_selesai": "17:15",
+                "acara": "Tangga Lagu Barat",
+                "penyiar": "Vita"
+            },
+            {
+                "waktu_mulai": "17:15",
+                "waktu_selesai": "17:30",
+                "acara": "Kilas Trisma",
+                "penyiar": "Deya"
+            },
+            {
+                "waktu_mulai": "17:30",
+                "waktu_selesai": "18:00",
+                "acara": "Tangga Lagu Indonesia",
+                "penyiar": "Nia"
+            }
+        ]
+    }
+}
