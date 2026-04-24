@@ -234,17 +234,16 @@ function renderReadme(data) {
             const tsDisplay = formatTime(tsSeconds);
             const div = document.createElement('div');
 
-            div.style.cssText = "position: relative; padding-left: 20px; border-left: 2px solid var(--primary-color); margin-bottom: 25px;";
+            div.style.cssText = "position: relative; border-left: 2px solid var(--primary-color); margin-bottom: 25px;";
             div.innerHTML = `
                 <!-- Timeline Dot -->
-                <div style="position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; background: var(--bg-color); border: 2px solid var(--primary-color); border-radius: 50%; box-shadow: 0 0 8px rgba(225, 29, 72, 0.5);"></div>
                 
                 <div class="glass-panel" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap;">
                         <button class="prog-ts-btn" data-seconds="${tsSeconds}" style="flex-shrink: 0; cursor: pointer; background: var(--primary-color); border: none; color: white; padding: 6px 12px; border-radius: 8px; font-family: monospace; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4); transition: all 0.2s;" onmouseover="this.style.background='#c9133c'" onmouseout="this.style.background='var(--primary-color)'">
                             <i class="fa-solid fa-play"></i> Munculkan di ${tsDisplay}
                         </button>
-                        <div style="flex: 1; min-width: 250px;">
+                        <div style="flex: 1 1 250px; min-width: 0; word-break: break-word;">
                             <h5 style="margin: 0 0 8px 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 ${prog.program || 'Segmen ' + (idx + 1)}
                                 ${prog.announcer ? `<span style="font-size: 0.75rem; background: rgba(225,29,72,0.15); padding: 3px 8px; border-radius: 20px; color: var(--primary-color); border: 1px solid rgba(225,29,72,0.3);"><i class="fa-solid fa-microphone-lines"></i> ${prog.announcer}</span>` : ''}
