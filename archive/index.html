@@ -95,7 +95,7 @@
         </div>
 
         <!-- Animated Hero Section -->
-        <div class="hero-section glass-panel" style="min-height: auto; padding-bottom: 30px;">
+        <div id="heroSection" class="hero-section glass-panel" style="min-height: auto; padding-bottom: 30px;">
             <h1>Arsip Siaran</h1>
             <p>Koleksi rekaman siaran VOT Radio Denpasar dari Archive.org</p>
 
@@ -118,7 +118,7 @@
                     class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="count-tag" style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem;">
+        <div id="countTag" class="count-tag" style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem;">
             Menampilkan <span id="countDisplay" style="color: var(--primary-color); font-weight: 700;">—</span> rekaman
         </div>
 
@@ -164,7 +164,7 @@
                 style="margin-bottom: 20px; width: auto; padding: 0 20px; border-radius: 20px; font-size: 0.9rem;">
                 <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
             </button>
-            <div class="card glass-panel" style="padding: 30px; margin-bottom: 20px;">
+            <div class="card glass-panel" style="padding: 20px; margin-bottom: 20px;">
                 <div
                     style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                     <h2 id="repoTitle" style="font-size: 1.8rem; margin: 0;">Arsip: Tanggal</h2>
@@ -181,7 +181,7 @@
                 <!-- File List / Commits (Like Github) -->
                 <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
                     <div
-                        style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); user-select: none; -webkit-user-select: none;">
                         <i class="fa-solid fa-folder-open" style="color: var(--primary-color);"></i> Files in this
                         repository
                     </div>
@@ -192,7 +192,8 @@
             </div>
 
             <!-- Readme / Description.json -->
-            <div class="card glass-panel" id="repoReadme" style="display: none; padding: 0; overflow: hidden;">
+            <div class="card glass-panel" id="repoReadme"
+                style="display: none; padding: 0; overflow: hidden; user-select: none; -webkit-user-select: none;">
                 <div
                     style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;">
                     <i class="fa-solid fa-book-open" style="color: var(--primary-color);"></i> README.md

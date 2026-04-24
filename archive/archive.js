@@ -317,6 +317,7 @@ function renderPagination() {
 // ---------------------------------------------------------
 
 let isPlaying = false;
+let pendingTrack = null; // { url, title, archiveUrl } — queued, not yet fetched
 
 // --- Subtitle Variables & Logic ---
 let currentSubtitles = [];
@@ -434,8 +435,17 @@ function updatePlayPauseIcon() {
 }
 
 playPauseBtn.addEventListener('click', function () {
+    // If a track is pre-linked but not yet fetched, start it now on first click
+    if (pendingTrack) {
+        const { url, title, archiveUrl } = pendingTrack;
+        pendingTrack = null;
+        // find the matching row's play button to pass as btnElem
+        const btn = document.querySelector(`.repofile-play-btn[data-url="${CSS.escape(url)}"]`)
+            || document.querySelector('.repofile-play-btn');
+        playDirectUrl(url, title, archiveUrl, btn || null);
+        return;
+    }
     if (!mainAudio.src) return;
-
     if (isPlaying) {
         mainAudio.pause();
     } else {
@@ -612,6 +622,12 @@ async function loadRepoFromIdentifier(identifier) {
     repoFilesList.innerHTML = '';
     repoReadme.style.display = 'none';
 
+    // Sembunyikan elemen list-only saat membuka halaman identifier
+    ['heroSection', 'countTag', 'searchIndicator'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
     try {
         // ONE request — contains everything: files[], title, publicdate, description
         const res = await fetch(`https://archive.org/metadata/${identifier}`);
@@ -645,7 +661,7 @@ async function loadRepoFromIdentifier(identifier) {
                 const sizeStr = f.size ? formatBytes(parseInt(f.size)) : '';
                 const durStr = f.length ? ` · ${formatTime(parseFloat(f.length))}` : '';
                 const srcBadge = f.source === 'derivative'
-                    ? `<span style="font-size:0.65rem;opacity:0.4;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;">deriv.</span>`
+                    ? `<span style="font-size:0.65em;opacity:0.4;padding:1px 5px;border-radius:3px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;">deriv.</span>`
                     : '';
                 const icon = isAudio ? 'fa-file-audio' : isImg ? 'fa-file-image' : isJson ? 'fa-file-code' : isSub ? 'fa-file-lines' : 'fa-file';
                 const iclr = isAudio ? 'var(--primary-color)' : 'var(--text-muted)';
@@ -653,11 +669,11 @@ async function loadRepoFromIdentifier(identifier) {
                 return `<div class="repofile-row" data-audio="${isAudio}" data-is-simple="${isSimple}"
                     style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:${isAudio ? 'pointer' : 'default'};"
                     onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-                    <div style="display:flex;align-items:center;gap:10px;font-family:monospace;min-width:0;flex:1;">
-                        <i class="fa-solid ${icon}" style="color:${iclr};font-size:1.05rem;flex-shrink:0;"></i>
+                    <div style="display:flex;align-items:center;gap:10px;font-family:monospace;min-width:0;flex:1;font-size:1em;">
+                        <i class="fa-solid ${icon}" style="color:${iclr};font-size:1.05em;flex-shrink:0;"></i>
                         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.name}">${f.name}</span>
                         ${srcBadge}
-                        <span style="font-size:0.73rem;opacity:0.45;flex-shrink:0;white-space:nowrap;">${sizeStr}${durStr}</span>
+                        <span style="font-size:0.73em;opacity:0.45;flex-shrink:0;white-space:nowrap;">${sizeStr}${durStr}</span>
                     </div>
                     <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;margin-left:8px;">
                         ${isAudio ? `<button class="icon-btn repofile-play-btn"
@@ -690,6 +706,23 @@ async function loadRepoFromIdentifier(identifier) {
                 playDirectUrl(btn.dataset.url, btn.dataset.title, btn.dataset.archive, btn);
             });
         });
+
+        // Pre-link first visible audio file to player bar — zero fetch, waits for play click
+        const firstAudioBtn = document.querySelector(
+            '#repoFilesList .repofile-row[data-audio="true"][data-is-simple="true"] .repofile-play-btn'
+        ) || document.querySelector('#repoFilesList .repofile-row[data-audio="true"] .repofile-play-btn');
+
+        if (firstAudioBtn) {
+            pendingTrack = {
+                url: firstAudioBtn.dataset.url,
+                title: firstAudioBtn.dataset.title,
+                archiveUrl: firstAudioBtn.dataset.archive
+            };
+            playerTitle.textContent = firstAudioBtn.dataset.title;
+            playerSub.textContent = 'Tekan play untuk memulai';
+            archiveLink.href = firstAudioBtn.dataset.archive;
+            playerThumb.classList.remove('pulse-soft');
+        }
 
         // Optional second request: load description.json if present in file list
         const descFile = files.find(f => f.name === 'description.json');
