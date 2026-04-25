@@ -1,0 +1,381 @@
+/* =========================================
+   Archive Custom Styles & Extractions
+   ========================================= */
+
+/* State & Indicators */
+.loading-state,
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    color: var(--text-color, #fff);
+}
+
+.loading-icon {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.empty-icon {
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.search-indicator-box {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background: rgba(225, 29, 72, 0.1);
+    border: 1px solid rgba(225, 29, 72, 0.3);
+}
+
+.count-tag {
+    margin-bottom: 20px;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.count-tag span {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* Repo Cards */
+.repo-card {
+    cursor: pointer;
+    padding: 20px;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.repo-card:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.repo-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.repo-card-header i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.repo-card-header h3 {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.repo-card-meta {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+.repo-card-meta i {
+    opacity: 0.5;
+}
+
+.repo-card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.repo-card-tags span {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    font-family: monospace;
+}
+
+.repo-card-tags span.tag-more {
+    opacity: 0.6;
+    background: transparent;
+    border: none;
+}
+
+/* Repo Files List */
+.repofile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.repofile-row[data-audio="true"] {
+    cursor: pointer;
+}
+
+.repofile-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.repofile-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: monospace;
+    min-width: 0;
+    flex: 1;
+    font-size: 1rem;
+}
+
+.repofile-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.repofile-name {
+    color: var(--text-main, #fff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.repofile-row[data-audio="true"] .repofile-name:hover {
+    color: var(--accent);
+}
+
+.repofile-badge {
+    font-size: 0.65em;
+    opacity: 0.4;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+}
+
+.repofile-meta {
+    font-size: 0.75rem;
+    opacity: 0.45;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.repofile-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.repofile-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.repofile-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Readme Segments */
+.segment-block {
+    position: relative;
+    border-left: 2px solid var(--primary-color);
+    margin-bottom: 25px;
+}
+
+.segment-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.segment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.segment-content {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.prog-ts-btn {
+    flex-shrink: 0;
+    cursor: pointer;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
+    transition: all 0.2s;
+}
+
+.prog-ts-btn:hover {
+    background: #c9133c;
+}
+
+.prog-ts-btn.active {
+    background: #1a7a40;
+    box-shadow: 0 0 10px rgba(26, 122, 64, 0.5);
+}
+
+.segment-info {
+    flex: 1 1 250px;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.segment-title {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    color: var(--text-main, #fff);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.segment-announcer {
+    font-size: 0.75rem;
+    background: rgba(225, 29, 72, 0.15);
+    padding: 3px 8px;
+    border-radius: 20px;
+    color: var(--primary-color);
+    border: 1px solid rgba(225, 29, 72, 0.3);
+}
+
+.segment-topic {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    color: var(--accent, #ffb86c);
+}
+
+.segment-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-muted, #aaa);
+}
+
+/* Pagination Controls */
+.page-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color, #fff);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.page-btn.active {
+    background: var(--primary-color);
+    color: white;
+    opacity: 1;
+}
+
+/* Date Popup Overlay */
+.date-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.date-popup-card {
+    width: 90%;
+    max-width: 650px;
+    padding: 30px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+}
+
+.popup-back-btn {
+    margin-bottom: 20px;
+    width: max-content;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Subtitle Block */
+.subtitle-wrapper {
+    position: absolute;
+    bottom: calc(100% + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    display: none;
+    z-index: 1000;
+    padding: 0 20px;
+}
+
+.subtitle-box {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 500;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    max-width: 800px;
+    backdrop-filter: blur(4px);
+    line-height: 1.4;
+}

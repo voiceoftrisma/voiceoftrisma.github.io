@@ -15,21 +15,6 @@
     <meta name="application-name" content="Voice of Trisma">
     <meta name="google-site-verification" content="7mjHa2WVudF6PQ6pueDkClMp03F8EjEGRVqzStK7UrE" />
 
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "url": "https://madyapadma-online.com/",
-        "logo": "./madyapadma.svg",
-        "name": "Madyapadma Online",
-        "sameAs": [
-            "https://www.instagram.com/madyapadma",
-            "https://www.youtube.com/@Madyapadmatrisma",
-            "https://github.com/Sparkplugx1904"
-        ]
-    }
-    </script>
-
     <link rel="icon" href="../assets/madyapadma.svg" type="image/png">
 
     <!-- External Dependencies -->
@@ -54,9 +39,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
             <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-sidebar">
         </div>
@@ -78,9 +61,7 @@
     <div class="main-content" style="padding-bottom: 120px;">
         <div class="navbar-main">
             <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
             <img src="../assets/madyapadma-voice-of-trisma.svg" alt="Logo Madyapadma" class="logo-main hidden-desktop">
             <div class="search-container">
@@ -111,37 +92,32 @@
             </div>
         </div>
 
-        <div class="search-indicator" id="searchIndicator"
-            style="display: none; align-items: center; justify-content: space-between; padding: 15px 20px; margin-bottom: 20px; border-radius: 12px; background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.3);">
+        <div class="search-indicator-box" id="searchIndicator">
             <span><i class="fa-solid fa-magnifying-glass"></i> Hasil pencarian: <strong id="searchQ"></strong></span>
             <button class="icon-btn" onclick="clearSearch()" style="width: 30px; height: 30px;"><i
                     class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div id="countTag" class="count-tag" style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem;">
-            Menampilkan <span id="countDisplay" style="color: var(--primary-color); font-weight: 700;">—</span> rekaman
+        <div id="countTag" class="count-tag">
+            Menampilkan <span id="countDisplay">—</span> rekaman
         </div>
 
         <!-- The List Grid -->
         <div id="listContainer">
             <div id="list" class="grid-content"></div>
-
             <!-- Pagination -->
             <div class="pagination-wrap" id="pagination"
                 style="display: flex; gap: 10px; justify-content: center; margin-top: 40px; flex-wrap: wrap;"></div>
         </div>
 
         <!-- Date Popup Overlay -->
-        <div id="datePopupOverlay"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-            <div class="card glass-panel"
-                style="width: 90%; max-width: 650px; padding: 30px; max-height: 85vh; display: flex; flex-direction: column; position: relative;">
-                <button class="icon-btn" onclick="closeDatePopup()"
-                    style="position: absolute; top: 20px; right: 20px; width: 40px; height: 40px;"><i
+        <div id="datePopupOverlay" class="date-popup-overlay">
+            <div class="card glass-panel date-popup-card">
+                <button class="icon-btn popup-close-btn" onclick="closeDatePopup()"><i
                         class="fa-solid fa-xmark"></i></button>
-                <button class="icon-btn" onclick="closeDatePopup()"
-                    style="margin-bottom: 20px; width: max-content; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; background: rgba(255,255,255,0.1);"><i
+                <button class="icon-btn popup-back-btn" onclick="closeDatePopup()"><i
                         class="fa-solid fa-arrow-left"></i> Kembali</button>
+
                 <h2 id="datePopupTitle" style="font-size: 1.8rem; margin-bottom: 10px;"><i
                         class="fa-solid fa-book-bookmark"></i> Arsip</h2>
                 <p id="datePopupSub" style="opacity: 0.7; margin-bottom: 25px;"></p>
@@ -178,22 +154,21 @@
                 </div>
                 <p id="repoSub" style="opacity: 0.7; margin-bottom: 25px;">Memuat data repository...</p>
 
-                <!-- File List / Commits (Like Github) -->
+                <!-- File List / Commits -->
                 <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
                     <div
-                        style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); user-select: none; -webkit-user-select: none;">
+                        style="background: rgba(0,0,0,0.2); padding: 15px 20px; font-weight: 600; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.1); user-select: none;">
                         <i class="fa-solid fa-folder-open" style="color: var(--primary-color);"></i> Files in this
                         repository
                     </div>
                     <div id="repoFilesList" style="display: flex; flex-direction: column;">
-                        <!-- File rows go here -->
+                        <!-- File rows generated by JS -->
                     </div>
                 </div>
             </div>
 
             <!-- Readme / Description.json -->
-            <div id="repoReadme"
-                style="display: none; padding: 20px 0 0 0; user-select: none; -webkit-user-select: none;">
+            <div id="repoReadme" style="display: none; padding: 20px 0 0 0; user-select: none;">
                 <div id="repoDescContent">
                     <h3 id="readmeTitle" style="font-size: 1.5rem; margin-bottom: 15px;">—</h3>
                     <p id="readmeText" style="line-height: 1.8; opacity: 0.8; margin-bottom: 30px;">—</p>
@@ -207,7 +182,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Hidden Audio Element for playing archive tracks -->
@@ -216,19 +190,15 @@
     <!-- Audio Player Bar (Glassmorphism + Neon) -->
     <div class="audio-player-bar">
         <!-- Subtitle Overlay -->
-        <div id="subtitleContainer"
-            style="position: absolute; bottom: calc(100% + 20px); left: 50%; transform: translateX(-50%); width: 100%; text-align: center; pointer-events: none; display: none; z-index: 1000; padding: 0 20px;">
-            <div id="subtitleText"
-                style="display: inline-block; background: rgba(0,0,0,0.6); color: white; padding: 8px 18px; border-radius: 8px; font-size: 1.15rem; font-weight: 500; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); max-width: 800px; backdrop-filter: blur(4px); line-height: 1.4;">
-            </div>
+        <div id="subtitleContainer" class="subtitle-wrapper">
+            <div id="subtitleText" class="subtitle-box"></div>
         </div>
 
-        <!-- Progress bar on top edge -->
         <input type="range" class="progress-bar-top" id="progressBar" min="0" max="100" value="0">
 
         <div class="player-center player-info">
             <div class="img-thumb-container">
-                <div class="img-thumb glass-panel pulse-soft" id="playerThumb">
+                <div class="img-thumb glass-panel" id="playerThumb">
                     <i class="fa-solid fa-music"></i>
                 </div>
             </div>
@@ -239,7 +209,6 @@
         </div>
 
         <div class="player-controls">
-            <!-- Volume Slider moved to the left of backward step -->
             <div class="volume-container">
                 <button class="icon-btn" id="volumeBtn" title="Volume">
                     <i class="fa-solid fa-volume-high"></i>
@@ -261,7 +230,6 @@
                 <i class="fa-solid fa-forward-step"></i>
             </button>
 
-            <!-- Archive Link moved to the right of forward step -->
             <a href="#" class="icon-btn" id="archiveLink" title="Buka di Archive.org" target="_blank"
                 style="display: flex; align-items: center; justify-content: center;">
                 <i class="fa-solid fa-external-link-alt"></i>
@@ -275,15 +243,10 @@
 
     <!-- Base UI Scripts -->
     <script>
-        // Logika Sidebar
-        function toggleSidebar() {
-            document.body.classList.toggle('sidebar-toggled');
-        }
+        function toggleSidebar() { document.body.classList.toggle('sidebar-toggled'); }
 
-        // Theme Toggle Logic
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = themeToggleBtn.querySelector('i');
-
         if (localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
             themeIcon.classList.replace('fa-moon', 'fa-sun');
@@ -292,7 +255,6 @@
         themeToggleBtn.addEventListener('click', function (e) {
             e.preventDefault();
             document.body.classList.toggle('light-theme');
-
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
                 themeIcon.classList.replace('fa-moon', 'fa-sun');
@@ -302,27 +264,19 @@
             }
         });
 
-        // Volume Popup Logic
         const volumeBtn = document.getElementById('volumeBtn');
         const volumeSliderWrapper = document.getElementById('volumeSliderWrapper');
-
         volumeBtn.addEventListener('click', function (event) {
             event.stopPropagation();
             volumeSliderWrapper.classList.toggle('show');
         });
-
         document.addEventListener('click', function (event) {
             if (!volumeSliderWrapper.contains(event.target) && !volumeBtn.contains(event.target)) {
                 volumeSliderWrapper.classList.remove('show');
             }
         });
-
-        volumeSliderWrapper.addEventListener('click', function (event) {
-            event.stopPropagation();
-        });
+        volumeSliderWrapper.addEventListener('click', function (event) { event.stopPropagation(); });
     </script>
-
-    <!-- Page Specific Script -->
     <script src="archive.js"></script>
 </body>
 
