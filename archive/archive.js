@@ -687,7 +687,7 @@ function playDirectUrl(url, title, archiveUrl, btnElem) {
 
 const urlP = new URLSearchParams(location.search);
 const initIdentifier = urlP.get('identifier');
-const initQ = urlP.get('title');
+const initQ = urlP.get('query') || urlP.get('title');
 
 if (initIdentifier) { loadRepoFromIdentifier(initIdentifier); }
 else if (initQ) { searchInput.value = initQ; loadAllForSearch(initQ); }

@@ -61,7 +61,7 @@
                 <div class="search-box">
                     <i class="fa fa-search search-icon"></i>
                     <input type="text" id="q" placeholder="Cari tanggal atau ID... (mis. 29-08-25)">
-                    <button type="button" class="search-btn">
+                    <button type="button" class="search-btn" id="mainSearchBtn">
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
@@ -147,6 +147,24 @@
         <audio id="mainAudio" src="http://i.klikhost.com:8502/stream" preload="none" style="display: none;"></audio>
 
         <script src="script.js"></script>
+        <script>
+            (function () {
+                var input = document.getElementById('q');
+                var btn = document.getElementById('mainSearchBtn');
+
+                function goSearch() {
+                    var q = input.value.trim();
+                    if (q) {
+                        window.location.href = 'archive?query=' + encodeURIComponent(q);
+                    }
+                }
+
+                btn.addEventListener('click', goSearch);
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') goSearch();
+                });
+            })();
+        </script>
 </body>
 </body>
 
