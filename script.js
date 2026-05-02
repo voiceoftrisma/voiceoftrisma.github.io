@@ -328,3 +328,38 @@ progressTop.addEventListener('input', function () {
     this.style.setProperty('--val', this.value + '%');
 });
 progressTop.style.setProperty('--val', progressTop.value + '%');
+
+// =========================================
+// INLINE SVG REPLACEMENT LOGIC
+// =========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Cari semua tag <img> yang memanggil logo 'voice-of-trisma'
+    const svgImages = document.querySelectorAll('img[src*="voice-of-trisma"]');
+
+    svgImages.forEach(img => {
+        const imgID = img.id;
+        const imgClass = img.className;
+        const imgURL = img.src;
+
+        fetch(imgURL)
+            .then(res => res.text())
+            .then(text => {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                const svg = xmlDoc.getElementsByTagName('svg')[0];
+
+                if (!svg) return;
+
+                // Pertahankan ID dan Class asli dari tag <img>
+                if (imgID) svg.setAttribute('id', imgID);
+                if (imgClass) svg.setAttribute('class', imgClass + ' inline-svg');
+                
+                // Tambahkan class penanda agar mudah ditarget oleh CSS
+                svg.classList.add('vot-logo-svg');
+
+                // Mengganti <img> dengan elemen <svg> yang sudah di-parse
+                img.replaceWith(svg);
+            })
+            .catch(err => console.error("Gagal memuat file SVG:", err));
+    });
+});
