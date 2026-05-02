@@ -238,10 +238,7 @@ checkRadioStatus();
 // Cek status secara berkala setiap 30 detik (jika jam pindah saat radio menyala, animasi akan ter-trigger otomatis)
 setInterval(checkRadioStatus, 30000);
 
-// Logika Sidebar
-function toggleSidebar() {
-    document.body.classList.toggle('sidebar-toggled');
-}
+// Logika Sidebar dihapus karena sudah di load-layout.js
 
 // Logika untuk tombol Play / Pause (Live Stream)
 const mainAudio = document.getElementById('mainAudio');
@@ -300,27 +297,7 @@ volumeSlider.addEventListener('input', function (e) {
     mainAudio.volume = e.target.value / 100;
 });
 
-// Theme Toggle Logic
-const themeToggleBtn = document.getElementById('themeToggleBtn');
-const themeIcon = themeToggleBtn.querySelector('i');
-
-if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light-theme');
-    themeIcon.classList.replace('fa-moon', 'fa-sun');
-}
-
-themeToggleBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.body.classList.toggle('light-theme');
-
-    if (document.body.classList.contains('light-theme')) {
-        localStorage.setItem('theme', 'light');
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-    } else {
-        localStorage.setItem('theme', 'dark');
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-    }
-});
+// Theme Toggle Logic dipindah ke load-layout.js
 
 // Progress bar visual only for live stream
 const progressTop = document.querySelector('.progress-bar-top');
@@ -329,37 +306,4 @@ progressTop.addEventListener('input', function () {
 });
 progressTop.style.setProperty('--val', progressTop.value + '%');
 
-// =========================================
-// INLINE SVG REPLACEMENT LOGIC
-// =========================================
-document.addEventListener("DOMContentLoaded", () => {
-    // Cari semua tag <img> yang memanggil logo 'voice-of-trisma'
-    const svgImages = document.querySelectorAll('img[src*="voice-of-trisma"]');
-
-    svgImages.forEach(img => {
-        const imgID = img.id;
-        const imgClass = img.className;
-        const imgURL = img.src;
-
-        fetch(imgURL)
-            .then(res => res.text())
-            .then(text => {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-                const svg = xmlDoc.getElementsByTagName('svg')[0];
-
-                if (!svg) return;
-
-                // Pertahankan ID dan Class asli dari tag <img>
-                if (imgID) svg.setAttribute('id', imgID);
-                if (imgClass) svg.setAttribute('class', imgClass + ' inline-svg');
-                
-                // Tambahkan class penanda agar mudah ditarget oleh CSS
-                svg.classList.add('vot-logo-svg');
-
-                // Mengganti <img> dengan elemen <svg> yang sudah di-parse
-                img.replaceWith(svg);
-            })
-            .catch(err => console.error("Gagal memuat file SVG:", err));
-    });
-});
+// INLINE SVG REPLACEMENT dipindah ke load-layout.js

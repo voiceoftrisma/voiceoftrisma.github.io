@@ -1,7 +1,4 @@
-// Logika Sidebar
-function toggleSidebar() {
-    document.body.classList.toggle('sidebar-toggled');
-}
+// Logika Sidebar sudah dipindah ke load-layout.js
 
 // Logika untuk tombol Play / Pause (Live Stream)
 const mainAudio = document.getElementById('mainAudio');
@@ -65,27 +62,7 @@ volumeSlider.addEventListener('input', function (e) {
     mainAudio.volume = e.target.value / 100;
 });
 
-// Theme Toggle Logic
-const themeToggleBtn = document.getElementById('themeToggleBtn');
-const themeIcon = themeToggleBtn.querySelector('i');
-
-if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light-theme');
-    themeIcon.classList.replace('fa-moon', 'fa-sun');
-}
-
-themeToggleBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.body.classList.toggle('light-theme');
-
-    if (document.body.classList.contains('light-theme')) {
-        localStorage.setItem('theme', 'light');
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-    } else {
-        localStorage.setItem('theme', 'dark');
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-    }
-});
+// Theme Toggle Logic sudah dipindah ke load-layout.js
 
 // Progress bar visual only
 const progressTop = document.querySelector('.progress-bar-top');

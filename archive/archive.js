@@ -5,7 +5,7 @@ const API = 'https://archive.org/services/search/beta/page_production/?page_type
 const listContainer = document.getElementById('listContainer');
 const listEl = document.getElementById('list');
 const paginationEl = document.getElementById('pagination');
-const searchInput = document.getElementById('searchInput');
+const searchInput = document.getElementById('q');
 const countDisplay = document.getElementById('countDisplay');
 const searchInd = document.getElementById('searchIndicator');
 const searchQ = document.getElementById('searchQ');
@@ -499,7 +499,7 @@ function clearSearch() {
     const u = new URL(location.href); u.searchParams.delete('title'); history.replaceState({}, '', u.toString());
 }
 
-document.getElementById('searchBtn').onclick = doSearch;
+document.getElementById('mainSearchBtn').onclick = doSearch;
 document.querySelector('.search-btn').onclick = doSearch;
 searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 

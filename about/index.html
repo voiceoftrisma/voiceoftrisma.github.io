@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <link rel="stylesheet" href="../layout.css">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="./about.css">
 
@@ -21,50 +22,10 @@
 
 <body>
 
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <img src="../assets/madyapadma-voice-of-trisma-origin.svg" alt="Logo Madyapadma" class="logo-sidebar">
-        </div>
-        <nav>
-            <a href="../"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
-            <a href="../archive"><i class="fa-solid fa-box-archive"></i> Archive</a>
-            <a href="../about" class="active"><i class="fa-solid fa-circle-info"></i> About</a>
-
-            <a href="#" id="themeToggleBtn" style="margin-top: auto;"><i class="fa-solid fa-moon"></i> Ganti Tema</a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <p>&copy; 2026 Madyapadma</p>
-            <p>Voice of Trisma v2.0</p>
-        </div>
-    </div>
+    <div id="sidebar-placeholder"></div>
 
     <div class="main-content">
-        <div class="navbar-main">
-            <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <img src="../assets/madyapadma-voice-of-trisma-origin.svg" alt="Logo Madyapadma"
-                class="logo-main hidden-desktop">
-            <div class="search-container">
-                <div class="search-box">
-                    <i class="fa fa-search search-icon"></i>
-                    <input type="text" id="q" placeholder="Cari di About...">
-                    <button type="button" class="search-btn">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <div id="navbar-placeholder"></div>
 
         <div class="hero-section glass-panel"
             style="max-width: 900px; min-height: auto; padding-bottom: 30px; margin: 30px auto;">
@@ -306,6 +267,7 @@
     </div>
 
     <audio id="mainAudio" src="http://i.klikhost.com:8502/stream" preload="none" style="display: none;"></audio>
+    <script src="../load-layout.js"></script>
     <script src="about.js"></script>
 </body>
 
