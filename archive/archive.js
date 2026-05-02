@@ -1,6 +1,15 @@
-const state = { data: [], allData: [], page: 1, totalPages: 1, hitsPerPage: 24, query: '', sortDesc: true, isSearch: false, currentRepoItems: [] };
-let pageCache = {};
-const API = 'https://archive.org/services/search/beta/page_production/?page_type=account_details&page_target=@16_i_gede_ananda_pradnyana&page_elements=[%22uploads%22]';
+const WORKER_URL = 'https://archive-cache-worker.anandapradnyana68.workers.dev/';
+
+const state = { 
+    data: [], 
+    page: 1, 
+    totalPages: 1, 
+    hitsPerPage: 24, 
+    query: '', 
+    sortDesc: true, 
+    isSearch: false, 
+    currentRepoItems: [] 
+};
 
 const listContainer = document.getElementById('listContainer');
 const listEl = document.getElementById('list');
@@ -44,57 +53,65 @@ function mapHit(h) {
     return { id, title, publicdate: h.fields.publicdate, date: formatDate(h.fields.publicdate), url: `https://archive.org/details/${id}` };
 }
 
-async function loadJson(page = 1) {
-    if (pageCache[page]) { state.data = pageCache[page].data; state.page = page; state.totalPages = pageCache[page].totalPages; render(); renderPagination(); return; }
+async function loadData() {
     showLoading();
+    const params = new URLSearchParams({
+        page: state.page,
+        hits_per_page: state.hitsPerPage,
+        query: state.query,
+        sort: state.sortDesc ? 'publicdate:desc' : 'publicdate:asc'
+    });
+
     try {
-        const res = await fetch(`${API}&hits_per_page=${state.hitsPerPage}&page=${page}&sort=publicdate:${state.sortDesc ? 'desc' : 'asc'}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error('Gagal memuat data');
-        const json = await res.json();
-        const up = json?.response?.body?.page_elements?.uploads;
-        const hits = up?.hits?.hits || []; const total = up?.hits?.total || 0;
-        const data = hits.map(mapHit); const totalPages = Math.ceil(total / state.hitsPerPage);
-        pageCache[page] = { data, totalPages };
-        state.data = data; state.page = page; state.totalPages = totalPages; state.isSearch = false; state.query = '';
-        render(); renderPagination();
+        const response = await fetch(`${WORKER_URL}?${params.toString()}`);
+        if (!response.ok) throw new Error('Gagal mengambil data dari Worker');
+        
+        const result = await response.json();
+        
+        state.data = result.data.map(it => ({
+            id: it.id,
+            title: it.title,
+            publicdate: it.publicdate,
+            date: formatDate(it.publicdate),
+            url: `https://archive.org/details/${it.id}`
+        }));
+        
+        state.totalPages = result.total_pages || 1;
+        
+        render(); 
+        renderPagination();
+        
+        if (state.data.length === 0 && state.query) {
+            listEl.innerHTML = `<div class="empty-state">Tidak ditemukan hasil untuk "${state.query}"</div>`;
+        }
     } catch (e) {
+        console.error("Gagal memuat data:", e);
         listEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation fa-3x empty-icon"></i><br>${e.message}</div>`;
     }
 }
 
-async function loadAllForSearch(query) {
-    showLoading();
-    try {
-        const first = await fetch(`${API}&hits_per_page=${state.hitsPerPage}&page=1&sort=publicdate:desc`, { cache: 'no-store' });
-        if (!first.ok) throw new Error('Gagal memuat data');
-        const fj = await first.json();
-        const up0 = fj?.response?.body?.page_elements?.uploads;
-        const total = up0?.hits?.total || 0; let allHits = [...(up0?.hits?.hits || [])];
-        const maxP = Math.min(Math.ceil(total / state.hitsPerPage), 100);
-        const reqs = []; for (let p = 2; p <= maxP; p++) reqs.push(fetch(`${API}&hits_per_page=${state.hitsPerPage}&page=${p}&sort=publicdate:desc`, { cache: 'no-store' }));
-        const ress = await Promise.allSettled(reqs);
-        for (const r of ress) if (r.status === 'fulfilled' && r.value.ok) { const j = await r.value.json(); allHits = allHits.concat(j?.response?.body?.page_elements?.uploads?.hits?.hits || []); }
-
-        const allData = allHits.map(mapHit);
-        const q = query.toLowerCase();
-        const filtered = allData.filter(it => it.title.toLowerCase().includes(q) || it.id.toLowerCase().includes(q) || it.date.toLowerCase().includes(q));
-
-        state.allData = filtered; state.page = 1; state.totalPages = Math.ceil(filtered.length / state.hitsPerPage);
-        state.isSearch = true; state.query = query;
-        state.data = filtered.slice(0, state.hitsPerPage);
-
-        render(); renderPagination();
-        searchQ.innerHTML = `"${query}" <span style="opacity: 0.7">(${filtered.length} hasil)</span>`;
-        searchInd.style.display = 'flex';
-    } catch (e) {
-        listEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation fa-3x empty-icon"></i><br>${e.message}</div>`;
-    }
+async function loadJson() {
+    state.isSearch = false;
+    state.query = '';
+    state.page = 1;
+    searchInd.style.display = 'none';
+    await loadData();
 }
 
-function loadSearchPage(page) {
-    state.page = page; const s = (page - 1) * state.hitsPerPage;
-    state.data = state.allData.slice(s, s + state.hitsPerPage);
-    render(); renderPagination();
+async function loadAllForSearch(q) {
+    state.query = q.toLowerCase();
+    state.isSearch = true;
+    state.page = 1;
+
+    searchInd.style.display = 'flex';
+    searchQ.innerHTML = `"${q}"`;
+    
+    await loadData();
+}
+
+function displayPage(page) {
+    state.page = page;
+    loadData();
 }
 
 function showLoading() {
@@ -273,7 +290,7 @@ function renderPagination() {
         const b = document.createElement('button');
         b.className = `glass-panel page-btn ${active ? 'active' : ''}`;
         b.innerHTML = label; b.disabled = disabled;
-        b.onclick = () => { if (!disabled) { if (state.isSearch) loadSearchPage(page); else loadJson(page); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
+        b.onclick = () => { if (!disabled) { displayPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
         return b;
     };
     paginationEl.appendChild(make('<i class="fa-solid fa-chevron-left"></i>', state.page - 1, state.page === 1));
@@ -476,18 +493,21 @@ volumeSlider.addEventListener('input', (e) => { mainAudio.volume = e.target.valu
 // Archive Specific Search & Sort Logic
 // ---------------------------------------------------------
 function toggleSort() {
-    state.sortDesc = !state.sortDesc; pageCache = {};
+    state.sortDesc = !state.sortDesc;
     document.getElementById('sortBtn').innerHTML = state.sortDesc ? '<i class="fa-solid fa-sort"></i> Terbaru' : '<i class="fa-solid fa-sort"></i> Terlama';
-    if (state.isSearch) loadAllForSearch(state.query); else loadJson(state.page);
+    
+    state.page = 1;
+    loadData();
 }
 
 async function doRefresh() {
     const btn = document.getElementById('refreshBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memuat...';
-    pageCache = {};
     try {
-        if (state.isSearch && state.query) await loadAllForSearch(state.query);
-        else await loadJson(state.page);
+        await loadJson();
+        if (state.isSearch && state.query) {
+            await loadAllForSearch(state.query);
+        }
     } finally {
         btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Refresh';
     }
@@ -495,7 +515,9 @@ async function doRefresh() {
 
 function clearSearch() {
     searchInput.value = ''; searchInd.style.display = 'none';
-    state.isSearch = false; state.query = ''; pageCache = {}; loadJson(1);
+    state.isSearch = false; state.query = '';
+    state.page = 1;
+    loadData();
     const u = new URL(location.href); u.searchParams.delete('title'); history.replaceState({}, '', u.toString());
 }
 
@@ -505,7 +527,7 @@ searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch()
 
 function doSearch() {
     const q = searchInput.value.trim();
-    listEl.innerHTML = ''; pageCache = {}; state.allData = []; state.page = 1;
+    listEl.innerHTML = ''; state.page = 1;
     if (q) { loadAllForSearch(q); const u = new URL(location.href); u.searchParams.set('title', q); history.replaceState({}, '', u.toString()); }
     else clearSearch();
 }
@@ -689,9 +711,18 @@ const urlP = new URLSearchParams(location.search);
 const initIdentifier = urlP.get('identifier');
 const initQ = urlP.get('query') || urlP.get('title');
 
-if (initIdentifier) { loadRepoFromIdentifier(initIdentifier); }
-else if (initQ) { searchInput.value = initQ; loadAllForSearch(initQ); }
-else { loadJson(1).catch(e => { listEl.innerHTML = `<div class="empty-state">⚠️<br>${e.message}</div>`; }); }
+if (initIdentifier) { 
+    loadRepoFromIdentifier(initIdentifier); 
+} else {
+    loadJson().then(() => {
+        if (initQ) {
+            searchInput.value = initQ;
+            loadAllForSearch(initQ);
+        }
+    }).catch(e => { 
+        listEl.innerHTML = `<div class="empty-state">⚠️<br>${e.message}</div>`; 
+    });
+}
 
 // ---------------------------------------------------------
 // Date Identifiers Popup Logic
