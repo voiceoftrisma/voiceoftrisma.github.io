@@ -114,7 +114,7 @@ body::before {
 .hero-section {
     border-radius: 28px;
     padding: 50px 60px;
-    margin-bottom: 40px;
+    margin-bottom: 0px;
     position: relative;
     overflow: hidden;
     /* Create a gradient background overlay */
@@ -232,7 +232,7 @@ body::before {
     line-height: 1.6;
     max-width: 600px;
     font-weight: 300;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 .stats-row {
@@ -560,7 +560,7 @@ body.sidebar-toggled .audio-player-bar {
 
 @media screen and (max-width: 1024px) {
     .main-content {
-        padding: 0 30px 140px 30px;
+        padding: 0 30px 50px 30px;
     }
 
 
