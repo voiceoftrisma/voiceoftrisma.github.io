@@ -294,9 +294,14 @@
     justify-content: center;
     border: none;
     cursor: pointer;
-    transition: opacity 0.2s, background 0.2s;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
     background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color, #fff);
+    color: var(--text-color, var(--text-main, #fff));
+}
+
+body.light-theme .page-btn {
+    color: var(--text-color, var(--text-main, #1a1a2e));
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .page-btn:disabled {

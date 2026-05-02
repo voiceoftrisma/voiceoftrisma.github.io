@@ -40,6 +40,7 @@ const archiveLink = document.getElementById('archiveLink');
 const progressBar = document.getElementById('progressBar');
 const timeText = document.getElementById('timeText');
 const playerThumb = document.getElementById('playerThumb');
+const playerBar = document.getElementById('playerBar');
 
 function formatDate(iso) {
     if (!iso) return '—';
@@ -214,6 +215,7 @@ function openRepo(date, items) {
 }
 
 function closeRepo() {
+    if (playerBar) playerBar.style.display = 'none';
     const url = new URL(location.href);
     url.searchParams.delete('identifier');
     window.location.href = url.toString();
@@ -561,6 +563,7 @@ function cueStandbyTrack(url, title, archiveUrl) {
 
 async function loadRepoFromIdentifier(identifier) {
     listContainer.style.display = 'none';
+    if (playerBar) playerBar.style.display = 'flex';
     repoView.style.display = 'block';
     repoTitle.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color);"></i> Memuat arsip...`;
     repoSub.textContent = 'Mengambil metadata dari Archive.org...';
@@ -712,8 +715,10 @@ const initIdentifier = urlP.get('identifier');
 const initQ = urlP.get('query') || urlP.get('title');
 
 if (initIdentifier) { 
+    if (playerBar) playerBar.style.display = 'flex';
     loadRepoFromIdentifier(initIdentifier); 
 } else {
+    if (playerBar) playerBar.style.display = 'none';
     loadJson().then(() => {
         if (initQ) {
             searchInput.value = initQ;
