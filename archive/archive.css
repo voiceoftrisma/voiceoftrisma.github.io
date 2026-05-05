@@ -109,7 +109,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
+    padding: 7px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: background 0.2s;
 }
@@ -143,6 +143,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: color 0.2s;
+    font-size: 0.75rem;
 }
 
 .repofile-row[data-audio="true"] .repofile-name:hover {
@@ -159,7 +160,7 @@
 }
 
 .repofile-meta {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     opacity: 0.45;
     flex-shrink: 0;
     white-space: nowrap;

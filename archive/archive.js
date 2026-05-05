@@ -1,14 +1,14 @@
 const WORKER_URL = 'https://archive-cache-worker.anandapradnyana68.workers.dev/';
 
-const state = { 
-    data: [], 
-    page: 1, 
-    totalPages: 1, 
-    hitsPerPage: 24, 
-    query: '', 
-    sortDesc: true, 
-    isSearch: false, 
-    currentRepoItems: [] 
+const state = {
+    data: [],
+    page: 1,
+    totalPages: 1,
+    hitsPerPage: 24,
+    query: '',
+    sortDesc: true,
+    isSearch: false,
+    currentRepoItems: []
 };
 
 const listContainer = document.getElementById('listContainer');
@@ -66,9 +66,9 @@ async function loadData() {
     try {
         const response = await fetch(`${WORKER_URL}?${params.toString()}`);
         if (!response.ok) throw new Error('Gagal mengambil data dari Worker');
-        
+
         const result = await response.json();
-        
+
         state.data = result.data.map(it => ({
             id: it.id,
             title: it.title,
@@ -76,12 +76,12 @@ async function loadData() {
             date: formatDate(it.publicdate),
             url: `https://archive.org/details/${it.id}`
         }));
-        
+
         state.totalPages = result.total_pages || 1;
-        
-        render(); 
+
+        render();
         renderPagination();
-        
+
         if (state.data.length === 0 && state.query) {
             listEl.innerHTML = `<div class="empty-state">Tidak ditemukan hasil untuk "${state.query}"</div>`;
         }
@@ -106,7 +106,7 @@ async function loadAllForSearch(q) {
 
     searchInd.style.display = 'flex';
     searchQ.innerHTML = `"${q}"`;
-    
+
     await loadData();
 }
 
@@ -222,7 +222,10 @@ function closeRepo() {
 }
 
 function renderReadme(data) {
-    if (!data.description && !data.programs?.length) return;
+    if (!data.description && !data.programs?.length) {
+        repoReadme.style.display = 'none';
+        return;
+    }
     repoReadme.style.display = 'block';
     document.getElementById('readmePrograms').parentElement.style.display = 'block';
 
@@ -497,7 +500,7 @@ volumeSlider.addEventListener('input', (e) => { mainAudio.volume = e.target.valu
 function toggleSort() {
     state.sortDesc = !state.sortDesc;
     document.getElementById('sortBtn').innerHTML = state.sortDesc ? '<i class="fa-solid fa-sort"></i> Terbaru' : '<i class="fa-solid fa-sort"></i> Terlama';
-    
+
     state.page = 1;
     loadData();
 }
@@ -567,8 +570,15 @@ async function loadRepoFromIdentifier(identifier) {
     repoView.style.display = 'block';
     repoTitle.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color);"></i> Memuat arsip...`;
     repoSub.textContent = 'Mengambil metadata dari Archive.org...';
-    repoFilesList.innerHTML = '';
-    repoReadme.style.display = 'none';
+
+    // Set loading state for Readme
+    repoReadme.style.display = 'block';
+    readmeTitle.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color);"></i> Memuat deskripsi...`;
+    readmeText.innerHTML = '';
+    document.getElementById('readmePrograms').parentElement.style.display = 'none';
+
+    // Set loading state for File List
+    repoFilesList.innerHTML = `<div style="padding: 30px; text-align: center; opacity: 0.7;"><i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary-color); margin-bottom: 10px;"></i><br>Memuat file repository...</div>`;
 
     ['heroSection', 'countTag', 'searchIndicator'].forEach(id => {
         const el = document.getElementById(id); if (el) el.style.display = 'none';
@@ -587,6 +597,29 @@ async function loadRepoFromIdentifier(identifier) {
         repoTitle.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> ${title}`;
         repoSub.innerHTML = `Diupload pada <b>${date}</b> &nbsp;·&nbsp; <a href="https://archive.org/details/${identifier}" target="_blank" style="color:var(--primary-color);">Buka di Archive.org <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75em;"></i></a>`;
 
+        // 1. Fetch and render description FIRST
+        const descFile = files.find(f => f.name === 'description.json');
+        if (descFile) {
+            try {
+                const dr = await fetch(`https://archive.org/download/${identifier}/description.json`);
+                if (dr.ok) {
+                    renderReadme(await dr.json());
+                } else {
+                    repoReadme.style.display = 'none';
+                }
+            } catch (e) {
+                repoReadme.style.display = 'none';
+            }
+        } else if (meta.metadata?.description) {
+            repoReadme.style.display = 'block';
+            readmeTitle.textContent = title;
+            readmeText.innerHTML = meta.metadata.description;
+            document.getElementById('readmePrograms').parentElement.style.display = 'none';
+        } else {
+            repoReadme.style.display = 'none';
+        }
+
+        // 2. Render files
         const HIDE = ['.torrent', '_meta.xml', '_files.xml', '_meta.sqlite', '.btree'];
         const shown = files.filter(f => !HIDE.some(s => f.name.endsWith(s)));
 
@@ -642,22 +675,11 @@ async function loadRepoFromIdentifier(identifier) {
             cueStandbyTrack(firstAudioBtn.dataset.url, firstAudioBtn.dataset.title, firstAudioBtn.dataset.archive);
         }
 
-        const descFile = files.find(f => f.name === 'description.json');
-        if (descFile) {
-            try {
-                const dr = await fetch(`https://archive.org/download/${identifier}/description.json`);
-                if (dr.ok) renderReadme(await dr.json());
-            } catch (e) { }
-        } else if (meta.metadata?.description) {
-            repoReadme.style.display = 'block';
-            readmeTitle.textContent = title;
-            readmeText.innerHTML = meta.metadata.description;
-            document.getElementById('readmePrograms').parentElement.style.display = 'none';
-        }
-
     } catch (e) {
         repoTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: var(--primary-color);"></i> Gagal Memuat`;
         repoSub.textContent = e.message;
+        repoReadme.style.display = 'none';
+        repoFilesList.innerHTML = '';
     }
 }
 
@@ -714,9 +736,9 @@ const urlP = new URLSearchParams(location.search);
 const initIdentifier = urlP.get('identifier');
 const initQ = urlP.get('query') || urlP.get('title');
 
-if (initIdentifier) { 
+if (initIdentifier) {
     if (playerBar) playerBar.style.display = 'flex';
-    loadRepoFromIdentifier(initIdentifier); 
+    loadRepoFromIdentifier(initIdentifier);
 } else {
     if (playerBar) playerBar.style.display = 'none';
     loadJson().then(() => {
@@ -724,8 +746,8 @@ if (initIdentifier) {
             searchInput.value = initQ;
             loadAllForSearch(initQ);
         }
-    }).catch(e => { 
-        listEl.innerHTML = `<div class="empty-state">⚠️<br>${e.message}</div>`; 
+    }).catch(e => {
+        listEl.innerHTML = `<div class="empty-state">⚠️<br>${e.message}</div>`;
     });
 }
 

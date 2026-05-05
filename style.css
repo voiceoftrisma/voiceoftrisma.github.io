@@ -43,7 +43,6 @@ body.light-theme .volume-slider-wrapper::after {
 }
 
 body {
-    display: flex;
     background: var(--bg-dark);
     /* fallback */
     background-image: var(--bg-gradient);
@@ -572,6 +571,9 @@ body.sidebar-toggled .audio-player-bar {
 
 @media screen and (max-width: 768px) {
 
+    .main-content {
+        padding: 0 20px 140px 20px;
+    }
 
     /* Stack player bar elements */
     .audio-player-bar,
