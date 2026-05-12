@@ -109,6 +109,67 @@
                 opacity: 0.3;
             }
         }
+        /* Premium Volume Meter */
+        .volume-container {
+            display: none;
+            width: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .volume-label {
+            font-size: 10px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .volume-meter-wrapper {
+            height: 12px;
+            width: 100%;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            position: relative;
+            border: 1px solid #222;
+        }
+
+        .volume-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #f093fb 100%);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+            border-radius: 6px;
+            transition: width 0.08s ease-out;
+        }
+
+        .volume-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .volume-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+        }
+
+        .volume-peak {
+            font-size: 12px;
+            color: #ff4b2b;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -124,6 +185,18 @@
     </div>
 
     <div class="log" id="debugLog"></div>
+
+    <!-- Debug Volume Meter -->
+    <div id="debugVolume" class="volume-container">
+        <div class="volume-label">Audio Signal Intensity</div>
+        <div class="volume-meter-wrapper">
+            <div id="volumeBar" class="volume-bar"></div>
+        </div>
+        <div class="volume-stats">
+            <div id="volumeValue" class="volume-text">-∞ dB</div>
+            <div id="peakValue" class="volume-peak">PEAK: -∞ dB</div>
+        </div>
+    </div>
 
     <div id="modeIndicator">System: IDLE</div>
 
@@ -171,8 +244,10 @@
         });
 
         // Debug mode
-        if (urlParams.get('debug') === '1' || urlParams.get('debug') === 'true') {
+        const isDebug = urlParams.get('debug') === '1' || urlParams.get('debug') === 'true';
+        if (isDebug) {
             debugLog.style.display = 'block';
+            document.getElementById('debugVolume').style.display = 'block';
         }
 
         function log(msg, color = '#00ff00') {
@@ -181,6 +256,69 @@
             p.innerHTML = `<span style="color:#666;">[${time}]</span> <span style="color:${color};">${msg}</span>`;
             debugLog.prepend(p);
             if (debugLog.children.length > 50) debugLog.lastChild.remove();
+        }
+
+        // --- AUDIO ANALYSIS LOGIC ---
+        let audioCtx, analyser, source, dataArray;
+        let peakDb = -Infinity;
+
+        function initAudioAnalysis() {
+            if (!isDebug || audioCtx) return;
+            
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 512;
+                analyser.smoothingTimeConstant = 0.8;
+                
+                source = audioCtx.createMediaElementSource(player);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                log("🎙️ Audio Analyzer Initialized", "#00f2fe");
+                updateVolume();
+            } catch (e) {
+                log(`❌ Analyzer Error: ${e.message}`, "red");
+            }
+        }
+
+        function updateVolume() {
+            if (!audioCtx) return;
+            requestAnimationFrame(updateVolume);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            let average = sum / dataArray.length;
+            
+            // Decibel Calculation (relative to 255)
+            // Using a simple RMS approximation for visualization
+            let rms = average / 255;
+            let db = rms > 0 ? 20 * Math.log10(rms) : -100;
+            
+            // Adjust visualization range (mapping -60dB to 0dB to 0-100%)
+            let volumePercent = Math.max(0, Math.min(100, (db + 60) * 1.66));
+            
+            if (db > peakDb) {
+                peakDb = db;
+                document.getElementById('peakValue').innerText = `PEAK: ${peakDb.toFixed(1)} dB`;
+            }
+
+            document.getElementById('volumeBar').style.width = volumePercent + '%';
+            document.getElementById('volumeValue').innerText = `${db.toFixed(1)} dB`;
+            
+            // Dynamic color shift for peak warning
+            if (db > -10) {
+                document.getElementById('volumeValue').style.color = "#ff4b2b";
+            } else if (db > -30) {
+                document.getElementById('volumeValue').style.color = "#f093fb";
+            } else {
+                document.getElementById('volumeValue').style.color = "#fff";
+            }
         }
 
         function startPanicMode() {
@@ -253,6 +391,7 @@
 
                 // Panggil Wake Lock saat interaksi pertama
                 requestWakeLock();
+                initAudioAnalysis();
 
                 spinner.style.display = "block";
                 spinner.style.borderTopColor = "#ffffff";
@@ -325,6 +464,7 @@
 
                     // Panggil Wake Lock saat play via Spacebar
                     requestWakeLock();
+                    initAudioAnalysis();
 
                     spinner.style.display = "block";
                     spinner.style.borderTopColor = "#ffffff";
