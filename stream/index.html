@@ -113,13 +113,7 @@
         .volume-container {
             display: none;
             width: 400px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             margin-top: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
         }
 
@@ -133,12 +127,12 @@
         }
 
         .volume-meter-wrapper {
-            height: 100px;
+            height: 80px;
             width: 100%;
             background: #000;
             border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             position: relative;
             border: 1px solid #222;
         }
@@ -149,23 +143,101 @@
             display: block;
         }
 
-        .volume-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Advanced Meter Styles */
+        .current-reading-wrapper {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        .volume-text {
-            font-size: 18px;
+        .current-db-display {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            line-height: 1;
+        }
+
+        .current-db-unit {
+            font-size: 14px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        #levelDescription {
+            font-size: 14px;
+            color: #00f2fe;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .stats-readings {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .reading-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .reading-box .label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .reading-box .value {
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
             font-family: 'JetBrains Mono', 'Consolas', monospace;
         }
 
-        .volume-peak {
-            font-size: 12px;
-            color: #ff4b2b;
-            font-weight: bold;
+        .reading-box.peak .value { color: #ff4b2b; }
+        .reading-box.min .value { color: #4facfe; }
+        .reading-box.max .value { color: #f093fb; }
+        .reading-box.avg .value { color: #fff; }
+
+        .reference-guide {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .reference-guide h4 {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .ref-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .ref-db {
+            font-weight: 700;
+            color: #ccc;
+            width: 50px;
+        }
+
+        .ref-desc {
+            flex: 1;
+            text-align: right;
         }
     </style>
 </head>
@@ -184,14 +256,51 @@
     <div class="log" id="debugLog"></div>
 
     <!-- Debug Volume Meter -->
-    <div id="debugVolume" class="volume-container">
-        <div class="volume-label">Frequency Spectrum Analysis</div>
+    <div id="debugVolume" class="volume-container" style="display: none;">
+        <div class="volume-label">Precision Sound Meter</div>
+        
+        <div class="current-reading-wrapper">
+            <div id="currentDb" class="current-db-display">-∞</div>
+            <div id="currentDbUnit" class="current-db-unit">dBFS</div>
+        </div>
+
+        <div id="levelDescription">Menganalisis...</div>
+
         <div class="volume-meter-wrapper">
             <canvas id="visualizer"></canvas>
         </div>
-        <div class="volume-stats">
-            <div id="volumeValue" class="volume-text">-∞ dB</div>
-            <div id="peakValue" class="volume-peak">PEAK: -∞ dB</div>
+
+        <div class="stats-readings">
+            <div class="reading-box min">
+                <span class="label">Min</span>
+                <span id="minDb" class="value">-∞ dB</span>
+            </div>
+            <div class="reading-box avg">
+                <span class="label">Rata-rata</span>
+                <span id="avgDb" class="value">-∞ dB</span>
+            </div>
+            <div class="reading-box max">
+                <span class="label">Maks</span>
+                <span id="maxDb" class="value">-∞ dB</span>
+            </div>
+            <div class="reading-box peak">
+                <span class="label">Puncak</span>
+                <span id="peakDb" class="value">-∞ dB</span>
+            </div>
+        </div>
+        <button id="resetStatsBtn" style="margin-top: 15px; width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
+            <i class="fa-solid fa-rotate-right" style="margin-right: 5px;"></i> Reset Statistics
+        </button>
+
+        <div class="reference-guide">
+            <h4>SPL Reference Guide</h4>
+            <div class="ref-item"><span class="ref-db">120 dB</span><span class="ref-desc">Ambulans / Petir</span></div>
+            <div class="ref-item"><span class="ref-db">100 dB</span><span class="ref-desc">Kereta Bawah Tanah</span></div>
+            <div class="ref-item"><span class="ref-db">80 dB</span><span class="ref-desc">Lalu Lintas Ramai</span></div>
+            <div class="ref-item"><span class="ref-db">60 dB</span><span class="ref-desc">Percakapan Normal</span></div>
+            <div class="ref-item"><span class="ref-db">40 dB</span><span class="ref-desc">Ruangan Tenang</span></div>
+            <div class="ref-item"><span class="ref-db">20 dB</span><span class="ref-desc">Bisikan Lembut</span></div>
+            <p style="font-size: 9px; color: #666; margin-top: 10px; text-align: center;">Note: Meter displays dBFS (Digital Scale).<br>SPL values are for physical context only.</p>
         </div>
     </div>
 
@@ -258,6 +367,29 @@
         // --- AUDIO ANALYSIS LOGIC ---
         let audioCtx, analyser, source, dataArray, canvas, canvasCtx;
         let peakDb = -Infinity;
+        let minDb = Infinity;
+        let maxDb = -Infinity;
+        let dbHistory = [];
+        const maxHistory = 100;
+
+        const referenceLevels = [
+            { db: -10, desc: "Keras (Kembang Api / Jet)" },
+            { db: -20, desc: "Sangat Bising (Konser)" },
+            { db: -30, desc: "Bising (Klakson Mobil)" },
+            { db: -40, desc: "Ramai (Lalu Lintas)" },
+            { db: -50, desc: "Normal (Percakapan)" },
+            { db: -60, desc: "Tenang (Kantor)" },
+            { db: -70, desc: "Sangat Tenang (Perpustakaan)" },
+            { db: -80, desc: "Hampir Hening" },
+            { db: -100, desc: "Hening" }
+        ];
+
+        function getLevelDescription(db) {
+            for (let ref of referenceLevels) {
+                if (db >= ref.db) return ref.desc;
+            }
+            return "Hening";
+        }
 
         function initAudioAnalysis() {
             if (!isDebug || audioCtx) return;
@@ -312,29 +444,52 @@
             }
 
             // Calculate dB for the stats
-            let sum = 0;
+            let sumFreq = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                sum += dataArray[i];
+                sumFreq += dataArray[i];
             }
-            let average = sum / dataArray.length;
-            let rms = average / 255;
+            let averageFreq = sumFreq / dataArray.length;
+            let rms = averageFreq / 255;
             let db = rms > 0 ? 20 * Math.log10(rms) : -100;
             
-            if (db > peakDb) {
-                peakDb = db;
-                document.getElementById('peakValue').innerText = `PEAK: ${peakDb.toFixed(1)} dB`;
-            }
+            // Update Stats
+            if (player && !player.paused) {
+                if (db > peakDb) peakDb = db;
+                if (db > maxDb) maxDb = db;
+                if (db < minDb && db > -99) minDb = db; // Ignore absolute silence for min
+                
+                dbHistory.push(db);
+                if (dbHistory.length > maxHistory) dbHistory.shift();
+                
+                const avgDb = dbHistory.reduce((a, b) => a + b, 0) / dbHistory.length;
 
-            document.getElementById('volumeValue').innerText = `${db.toFixed(1)} dB`;
-            
-            if (db > -10) {
-                document.getElementById('volumeValue').style.color = "#ff4b2b";
-            } else if (db > -30) {
-                document.getElementById('volumeValue').style.color = "#f093fb";
-            } else {
-                document.getElementById('volumeValue').style.color = "#fff";
+                document.getElementById('currentDb').innerText = db.toFixed(1);
+                document.getElementById('levelDescription').innerText = getLevelDescription(db);
+                document.getElementById('minDb').innerText = minDb === Infinity ? "-∞ dB" : minDb.toFixed(1) + " dB";
+                document.getElementById('maxDb').innerText = maxDb.toFixed(1) + " dB";
+                document.getElementById('avgDb').innerText = avgDb.toFixed(1) + " dB";
+                document.getElementById('peakDb').innerText = peakDb.toFixed(1) + " dB";
+
+                // Color shift for current display
+                const displayEl = document.getElementById('currentDb');
+                if (db > -10) displayEl.style.color = "#ff4b2b";
+                else if (db > -30) displayEl.style.color = "#f093fb";
+                else displayEl.style.color = "#fff";
             }
         }
+
+        // Reset Stats Logic
+        document.getElementById('resetStatsBtn').addEventListener('click', () => {
+            peakDb = -Infinity;
+            minDb = Infinity;
+            maxDb = -Infinity;
+            dbHistory = [];
+            document.getElementById('minDb').innerText = "-∞ dB";
+            document.getElementById('maxDb').innerText = "-∞ dB";
+            document.getElementById('avgDb').innerText = "-∞ dB";
+            document.getElementById('peakDb').innerText = "-∞ dB";
+            log("🧹 Statistics Reset", "#ff9800");
+        });
 
         function startPanicMode() {
             if (retryInterval) return;
