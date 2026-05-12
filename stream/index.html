@@ -133,23 +133,20 @@
         }
 
         .volume-meter-wrapper {
-            height: 12px;
+            height: 100px;
             width: 100%;
             background: #000;
-            border-radius: 6px;
+            border-radius: 12px;
             overflow: hidden;
             margin-bottom: 12px;
             position: relative;
             border: 1px solid #222;
         }
 
-        .volume-bar {
+        #visualizer {
+            width: 100%;
             height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #f093fb 100%);
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
-            border-radius: 6px;
-            transition: width 0.08s ease-out;
+            display: block;
         }
 
         .volume-stats {
@@ -188,9 +185,9 @@
 
     <!-- Debug Volume Meter -->
     <div id="debugVolume" class="volume-container">
-        <div class="volume-label">Audio Signal Intensity</div>
+        <div class="volume-label">Frequency Spectrum Analysis</div>
         <div class="volume-meter-wrapper">
-            <div id="volumeBar" class="volume-bar"></div>
+            <canvas id="visualizer"></canvas>
         </div>
         <div class="volume-stats">
             <div id="volumeValue" class="volume-text">-∞ dB</div>
@@ -259,7 +256,7 @@
         }
 
         // --- AUDIO ANALYSIS LOGIC ---
-        let audioCtx, analyser, source, dataArray;
+        let audioCtx, analyser, source, dataArray, canvas, canvasCtx;
         let peakDb = -Infinity;
 
         function initAudioAnalysis() {
@@ -268,7 +265,7 @@
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 512;
+                analyser.fftSize = 256;
                 analyser.smoothingTimeConstant = 0.8;
                 
                 source = audioCtx.createMediaElementSource(player);
@@ -276,42 +273,60 @@
                 analyser.connect(audioCtx.destination);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-                log("🎙️ Audio Analyzer Initialized", "#00f2fe");
-                updateVolume();
+                
+                canvas = document.getElementById('visualizer');
+                canvasCtx = canvas.getContext('2d');
+
+                log("🎙️ Frequency Visualizer Initialized", "#00f2fe");
+                draw();
             } catch (e) {
                 log(`❌ Analyzer Error: ${e.message}`, "red");
             }
         }
 
-        function updateVolume() {
+        function draw() {
             if (!audioCtx) return;
-            requestAnimationFrame(updateVolume);
+            requestAnimationFrame(draw);
             
             analyser.getByteFrequencyData(dataArray);
             
+            // Draw Visualizer
+            const width = canvas.width;
+            const height = canvas.height;
+            canvasCtx.clearRect(0, 0, width, height);
+
+            const barWidth = (width / dataArray.length) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                barHeight = (dataArray[i] / 255) * height;
+
+                // Gradient color
+                const hue = i / dataArray.length * 360;
+                canvasCtx.fillStyle = `hsla(${hue}, 80%, 60%, 0.8)`;
+                
+                canvasCtx.fillRect(x, height - barHeight, barWidth, barHeight);
+
+                x += barWidth + 1;
+            }
+
+            // Calculate dB for the stats
             let sum = 0;
             for (let i = 0; i < dataArray.length; i++) {
                 sum += dataArray[i];
             }
             let average = sum / dataArray.length;
-            
-            // Decibel Calculation (relative to 255)
-            // Using a simple RMS approximation for visualization
             let rms = average / 255;
             let db = rms > 0 ? 20 * Math.log10(rms) : -100;
-            
-            // Adjust visualization range (mapping -60dB to 0dB to 0-100%)
-            let volumePercent = Math.max(0, Math.min(100, (db + 60) * 1.66));
             
             if (db > peakDb) {
                 peakDb = db;
                 document.getElementById('peakValue').innerText = `PEAK: ${peakDb.toFixed(1)} dB`;
             }
 
-            document.getElementById('volumeBar').style.width = volumePercent + '%';
             document.getElementById('volumeValue').innerText = `${db.toFixed(1)} dB`;
             
-            // Dynamic color shift for peak warning
             if (db > -10) {
                 document.getElementById('volumeValue').style.color = "#ff4b2b";
             } else if (db > -30) {
