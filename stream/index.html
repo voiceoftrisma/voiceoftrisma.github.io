@@ -109,6 +109,7 @@
                 opacity: 0.3;
             }
         }
+
         /* Premium Volume Meter */
         .volume-container {
             display: none;
@@ -201,15 +202,26 @@
             font-family: 'JetBrains Mono', 'Consolas', monospace;
         }
 
-        .reading-box.peak .value { color: #ff4b2b; }
-        .reading-box.min .value { color: #4facfe; }
-        .reading-box.max .value { color: #f093fb; }
-        .reading-box.avg .value { color: #fff; }
+        .reading-box.peak .value {
+            color: #ff4b2b;
+        }
+
+        .reading-box.min .value {
+            color: #4facfe;
+        }
+
+        .reading-box.max .value {
+            color: #f093fb;
+        }
+
+        .reading-box.avg .value {
+            color: #fff;
+        }
 
         .reference-guide {
             margin-top: 20px;
             padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .reference-guide h4 {
@@ -258,7 +270,7 @@
     <!-- Debug Volume Meter -->
     <div id="debugVolume" class="volume-container" style="display: none;">
         <div class="volume-label">Precision Sound Meter</div>
-        
+
         <div class="current-reading-wrapper">
             <div id="currentDb" class="current-db-display">-∞</div>
             <div id="currentDbUnit" class="current-db-unit">dBFS</div>
@@ -288,19 +300,22 @@
                 <span id="peakDb" class="value">-∞ dB</span>
             </div>
         </div>
-        <button id="resetStatsBtn" style="margin-top: 15px; width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
+        <button id="resetStatsBtn"
+            style="margin-top: 15px; width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
             <i class="fa-solid fa-rotate-right" style="margin-right: 5px;"></i> Reset Statistics
         </button>
 
         <div class="reference-guide">
             <h4>SPL Reference Guide</h4>
             <div class="ref-item"><span class="ref-db">120 dB</span><span class="ref-desc">Ambulans / Petir</span></div>
-            <div class="ref-item"><span class="ref-db">100 dB</span><span class="ref-desc">Kereta Bawah Tanah</span></div>
+            <div class="ref-item"><span class="ref-db">100 dB</span><span class="ref-desc">Kereta Bawah Tanah</span>
+            </div>
             <div class="ref-item"><span class="ref-db">80 dB</span><span class="ref-desc">Lalu Lintas Ramai</span></div>
             <div class="ref-item"><span class="ref-db">60 dB</span><span class="ref-desc">Percakapan Normal</span></div>
             <div class="ref-item"><span class="ref-db">40 dB</span><span class="ref-desc">Ruangan Tenang</span></div>
             <div class="ref-item"><span class="ref-db">20 dB</span><span class="ref-desc">Bisikan Lembut</span></div>
-            <p style="font-size: 9px; color: #666; margin-top: 10px; text-align: center;">Note: Meter displays dBFS (Digital Scale).<br>SPL values are for physical context only.</p>
+            <p style="font-size: 9px; color: #666; margin-top: 10px; text-align: center;">Note: Meter displays dBFS
+                (Digital Scale).<br>SPL values are for physical context only.</p>
         </div>
     </div>
 
@@ -393,19 +408,19 @@
 
         function initAudioAnalysis() {
             if (!isDebug || audioCtx) return;
-            
+
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
                 analyser.fftSize = 256;
                 analyser.smoothingTimeConstant = 0.8;
-                
+
                 source = audioCtx.createMediaElementSource(player);
                 source.connect(analyser);
                 analyser.connect(audioCtx.destination);
-                
+
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
+
                 canvas = document.getElementById('visualizer');
                 canvasCtx = canvas.getContext('2d');
 
@@ -419,9 +434,9 @@
         function draw() {
             if (!audioCtx) return;
             requestAnimationFrame(draw);
-            
+
             analyser.getByteFrequencyData(dataArray);
-            
+
             // Draw Visualizer
             const width = canvas.width;
             const height = canvas.height;
@@ -437,7 +452,7 @@
                 // Gradient color
                 const hue = i / dataArray.length * 360;
                 canvasCtx.fillStyle = `hsla(${hue}, 80%, 60%, 0.8)`;
-                
+
                 canvasCtx.fillRect(x, height - barHeight, barWidth, barHeight);
 
                 x += barWidth + 1;
@@ -451,16 +466,16 @@
             let averageFreq = sumFreq / dataArray.length;
             let rms = averageFreq / 255;
             let db = rms > 0 ? 20 * Math.log10(rms) : -100;
-            
+
             // Update Stats
             if (player && !player.paused) {
                 if (db > peakDb) peakDb = db;
                 if (db > maxDb) maxDb = db;
                 if (db < minDb && db > -99) minDb = db; // Ignore absolute silence for min
-                
+
                 dbHistory.push(db);
                 if (dbHistory.length > maxHistory) dbHistory.shift();
-                
+
                 const avgDb = dbHistory.reduce((a, b) => a + b, 0) / dbHistory.length;
 
                 document.getElementById('currentDb').innerText = db.toFixed(1);

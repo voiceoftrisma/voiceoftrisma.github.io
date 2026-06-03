@@ -500,6 +500,129 @@ body.sidebar-toggled .audio-player-bar {
     fill: #fff;
 }
 
+/* Connecting/Loading State — same red glow as playing with spinner */
+.play-pause-btn.connecting {
+    background: var(--accent);
+    box-shadow: 0 5px 20px var(--accent-glow);
+}
+
+.play-pause-btn.connecting .morph-path {
+    fill: none;
+    stroke: #fff;
+}
+
+/* ── YouTube Paper Spinner ─────────────────────────────── */
+.btn-icon-spinner {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    animation: container-rotate 1568ms linear infinite;
+}
+
+.btn-icon-spinner .spinner-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    color: #ffffff;
+}
+
+.btn-icon-spinner .layer-1 {
+    animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+               layer-1-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+.btn-icon-spinner .layer-2 {
+    animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+               layer-2-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+.btn-icon-spinner .layer-3 {
+    animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+               layer-3-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+.btn-icon-spinner .layer-4 {
+    animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+               layer-4-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+
+@keyframes container-rotate {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fill-unfill-rotate {
+    12.5% { transform: rotate(135deg); }
+    25%   { transform: rotate(270deg); }
+    37.5% { transform: rotate(405deg); }
+    50%   { transform: rotate(540deg); }
+    62.5% { transform: rotate(675deg); }
+    75%   { transform: rotate(810deg); }
+    87.5% { transform: rotate(945deg); }
+    to    { transform: rotate(1080deg); }
+}
+
+@keyframes layer-1-fade-in-out { from, 25% { opacity: 0.99; } 26%, to { opacity: 0; } }
+@keyframes layer-2-fade-in-out { from, 25% { opacity: 0; } 26%, 50% { opacity: 0.99; } 51%, to { opacity: 0; } }
+@keyframes layer-3-fade-in-out { from, 50% { opacity: 0; } 51%, 75% { opacity: 0.99; } 76%, to { opacity: 0; } }
+@keyframes layer-4-fade-in-out { from, 75% { opacity: 0; } 76%, 100% { opacity: 0.99; } }
+
+.btn-icon-spinner .circle-clipper {
+    display: inline-block;
+    position: relative;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    border-color: inherit;
+}
+
+.btn-icon-spinner .circle-clipper.left { float: left; }
+.btn-icon-spinner .circle-clipper.right { float: right; }
+
+.btn-icon-spinner .circle {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    width: 200%;
+    height: 100%;
+    border-width: 3px;
+    border-style: solid;
+    border-color: inherit;
+    border-bottom-color: transparent !important;
+    border-radius: 50%;
+    animation: none;
+}
+
+.btn-icon-spinner .circle-clipper.left .circle {
+    border-right-color: transparent !important;
+    transform: rotate(129deg);
+    animation: left-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+
+.btn-icon-spinner .circle-clipper.right .circle {
+    left: -100%;
+    border-left-color: transparent !important;
+    transform: rotate(-129deg);
+    animation: right-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+}
+
+@keyframes left-spin {
+    from { transform: rotate(130deg); }
+    50%  { transform: rotate(-5deg); }
+    to   { transform: rotate(130deg); }
+}
+
+@keyframes right-spin {
+    from { transform: rotate(-130deg); }
+    50%  { transform: rotate(5deg); }
+    to   { transform: rotate(-130deg); }
+}
+
+/* Override warna spinner di state connecting (putih di atas bg merah) */
+.play-pause-btn.connecting .btn-icon-spinner .spinner-layer {
+    color: #ffffff;
+}
+
+body.light-theme .play-pause-btn.connecting {
+    box-shadow: 0 5px 20px rgba(225, 29, 72, 0.4);
+}
+
 /* Player Tools Section */
 .player-tools {
     display: flex;

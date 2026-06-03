@@ -240,36 +240,162 @@ setInterval(checkRadioStatus, 30000);
 
 // Logika Sidebar dihapus karena sudah di load-layout.js
 
-// Logika untuk tombol Play / Pause (Live Stream)
+// ─── State Machine untuk Tombol Play/Pause ───────────────────────────
+// States: 'idle' | 'connecting' | 'playing' | 'reconnecting'
+const STREAM_URL = 'http://i.klikhost.com:8502/stream';
+const RECONNECT_INTERVAL = 2000;
+const HEARTBEAT_INTERVAL = 2000;
+
 const mainAudio = document.getElementById('mainAudio');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const morphPath = document.querySelector('.morph-path');
-let isPlaying = false;
+const btnIconMorph = document.querySelector('.btn-icon-morph');
+const btnSpinner = document.querySelector('.btn-icon-spinner');
 
-function updatePlayPauseIcon() {
-    if (isPlaying) {
-        morphPath.setAttribute('d', 'M 6 5 L 10 5 L 10 19 L 6 19 Z M 14 5 L 18 5 L 18 19 L 14 19 Z');
-        playPauseBtn.classList.add('playing');
-    } else {
-        morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
-        playPauseBtn.classList.remove('playing');
+let playerState = 'idle';
+let retryTimer = null;
+let heartbeatTimer = null;
+let lastCurrentTime = -1;
+
+function setPlayerState(newState) {
+    playerState = newState;
+    playPauseBtn.classList.remove('playing', 'connecting');
+
+    switch (newState) {
+        case 'idle':
+            btnIconMorph.style.display = '';
+            btnSpinner.style.display = 'none';
+            morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
+            stopHeartbeat();
+            clearRetry();
+            break;
+
+        case 'connecting':
+            btnIconMorph.style.display = 'none';
+            btnSpinner.style.display = '';
+            playPauseBtn.classList.add('connecting');
+            break;
+
+        case 'playing':
+            btnIconMorph.style.display = '';
+            btnSpinner.style.display = 'none';
+            morphPath.setAttribute('d', 'M 6 5 L 10 5 L 10 19 L 6 19 Z M 14 5 L 18 5 L 18 19 L 14 19 Z');
+            playPauseBtn.classList.add('playing');
+            clearRetry();
+            startHeartbeat();
+            break;
+
+        case 'reconnecting':
+            btnIconMorph.style.display = 'none';
+            btnSpinner.style.display = '';
+            playPauseBtn.classList.add('connecting');
+            stopHeartbeat();
+            break;
     }
 }
 
+function clearRetry() {
+    if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+    }
+}
+
+function playStream(cacheBust) {
+    const url = cacheBust
+        ? STREAM_URL + '?t=' + Date.now()
+        : STREAM_URL;
+    mainAudio.src = url;
+    mainAudio.load();
+    return mainAudio.play();
+}
+
+function connectWithRetry() {
+    if (playerState === 'playing') return;
+    setPlayerState('connecting');
+
+    playStream(true).then(() => {
+        setPlayerState('playing');
+    }).catch(() => {
+        retryTimer = setTimeout(connectWithRetry, RECONNECT_INTERVAL);
+    });
+}
+
+function reconnect() {
+    if (playerState !== 'playing' && playerState !== 'reconnecting') return;
+    setPlayerState('reconnecting');
+
+    playStream(true).then(() => {
+        setPlayerState('playing');
+    }).catch(() => {
+        retryTimer = setTimeout(reconnect, RECONNECT_INTERVAL);
+    });
+}
+
+function startHeartbeat() {
+    stopHeartbeat();
+    lastCurrentTime = mainAudio.currentTime;
+    heartbeatTimer = setInterval(() => {
+        if (playerState !== 'playing') return;
+        const ct = mainAudio.currentTime;
+        if (ct === lastCurrentTime) {
+            // currentTime hasn't moved → stream stalled
+            reconnect();
+        }
+        lastCurrentTime = ct;
+    }, HEARTBEAT_INTERVAL);
+}
+
+function stopHeartbeat() {
+    if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
+    }
+    lastCurrentTime = -1;
+}
+
+// Event listener untuk tombol Play/Pause
 playPauseBtn.addEventListener('click', function () {
-    if (isPlaying) {
-        mainAudio.pause();
-        mainAudio.src = '';
-        isPlaying = false;
-        updatePlayPauseIcon();
-    } else {
-        mainAudio.src = 'http://i.klikhost.com:8502/stream?' + 't=' + new Date().getTime();
-        mainAudio.play().then(() => {
-            isPlaying = true;
-            updatePlayPauseIcon();
-        }).catch(e => {
-            console.error("Autoplay blocked or stream offline", e);
-        });
+    switch (playerState) {
+        case 'playing':
+            // Pause
+            mainAudio.pause();
+            mainAudio.removeAttribute('src');
+            mainAudio.load();
+            setPlayerState('idle');
+            break;
+
+        case 'idle':
+            connectWithRetry();
+            break;
+
+        case 'connecting':
+        case 'reconnecting':
+            // Batalkan percobaan koneksi
+            mainAudio.pause();
+            mainAudio.removeAttribute('src');
+            mainAudio.load();
+            setPlayerState('idle');
+            break;
+    }
+});
+
+// Audio error events → trigger reconnect
+mainAudio.addEventListener('error', function () {
+    if (playerState === 'playing') {
+        reconnect();
+    }
+});
+
+mainAudio.addEventListener('stalled', function () {
+    if (playerState === 'playing') {
+        reconnect();
+    }
+});
+
+mainAudio.addEventListener('waiting', function () {
+    if (playerState === 'playing') {
+        reconnect();
     }
 });
 
