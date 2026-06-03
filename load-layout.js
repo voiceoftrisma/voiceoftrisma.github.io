@@ -16,6 +16,7 @@ const sidebarHTML = `
             </div>
             <img src="${base}assets/madyapadma-voice-of-trisma-origin.svg" alt="Logo Madyapadma" class="logo-sidebar">
         </div>
+
         <nav>
             <a href="${base}" data-page="stream"><i class="fa-solid fa-broadcast-tower"></i> Stream</a>
             <a href="${base}archive" data-page="archive"><i class="fa-solid fa-box-archive"></i> Archive</a>
