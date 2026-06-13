@@ -243,8 +243,8 @@ setInterval(checkRadioStatus, 30000);
 // ─── State Machine untuk Tombol Play/Pause ───────────────────────────
 // States: 'idle' | 'connecting' | 'playing' | 'reconnecting'
 const STREAM_URL = 'http://i.klikhost.com:8502/stream';
-const RECONNECT_INTERVAL = 2000;
-const HEARTBEAT_INTERVAL = 2000;
+const RECONNECT_INTERVAL = 1000;
+const HEARTBEAT_INTERVAL = 1000;
 
 const mainAudio = document.getElementById('mainAudio');
 const playPauseBtn = document.getElementById('playPauseBtn');
@@ -257,6 +257,93 @@ let retryTimer = null;
 let heartbeatTimer = null;
 let lastCurrentTime = -1;
 
+// ─── ALWAYS ON TAB ───
+let wakeLock = null;
+let swRegistration = null;
+let lastAliveTime = Date.now();
+const ALWAYS_ON_TIMEOUT = 10 * 60 * 1000;
+
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+            console.warn('Wake Lock gagal:', err);
+        }
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release().then(() => wakeLock = null).catch(() => {});
+    }
+}
+
+async function registerAlwaysOnSW() {
+    if ('serviceWorker' in navigator) {
+        try {
+            swRegistration = await navigator.serviceWorker.register('sw.js');
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'TIMEOUT') {
+                    stopPlayback();
+                }
+                if (event.data.type === 'PONG') {
+                    lastAliveTime = Date.now();
+                }
+            });
+            if (swRegistration.active) {
+                swRegistration.active.postMessage({ type: 'STOP_ALWAYS_ON' });
+            }
+        } catch (err) {
+            console.warn('SW registrasi gagal:', err);
+        }
+    }
+}
+
+function startAlwaysOn() {
+    lastAliveTime = Date.now();
+    requestWakeLock();
+    setupMediaSession();
+    if (swRegistration?.active) {
+        swRegistration.active.postMessage({ type: 'START_ALWAYS_ON' });
+    }
+}
+
+function stopAlwaysOn() {
+    releaseWakeLock();
+    if (swRegistration?.active) {
+        swRegistration.active.postMessage({ type: 'STOP_ALWAYS_ON' });
+    }
+}
+
+function setupMediaSession() {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Voice of Trisma',
+            artist: 'Siaran Langsung',
+            artwork: [
+                { src: './assets/madyapadma.svg', sizes: '96x96', type: 'image/svg+xml' },
+                { src: './assets/madyapadma.svg', sizes: '128x128', type: 'image/svg+xml' },
+                { src: './assets/madyapadma.svg', sizes: '192x192', type: 'image/svg+xml' },
+            ]
+        });
+        navigator.mediaSession.setActionHandler('play', () => {
+            if (playerState !== 'playing') connectWithRetry();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            mainAudio.pause();
+            setPlayerState('idle');
+        });
+    }
+}
+
+function stopPlayback() {
+    mainAudio.pause();
+    mainAudio.removeAttribute('src');
+    mainAudio.load();
+    setPlayerState('idle');
+}
+
 function setPlayerState(newState) {
     playerState = newState;
     playPauseBtn.classList.remove('playing', 'connecting');
@@ -268,6 +355,7 @@ function setPlayerState(newState) {
             morphPath.setAttribute('d', 'M 8 5 L 19 12 L 8 19 Z');
             stopHeartbeat();
             clearRetry();
+            stopAlwaysOn();
             break;
 
         case 'connecting':
@@ -283,6 +371,7 @@ function setPlayerState(newState) {
             playPauseBtn.classList.add('playing');
             clearRetry();
             startHeartbeat();
+            startAlwaysOn();
             break;
 
         case 'reconnecting':
@@ -339,10 +428,17 @@ function startHeartbeat() {
         if (playerState !== 'playing') return;
         const ct = mainAudio.currentTime;
         if (ct === lastCurrentTime) {
-            // currentTime hasn't moved → stream stalled
             reconnect();
+        } else {
+            lastAliveTime = Date.now();
+            if (swRegistration?.active) {
+                swRegistration.active.postMessage({ type: 'PING' });
+            }
         }
         lastCurrentTime = ct;
+        if (Date.now() - lastAliveTime >= ALWAYS_ON_TIMEOUT) {
+            stopPlayback();
+        }
     }, HEARTBEAT_INTERVAL);
 }
 
@@ -433,3 +529,19 @@ progressTop.addEventListener('input', function () {
 progressTop.style.setProperty('--val', progressTop.value + '%');
 
 // INLINE SVG REPLACEMENT dipindah ke load-layout.js
+
+// ─── VISIBILITY HANDLER ───
+document.addEventListener('visibilitychange', () => {
+    if (playerState === 'playing') {
+        if (document.visibilityState === 'visible') {
+            requestWakeLock();
+            lastAliveTime = Date.now();
+            if (swRegistration?.active) {
+                swRegistration.active.postMessage({ type: 'PING' });
+            }
+        }
+    }
+});
+
+// ─── REGISTER SERVICE WORKER ───
+registerAlwaysOnSW();
