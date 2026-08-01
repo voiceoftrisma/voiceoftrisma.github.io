@@ -713,6 +713,7 @@ body > * {
 .chart-wrap {
     width: 100%;
     overflow-x: auto;
+    position: relative;
 }
 
 .chart-empty {
@@ -764,6 +765,54 @@ body > * {
 .chart-dot-off {
     fill: var(--text-muted);
     opacity: 0.5;
+}
+
+/* Area hover transparan tiap titik — kursor pointer */
+.chart-hit-area {
+    cursor: pointer;
+}
+
+/* Tooltip detail titik: diposisikan di sudut dekat titik (bukan mengikuti kursor),
+   tidak menangkap pointer. Background selalu gelap → teks di-hardcode terang
+   supaya tetap terbaca di tema gelap MAUPUN terang (jangan pakai var(--text-main)). */
+.chart-tooltip {
+    position: absolute;
+    z-index: 50;
+    display: none;
+    pointer-events: none;
+    background: rgba(12, 14, 22, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #f2f2f2;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+}
+
+.chart-tooltip.visible {
+    display: block;
+}
+
+.chart-tooltip .tt-time {
+    color: #ff8a8a;
+    font-weight: 600;
+}
+
+.chart-tooltip .tt-status {
+    opacity: 0.75;
+}
+
+/* Petunjuk zoom di pojok kanan-bawah chart */
+.chart-zoom-hint {
+    position: absolute;
+    bottom: 2px;
+    right: 6px;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    opacity: 0.75;
+    pointer-events: none;
 }
 
 /* ---------- Preview ---------- */

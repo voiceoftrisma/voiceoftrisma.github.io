@@ -607,18 +607,30 @@
         return { current: current, next: next };
     }
 
+    /* State grafik: samples penuh + rentang tampil [i0, i1].
+       chartState diletakkan di scope IIFE supaya pinch/zoom berlanjut
+       melewati re-render SVG (listener baru tetap baca state yang sama). */
+    var chartState = { samples: [], range: null, pendingRender: false, pointers: {}, pinch: null };
+
     function fetchHistory() {
         return fetch(STATS_BASE + '/?history=1&t=' + Date.now())
             .then(function (res) { return res.json().catch(function () { return {}; }); })
             .then(function (data) {
-                renderChart(data.history || []);
+                chartState.samples = data.history || [];
+                chartState.range = null;
+                renderChart(chartState.samples, null);
                 return data;
             })
-            .catch(function () { renderChart([]); });
+            .catch(function () {
+                chartState.samples = [];
+                chartState.range = null;
+                renderChart([], null);
+            });
     }
 
-    /* Gambar grafik SVG pendengar 6 jam terakhir. */
-    function renderChart(samples) {
+    /* Gambar grafik SVG pendengar 6 jam terakhir.
+       range = [i0, i1] indeks sample yang ditampilkan (zoom); null = semua. */
+    function renderChart(samples, range) {
         var wrap = document.getElementById('chartWrap');
         if (!wrap) return;
         if (!samples.length) {
@@ -627,11 +639,15 @@
             return;
         }
 
+        var i0 = range ? range[0] : 0;
+        var i1 = range ? range[1] : samples.length - 1;
+        var view = samples.slice(i0, i1 + 1);
+
         var W = 760, H = 300, PAD_L = 44, PAD_R = 12, PAD_T = 18, PAD_B = 34;
         var plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
 
-        var times = samples.map(function (s) { return s[0]; });
-        var values = samples.map(function (s) { return s[1]; });
+        var times = view.map(function (s) { return s[0]; });
+        var values = view.map(function (s) { return s[1]; });
         var maxV = Math.max.apply(null, values.concat([1]));
         var yMax = Math.max(1, Math.ceil(maxV / 5) * 5);
         var tMin = times[0], tMax = times[times.length - 1];
@@ -661,21 +677,24 @@
 
         // Area offline (streamstatus 0) sebagai pita abu-abu
         var bands = '';
-        for (var i = 0; i < samples.length - 1; i++) {
-            if (samples[i][2] === 0 && samples[i + 1][2] === 0) {
-                var x1 = x(samples[i][0]), x2 = x(samples[i + 1][0]);
+        for (var i = 0; i < view.length - 1; i++) {
+            if (view[i][2] === 0 && view[i + 1][2] === 0) {
+                var x1 = x(view[i][0]), x2 = x(view[i + 1][0]);
                 bands += '<rect x="' + x1 + '" y="' + PAD_T + '" width="' + (x2 - x1) +
                     '" height="' + plotH + '" class="chart-offline"/>';
             }
         }
 
         // Garis pendengar
-        var line = samples.map(function (s) { return x(s[0]) + ',' + y(s[1]); }).join(' ');
-        // Titik data
-        var dots = samples.map(function (s) {
+        var line = view.map(function (s) { return x(s[0]) + ',' + y(s[1]); }).join(' ');
+        // Titik data + area hover transparan (r=9) untuk tooltip
+        var dots = view.map(function (s) {
             var on = s[2] === 1;
-            return '<circle cx="' + x(s[0]) + '" cy="' + y(s[1]) + '" r="2.5" class="' +
-                (on ? 'chart-dot' : 'chart-dot-off') + '"/>';
+            return '<g class="chart-hit" data-t="' + s[0] + '" data-l="' + s[1] + '" data-s="' + s[2] + '">' +
+                '<circle cx="' + x(s[0]) + '" cy="' + y(s[1]) + '" r="9" fill="transparent" class="chart-hit-area"/>' +
+                '<circle cx="' + x(s[0]) + '" cy="' + y(s[1]) + '" r="2.5" class="' +
+                (on ? 'chart-dot' : 'chart-dot-off') + '"/>' +
+                '</g>';
         }).join('');
 
         var ns = 'http://www.w3.org/2000/svg';
@@ -695,12 +714,23 @@
 
         wrap.innerHTML = '';
         wrap.appendChild(svg);
+        initChartTooltip(wrap);
+        initChartZoom(wrap, samples);
 
-        // Ringkasan statistik
+        // Petunjuk zoom (kecil, tidak mengganggu)
+        var hint = wrap.querySelector('.chart-zoom-hint');
+        if (!hint) {
+            hint = document.createElement('div');
+            hint.className = 'chart-zoom-hint';
+            hint.textContent = 'Cubit dua jari / Ctrl+scroll untuk zoom';
+            wrap.appendChild(hint);
+        }
+
+        // Ringkasan statistik (dari rentang yang sedang ditampilkan)
         var peak = Math.max.apply(null, values);
-        var onlineSamples = samples.filter(function (s) { return s[2] === 1; }).length;
+        var onlineSamples = view.filter(function (s) { return s[2] === 1; }).length;
         var avg = values.reduce(function (a, b) { return a + b; }, 0) / values.length;
-        var pctOnline = Math.round((onlineSamples / samples.length) * 100);
+        var pctOnline = Math.round((onlineSamples / view.length) * 100);
         setText('statPeak', String(peak));
         setText('statAvg', String(Math.round(avg * 10) / 10));
         setText('statOnline', String(pctOnline));
@@ -709,6 +739,158 @@
     function setText(id, text) {
         var el = document.getElementById(id);
         if (el) el.textContent = text;
+    }
+
+    /* ---------------- Tooltip grafik ---------------- */
+
+    /* Tooltip detail titik grafik: muncul di dekat kursor (offset 16px kanan-bawah,
+       flip ke kiri/atas kalau mepet tepi) sehingga TIDAK menutupi titik yang
+       ditunjuk. pointer-events: none supaya tooltip tidak menangkap hover. */
+    function initChartTooltip(wrap) {
+        var tip = document.getElementById('chartTooltip');
+        if (!tip) {
+            tip = document.createElement('div');
+            tip.id = 'chartTooltip';
+            tip.className = 'chart-tooltip';
+            wrap.appendChild(tip);
+        }
+        var svg = wrap.querySelector('.chart-svg');
+        if (!svg) return;
+
+        svg.addEventListener('pointermove', function (e) {
+            var hit = e.target && e.target.closest ? e.target.closest('.chart-hit') : null;
+            if (!hit) {
+                tip.classList.remove('visible');
+                return;
+            }
+            var t = parseInt(hit.getAttribute('data-t'), 10);
+            var l = parseInt(hit.getAttribute('data-l'), 10);
+            var s = parseInt(hit.getAttribute('data-s'), 10);
+            var d = new Date(t * 1000);
+            var hh = String(d.getHours()).padStart(2, '0');
+            var mm = String(d.getMinutes()).padStart(2, '0');
+            tip.innerHTML =
+                '<div class="tt-time">' + hh + ':' + mm + '</div>' +
+                '<div>Pendengar: <strong>' + l + '</strong></div>' +
+                '<div class="tt-status">' + (s === 1 ? 'Streaming' : 'Offline') + '</div>';
+            tip.classList.add('visible');
+
+            // Posisi tooltip dihitung dari TITIK (bukan mengikuti kursor).
+            // Kursor hanya menentukan kuadran: salah satu SUDUT tooltip menempel
+            // dekat titik. Kalau kuadran itu keluar area chart, cari kuadran lain
+            // yang muat supaya tooltip tidak tertutup kursor/halaman.
+            var hitRect = hit.getBoundingClientRect();
+            var wrapRect = wrap.getBoundingClientRect();
+            var px = hitRect.left + hitRect.width / 2 - wrapRect.left;
+            var py = hitRect.top + hitRect.height / 2 - wrapRect.top;
+            var h = e.clientX >= hitRect.left + hitRect.width / 2 ? 1 : -1;
+            var v = e.clientY >= hitRect.top + hitRect.height / 2 ? 1 : -1;
+            var W = tip.offsetWidth, H = tip.offsetHeight, off = 14;
+            var tries = [[h, v], [h, -v], [-h, v], [-h, -v]];
+            var placed = null;
+            for (var i = 0; i < 4 && !placed; i++) {
+                var x = tries[i][0] === 1 ? px + off : px - W - off;
+                var y = tries[i][1] === 1 ? py + off : py - H - off;
+                if (x >= 4 && y >= 4 && x + W <= wrapRect.width - 4 && y + H <= wrapRect.height - 4) {
+                    placed = { x: x, y: y };
+                }
+            }
+            if (!placed) {
+                placed = {
+                    x: Math.max(4, Math.min(px + off, wrapRect.width - W - 4)),
+                    y: Math.max(4, Math.min(py + off, wrapRect.height - H - 4))
+                };
+            }
+            tip.style.left = placed.x + 'px';
+            tip.style.top = placed.y + 'px';
+        });
+
+        svg.addEventListener('pointerleave', function () {
+            tip.classList.remove('visible');
+        });
+    }
+
+    /* ---------------- Zoom grafik (pinch / Ctrl+scroll) ---------------- */
+
+    /* Zoom mengubah RENTANG sample yang ditampilkan (grafik tetap melebar penuh).
+       Pinch dua jari menjauh = zoom in (detail), menutup = zoom out.
+       State pinch disimpan di chartState (scope IIFE) supaya berlanjut
+       melewati re-render SVG: listener baru tetap membaca pointer aktif. */
+    function initChartZoom(wrap, samples) {
+        var svg = wrap.querySelector('.chart-svg');
+        if (!svg || !samples.length) return;
+        var full = [0, samples.length - 1];
+        var n = samples.length;
+
+        function currentRange() { return chartState.range || full; }
+
+        function applyRange(r) {
+            chartState.range = r;
+            requestRender();
+        }
+
+        function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+        svg.addEventListener('pointerdown', function (e) {
+            try { svg.setPointerCapture(e.pointerId); } catch (err) { /* sintetis/tidak didukung */ }
+            chartState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+            var ids = Object.keys(chartState.pointers);
+            if (ids.length === 2) {
+                var a = chartState.pointers[ids[0]], b = chartState.pointers[ids[1]];
+                var r = currentRange();
+                chartState.pinch = { d: dist(a, b), i0: r[0], i1: r[1] };
+            }
+        });
+
+        svg.addEventListener('pointermove', function (e) {
+            if (!(e.pointerId in chartState.pointers)) return;
+            chartState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+            var p = chartState.pinch;
+            if (!p) return;
+            var ids = Object.keys(chartState.pointers);
+            if (ids.length < 2) return;
+            var a = chartState.pointers[ids[0]], b = chartState.pointers[ids[1]];
+            var d = dist(a, b);
+            if (d < 5) return;
+            var len = Math.max(4, Math.min(n - 1, Math.round((p.i1 - p.i0) * (p.d / d))));
+            var c = (p.i0 + p.i1) / 2;
+            var i0 = Math.max(0, Math.min(n - 1 - len, Math.round(c - len / 2)));
+            applyRange([i0, i0 + len]);
+        });
+
+        function endPinch(e) {
+            delete chartState.pointers[e.pointerId];
+            chartState.pinch = null;
+        }
+        svg.addEventListener('pointerup', endPinch);
+        svg.addEventListener('pointercancel', endPinch);
+        svg.addEventListener('pointerleave', function (e) {
+            if (e.pointerType === 'mouse') {
+                delete chartState.pointers[e.pointerId];
+                chartState.pinch = null;
+            }
+        });
+
+        // Fallback desktop: Ctrl+scroll = zoom, scroll biasa tetap horizontal.
+        svg.addEventListener('wheel', function (e) {
+            if (!e.ctrlKey) return;
+            e.preventDefault();
+            var r = currentRange();
+            var len = Math.max(4, Math.min(n - 1, Math.round((r[1] - r[0]) * (e.deltaY > 0 ? 1.25 : 1 / 1.25))));
+            var c = (r[0] + r[1]) / 2;
+            var i0 = Math.max(0, Math.min(n - 1 - len, Math.round(c - len / 2)));
+            applyRange([i0, i0 + len]);
+        });
+    }
+
+    /* Re-render throttled (satu per frame) — dipakai zoom saat pinch berlangsung. */
+    function requestRender() {
+        if (chartState.pendingRender) return;
+        chartState.pendingRender = true;
+        requestAnimationFrame(function () {
+            chartState.pendingRender = false;
+            renderChart(chartState.samples, chartState.range);
+        });
     }
 
     /* ---------------- Preview (mode lihat) ---------------- */
