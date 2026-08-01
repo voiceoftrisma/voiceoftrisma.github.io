@@ -841,3 +841,239 @@ body.light-theme .vot-logo-svg [stroke="#ffffff"],
 body.light-theme .vot-logo-svg [stroke="white"] {
     stroke: #000000 !important;
 }
+/* =========================================
+   JADWAL SIARAN MINGGUAN (modal dari sidebar)
+   ========================================= */
+.jadwal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 5vh 16px 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.jadwal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.jadwal-modal {
+    width: 100%;
+    max-width: 980px;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 20px;
+    padding: 26px 30px;
+    transform: translateY(14px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jadwal-overlay.open .jadwal-modal {
+    transform: none;
+}
+
+.jadwal-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.jadwal-modal-head h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.jadwal-modal-head h2 i {
+    color: var(--accent);
+    margin-right: 10px;
+}
+
+.jadwal-modal-close {
+    background: var(--glass-bg-hover);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.jadwal-modal-close:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.jadwal-note {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.jadwal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.jadwal-day {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 18px 18px 14px;
+    transition: var(--transition);
+}
+
+.jadwal-day:hover {
+    background: var(--glass-bg-hover);
+    transform: translateY(-2px);
+}
+
+.jadwal-day.today {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 8px 28px var(--accent-glow);
+}
+
+.jadwal-day-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.jadwal-day-name {
+    font-weight: 700;
+    font-size: 1.02rem;
+}
+
+.jadwal-day.today .jadwal-day-name {
+    color: var(--accent);
+}
+
+.today-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.jadwal-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 6px;
+    border-radius: 10px;
+}
+
+.jadwal-row.now {
+    background: rgba(225, 29, 72, 0.16);
+    padding: 8px 10px;
+    margin: 2px -4px;
+}
+
+.jadwal-time {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    min-width: 92px;
+}
+
+.jadwal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.jadwal-acara {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.jadwal-row.now .jadwal-acara {
+    font-weight: 700;
+}
+
+.jadwal-penyiar {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.jadwal-penyiar i {
+    margin-right: 4px;
+    font-size: 0.7rem;
+}
+
+.onair-chip {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+    align-self: center;
+}
+
+.jadwal-empty {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 8px 0;
+}
+
+.jadwal-foot {
+    margin-top: 22px;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+@media (max-width: 1024px) {
+    .jadwal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .jadwal-overlay {
+        padding: 2vh 10px 12px;
+    }
+
+    .jadwal-modal {
+        padding: 20px 14px;
+    }
+
+    .jadwal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .jadwal-modal-head h2 {
+        font-size: 1.15rem;
+    }
+}

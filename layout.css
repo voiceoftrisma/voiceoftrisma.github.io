@@ -292,10 +292,21 @@ body.sidebar-toggled .navbar-main>.logo-main.hidden-desktop {
     flex: 1;
     max-width: 450px;
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Tombol jadwal di samping kiri kotak pencarian (semua halaman) */
+.jadwal-search-btn {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
 }
 
 .search-box {
     display: flex;
+    flex: 1;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
     border-radius: 14px;
@@ -409,6 +420,12 @@ body.sidebar-toggled .navbar-main>.logo-main.hidden-desktop {
     }
 
     .search-container {
+        /* Container tetap tampil di layar kecil: tombol jadwal selalu muncul. */
+        display: flex;
+    }
+
+    .search-box {
+        /* Search bar disembunyikan di layar kecil, tombol jadwal tetap ada. */
         display: none;
     }
 }

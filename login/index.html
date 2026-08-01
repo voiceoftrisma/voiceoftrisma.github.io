@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice of Trisma - Login</title>
+    <link rel="icon" href="../assets/madyapadma.svg" type="image/png">
+
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Login Page Stylesheet -->
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggleBtn" title="Ganti Tema" aria-label="Ganti Tema">
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- Login Card -->
+    <main class="login-wrap">
+        <div class="login-card glass-panel">
+
+            <div class="login-brand">
+                <img src="../assets/madyapadma-voice-of-trisma-origin.svg" alt="Voice of Trisma" class="login-logo">
+                <p>Masuk ke Dashboard Admin Voice of Trisma</p>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="username" name="username" placeholder="Masukkan username"
+                            autocomplete="username" required>
+                    </div>
+                    <span class="field-error" id="usernameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="Masukkan password"
+                            autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" id="passwordToggle" title="Tampilkan password"
+                            aria-label="Tampilkan password">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="field-error" id="passwordError"></span>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Ingat saya</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-label">Masuk</span>
+                    <span class="btn-spinner" style="display: none;">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    </span>
+                </button>
+
+                <div class="form-error" id="formError" style="display: none;"></div>
+            </form>
+
+            <a href="../" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+
+        <p class="login-copyright">© Voice of Trisma<br>Madyapadma Journalistic Park</p>
+    </main>
+
+    <script src="login.js"></script>
+</body>
+
+</html>

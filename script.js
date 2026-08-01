@@ -1,6 +1,8 @@
 // Konfigurasi URL
 const STATS_URL = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev?t=';
-const JADWAL_URL = './jadwal.json';
+// Jadwal diambil dari Cloudflare Worker (API admin-worker).
+// File lokal jadwal.json sudah dihapus — kelola lewat Dashboard Admin: ./dashboard
+const JADWAL_URL = 'https://voiceoftrisma-admin-worker.anandapradnyana68.workers.dev/api/jadwal?t=';
 
 // Elemen DOM
 const liveBadge = document.getElementById('liveBadge');
@@ -33,7 +35,7 @@ function getWaktuBali() {
  */
 async function getAcaraSekarang() {
     try {
-        const response = await fetch(JADWAL_URL);
+        const response = await fetch(JADWAL_URL + Date.now());
         const data = await response.json();
 
         const { day, time } = getWaktuBali();

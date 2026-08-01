@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice of Trisma - Dashboard Admin</title>
+    <link rel="icon" href="../assets/madyapadma.svg" type="image/png">
+
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Dashboard Stylesheet -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <!-- ===== Overlay Verifikasi Sesi (dipakai saat halaman dibuka) ===== -->
+    <div id="verifyOverlay" class="verify-overlay">
+        <div class="verify-box glass-panel">
+            <i class="fa-solid fa-circle-notch fa-spin verify-spin"></i>
+            <p>Memverifikasi sesi...</p>
+        </div>
+    </div>
+
+    <!-- ===== Top Bar ===== -->
+    <header class="dash-topbar">
+        <div class="dash-brand">
+            <img src="../assets/madyapadma-voice-of-trisma-origin.svg" alt="Voice of Trisma" class="dash-logo">
+            <div class="dash-brand-text">
+                <h1>Dashboard Admin</h1>
+                <p id="dashUser">Mengambil data...</p>
+            </div>
+        </div>
+        <div class="dash-actions">
+            <button class="icon-btn" id="themeToggleBtn" title="Ganti Tema" aria-label="Ganti Tema">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <a href="../" class="icon-btn" title="Lihat Situs" aria-label="Lihat Situs">
+                <i class="fa-solid fa-tower-broadcast"></i>
+            </a>
+            <button class="btn-logout" id="logoutBtn" title="Keluar">
+                <i class="fa-solid fa-right-from-bracket"></i> Keluar
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== Layout: Nav + Konten ===== -->
+    <div class="dash-layout">
+
+        <!-- Navigasi section. CARA TAMBAH TAB BARU:
+             duplikat baris <button> di bawah dengan data-section="nama-fitur",
+             lalu buat <section id="section-nama-fitur"> dan daftarkan di
+             SECTIONS pada dashboard.js -->
+        <nav class="dash-nav" id="dashNav">
+            <button class="dash-nav-item active" data-section="jadwal">
+                <i class="fa-solid fa-calendar-days"></i> Jadwal Siaran
+            </button>
+            <button class="dash-nav-item" data-section="statistik">
+                <i class="fa-solid fa-chart-line"></i> Statistik
+            </button>
+            <button class="dash-nav-item" data-section="preview">
+                <i class="fa-solid fa-eye"></i> Preview
+            </button>
+            <button class="dash-nav-item" data-section="log">
+                <i class="fa-solid fa-list"></i> Log Aktivitas
+            </button>
+        </nav>
+
+        <main class="dash-main">
+
+            <!-- ===== Section: Jadwal Siaran ===== -->
+            <section id="section-jadwal" class="dash-section">
+                <div class="section-head">
+                    <h2>Jadwal Siaran</h2>
+                    <p>Edit jadwal harian di bawah. Perubahan baru tersimpan ke Cloudflare
+                        setelah tombol <strong>Simpan Perubahan</strong> ditekan.</p>
+                </div>
+
+                <!-- Toolbar jadwal -->
+                <div class="dash-toolbar glass-panel">
+                    <div class="tool-group">
+                        <button type="button" class="btn-ghost" id="undoBtn" title="Pulihkan versi jadwal sebelumnya">
+                            <i class="fa-solid fa-rotate-left"></i> Undo
+                        </button>
+                        <button type="button" class="btn-ghost" id="exportIcsBtn" title="Ekspor jadwal ke Google Calendar (.ics)">
+                            <i class="fa-solid fa-calendar-plus"></i> Ekspor .ics
+                        </button>
+                        <button type="button" class="btn-ghost" id="exportJsonBtn" title="Unduh cadangan jadwal (JSON)">
+                            <i class="fa-solid fa-file-arrow-down"></i> Backup JSON
+                        </button>
+                        <button type="button" class="btn-ghost" id="importJsonBtn" title="Muat cadangan jadwal (JSON)">
+                            <i class="fa-solid fa-file-arrow-up"></i> Restore JSON
+                        </button>
+                        <input type="file" id="importFile" accept="application/json,.json" style="display:none;">
+                    </div>
+                    <div class="tool-group tool-duplicate">
+                        <label for="dupFrom">Duplikasi:</label>
+                        <select id="dupFrom" class="inp select-inline" title="Hari sumber"></select>
+                        <span class="dup-arrow">→</span>
+                        <select id="dupTo" class="inp select-inline" title="Hari tujuan"></select>
+                        <button type="button" class="btn-ghost" id="dupBtn" title="Salin jadwal dari hari sumber ke hari tujuan">
+                            <i class="fa-solid fa-copy"></i> Salin
+                        </button>
+                    </div>
+                </div>
+
+                <div id="jadwalContainer" class="day-grid">
+                    <!-- Kartu hari dirender oleh dashboard.js -->
+                </div>
+            </section>
+
+            <!-- ===== Section: Statistik ===== -->
+            <section id="section-statistik" class="dash-section" style="display:none;">
+                <div class="section-head">
+                    <h2>Statistik Pendengar</h2>
+                    <p>Status siaran langsung dan grafik pendengar unik 6 jam terakhir
+                        (diperbarui otomatis setiap 5 menit oleh worker
+                        <code>voiceoftrisma-stream-stats</code>).</p>
+                </div>
+
+                <div class="stat-grid">
+                    <!-- Kartu status live -->
+                    <div class="stat-card glass-panel" id="liveCard">
+                        <div class="stat-card-title">
+                            <span class="live-dot" id="liveDot"></span>
+                            <span id="liveLabel">Memuat status...</span>
+                        </div>
+                        <div class="live-program" id="liveProgram">-</div>
+                        <div class="live-meta">
+                            <span id="liveNext">-</span>
+                        </div>
+                        <div class="live-listeners">
+                            <span class="big-number" id="liveListeners">-</span>
+                            <span class="big-label">pendengar sekarang</span>
+                        </div>
+                        <button type="button" class="btn-ghost" id="refreshStatsBtn">
+                            <i class="fa-solid fa-rotate-right"></i> Muat ulang
+                        </button>
+                    </div>
+
+                    <!-- Kartu ringkasan 6 jam -->
+                    <div class="stat-card glass-panel">
+                        <div class="stat-card-title">Ringkasan 6 Jam</div>
+                        <div class="stat-summary">
+                            <div><span class="big-number" id="statPeak">-</span><span class="big-label">puncak</span></div>
+                            <div><span class="big-number" id="statAvg">-</span><span class="big-label">rata-rata</span></div>
+                            <div><span class="big-number" id="statOnline">-</span><span class="big-label">% on air</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik SVG -->
+                <div class="stat-card glass-panel chart-card">
+                    <div class="stat-card-title">Pendengar Unik — 6 Jam Terakhir</div>
+                    <div id="chartWrap" class="chart-wrap">
+                        <p class="chart-empty">Belum ada data. Worker akan mengumpulkan sample
+                            setiap 5 menit — coba lagi sebentar lagi.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Section: Preview ===== -->
+            <section id="section-preview" class="dash-section" style="display:none;">
+                <div class="section-head">
+                    <h2>Preview Jadwal</h2>
+                    <p>Mode lihat — tampilan jadwal seperti yang akan dilihat pendengar
+                        (termasuk perubahan yang belum disimpan).</p>
+                </div>
+                <div id="previewContainer" class="preview-week">
+                    <!-- Kartu hari preview dirender oleh dashboard.js -->
+                </div>
+            </section>
+
+            <!-- ===== Section: Log Aktivitas ===== -->
+            <section id="section-log" class="dash-section" style="display:none;">
+                <div class="section-head">
+                    <h2>Log Aktivitas</h2>
+                    <p>Riwayat login admin dan perubahan jadwal (100 entri terakhir, tersimpan di KV).</p>
+                </div>
+                <div class="table-wrap glass-panel log-wrap">
+                    <table class="log-table" id="logTable">
+                        <thead>
+                            <tr>
+                                <th>Waktu (WITA)</th>
+                                <th>Aktivitas</th>
+                                <th>Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody">
+                            <tr><td colspan="3" class="log-empty">Memuat log...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===== Save Bar (sticky bawah) ===== -->
+    <div class="dash-savebar">
+        <span id="saveStatus" class="save-status">Memuat jadwal...</span>
+        <button id="saveBtn" class="btn-save" disabled>
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+        </button>
+    </div>
+
+    <!-- ===== Modal Riwayat (Undo) ===== -->
+    <div id="historyModal" class="modal-backdrop" style="display:none;">
+        <div class="modal glass-panel">
+            <div class="modal-head">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Perubahan Jadwal</h3>
+                <button type="button" class="icon-btn modal-close" id="historyClose" aria-label="Tutup">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="modal-sub">5 versi terakhir tersimpan otomatis di Cloudflare KV saat
+                jadwal disimpan. Klik <strong>Pulihkan</strong> untuk mengembalikan versi itu.</p>
+            <div id="historyList" class="history-list">
+                <p class="log-empty">Memuat riwayat...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template baris jadwal (dipakai dashboard.js) -->
+    <template id="rowTemplate">
+        <tr class="jadwal-row">
+            <td class="col-mulai"><input type="time" class="inp mulai" step="60" title="Waktu mulai"></td>
+            <td class="col-selesai"><input type="time" class="inp selesai" step="60" title="Waktu selesai (kosongkan jika tidak ada)"></td>
+            <td class="col-acara"><input type="text" class="inp acara" placeholder="Nama acara" maxlength="80"></td>
+            <td class="col-penyiar"><input type="text" class="inp penyiar" placeholder="Penyiar" maxlength="40"></td>
+            <td class="col-aksi">
+                <button type="button" class="btn-del" title="Hapus baris" aria-label="Hapus baris">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </template>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>
