@@ -276,6 +276,7 @@
     margin: 0 0 12px 0;
     font-size: 0.95rem;
     color: var(--accent, #ffb86c);
+    text-align: justify;
 }
 
 .segment-desc {
@@ -283,6 +284,12 @@
     font-size: 0.95rem;
     line-height: 1.7;
     color: var(--text-muted, #aaa);
+    text-align: justify;
+}
+
+/* Deskripsi repo — rata kanan-kiri */
+#readmeText {
+    text-align: justify;
 }
 
 /* Pagination Controls */
