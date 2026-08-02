@@ -592,22 +592,6 @@ body > * {
     gap: 8px;
 }
 
-.tool-duplicate label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.dup-arrow {
-    color: var(--text-muted);
-}
-
-.select-inline {
-    width: auto;
-    min-width: 110px;
-    padding: 8px 10px;
-    font-size: 0.85rem;
-}
-
 .btn-ghost {
     display: inline-flex;
     align-items: center;
@@ -1126,11 +1110,6 @@ body > * {
 
     .tool-group {
         width: 100%;
-    }
-
-    .tool-duplicate .select-inline {
-        flex: 1;
-        min-width: 0;
     }
 }
 

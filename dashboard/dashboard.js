@@ -174,7 +174,6 @@
             if (!r.ok) throw new Error(r.data.error || 'Gagal memuat jadwal.');
             state.jadwal = normalizeJadwal(r.data.jadwal);
             renderJadwal();
-            initDupSelects();
             setStatus('Siap. Belum ada perubahan.');
         }).catch(function (e) {
             setStatus('Gagal memuat jadwal: ' + e.message, true);
@@ -326,75 +325,7 @@
         return { jadwal: doc };
     }
 
-    /* ---------------- Toolbar: Undo / duplikasi / ekspor / import ---------------- */
-
-    function initDupSelects() {
-        var from = document.getElementById('dupFrom');
-        var to = document.getElementById('dupTo');
-        if (!from || !to) return;
-        var options = '';
-        for (var d in DAYS) options += '<option value="' + d + '">' + DAYS[d] + '</option>';
-        from.innerHTML = options;
-        to.innerHTML = options;
-        // Sumber default: hari ini jika berisi; kalau kosong (mis. Minggu),
-        // ambil hari pertama (0..6) yang punya jadwal.
-        var nowDay = String(getWaktuBali().day);
-        if (DAYS[nowDay] && dayHasContent(nowDay)) {
-            from.value = nowDay;
-        } else {
-            for (var d2 = 0; d2 <= 6; d2++) {
-                var k = String(d2);
-                if (DAYS[k] && dayHasContent(k)) { from.value = k; break; }
-            }
-        }
-        // Tujuan default: hari berikutnya (mengitari 6→0) yang ada.
-        var f = Number(from.value);
-        for (var i = 1; i <= 6; i++) {
-            var n = String((f + i) % 7);
-            if (DAYS[n] && n !== from.value) { to.value = n; break; }
-        }
-    }
-
-    /* Apakah kartu hari punya minimal satu baris terisi? */
-    function dayHasContent(day) {
-        var card = document.querySelector('.day-card[data-day="' + day + '"]');
-        if (!card) return false;
-        var filled = false;
-        card.querySelectorAll('tbody tr').forEach(function (tr) {
-            if (tr.querySelector('.mulai').value.trim() ||
-                tr.querySelector('.selesai').value.trim() ||
-                tr.querySelector('.acara').value.trim() ||
-                tr.querySelector('.penyiar').value.trim()) filled = true;
-        });
-        return filled;
-    }
-
-    function duplicateDay(from, to) {
-        if (from === to) return;
-        var source = document.querySelector('.day-card[data-day="' + from + '"]');
-        var target = document.querySelector('.day-card[data-day="' + to + '"]');
-        if (!source || !target) return;
-        // JANGAN kosongkan target kalau sumber tidak punya isi (mis. Minggu):
-        // Salin dari hari kosong = menghapus jadwal hari tujuan tanpa sadar.
-        if (!dayHasContent(from)) {
-            setStatus('Hari ' + DAYS[from] + ' kosong — tidak ada yang bisa disalin. Pilih hari sumber lain.');
-            return;
-        }
-        var rows = source.querySelectorAll('tbody tr');
-        var tbody = target.querySelector('tbody');
-        tbody.innerHTML = '';
-        rows.forEach(function (tr) {
-            var item = {
-                waktu_mulai: tr.querySelector('.mulai').value,
-                waktu_selesai: tr.querySelector('.selesai').value,
-                acara: tr.querySelector('.acara').value,
-                penyiar: tr.querySelector('.penyiar').value
-            };
-            tbody.appendChild(buildRow(item));
-        });
-        markDirty();
-        setStatus('Jadwal ' + DAYS[from] + ' disalin ke ' + DAYS[to] + '. Jangan lupa simpan.');
-    }
+    /* ---------------- Toolbar: Undo / ekspor / import ---------------- */
 
     /* ---------------- Ekspor .ics (Google Calendar) ---------------- */
 
@@ -1122,12 +1053,6 @@
     });
 
     /* ---------------- Toolbar bindings ---------------- */
-
-    document.getElementById('dupBtn').addEventListener('click', function () {
-        var from = document.getElementById('dupFrom').value;
-        var to = document.getElementById('dupTo').value;
-        duplicateDay(from, to);
-    });
 
     document.getElementById('exportIcsBtn').addEventListener('click', exportIcs);
     document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
