@@ -336,12 +336,37 @@
         for (var d in DAYS) options += '<option value="' + d + '">' + DAYS[d] + '</option>';
         from.innerHTML = options;
         to.innerHTML = options;
+        // Sumber default: hari ini jika berisi; kalau kosong (mis. Minggu),
+        // ambil hari pertama (0..6) yang punya jadwal.
         var nowDay = String(getWaktuBali().day);
-        if (DAYS[nowDay]) from.value = nowDay;
-        // Tujuan default: hari berikutnya yang ada
-        var next = Number(nowDay) + 1;
-        if (!DAYS[next]) next = 1;
-        if (DAYS[next]) to.value = String(next);
+        if (DAYS[nowDay] && dayHasContent(nowDay)) {
+            from.value = nowDay;
+        } else {
+            for (var d2 = 0; d2 <= 6; d2++) {
+                var k = String(d2);
+                if (DAYS[k] && dayHasContent(k)) { from.value = k; break; }
+            }
+        }
+        // Tujuan default: hari berikutnya (mengitari 6→0) yang ada.
+        var f = Number(from.value);
+        for (var i = 1; i <= 6; i++) {
+            var n = String((f + i) % 7);
+            if (DAYS[n] && n !== from.value) { to.value = n; break; }
+        }
+    }
+
+    /* Apakah kartu hari punya minimal satu baris terisi? */
+    function dayHasContent(day) {
+        var card = document.querySelector('.day-card[data-day="' + day + '"]');
+        if (!card) return false;
+        var filled = false;
+        card.querySelectorAll('tbody tr').forEach(function (tr) {
+            if (tr.querySelector('.mulai').value.trim() ||
+                tr.querySelector('.selesai').value.trim() ||
+                tr.querySelector('.acara').value.trim() ||
+                tr.querySelector('.penyiar').value.trim()) filled = true;
+        });
+        return filled;
     }
 
     function duplicateDay(from, to) {
@@ -349,6 +374,12 @@
         var source = document.querySelector('.day-card[data-day="' + from + '"]');
         var target = document.querySelector('.day-card[data-day="' + to + '"]');
         if (!source || !target) return;
+        // JANGAN kosongkan target kalau sumber tidak punya isi (mis. Minggu):
+        // Salin dari hari kosong = menghapus jadwal hari tujuan tanpa sadar.
+        if (!dayHasContent(from)) {
+            setStatus('Hari ' + DAYS[from] + ' kosong — tidak ada yang bisa disalin. Pilih hari sumber lain.');
+            return;
+        }
         var rows = source.querySelectorAll('tbody tr');
         var tbody = target.querySelector('tbody');
         tbody.innerHTML = '';
