@@ -48,6 +48,14 @@ function formatDate(iso) {
     return `${String(d.getUTCDate()).padStart(2, '0')}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCFullYear()).slice(-2)}`;
 }
 
+// Escape HTML — semua data dinamis (query pencarian, metadata Archive.org,
+// deskripsi, subtitle) WAJIB lewat sini sebelum masuk innerHTML.
+function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
 function mapHit(h) {
     const id = h.fields.identifier;
     let title = h.fields.title || id;
@@ -83,11 +91,11 @@ async function loadData() {
         renderPagination();
 
         if (state.data.length === 0 && state.query) {
-            listEl.innerHTML = `<div class="empty-state">Tidak ditemukan hasil untuk "${state.query}"</div>`;
+            listEl.innerHTML = `<div class="empty-state">Tidak ditemukan hasil untuk "${escapeHtml(state.query)}"</div>`;
         }
     } catch (e) {
         console.error("Gagal memuat data:", e);
-        listEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation fa-3x empty-icon"></i><br>${e.message}</div>`;
+        listEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation fa-3x empty-icon"></i><br>${escapeHtml(e.message)}</div>`;
     }
 }
 
@@ -105,7 +113,7 @@ async function loadAllForSearch(q) {
     state.page = 1;
 
     searchInd.style.display = 'flex';
-    searchQ.innerHTML = `"${q}"`;
+    searchQ.innerHTML = `"${escapeHtml(q)}"`;
 
     await loadData();
 }
@@ -152,7 +160,7 @@ function render() {
                 <i class="fa-solid fa-file-audio"></i> ${items.length} rekaman tersedia
             </p>
             <div class="repo-card-tags">
-                ${items.slice(0, 3).map(i => `<span>${i.id.substring(13, 28)}..</span>`).join('')}
+                ${items.slice(0, 3).map(i => `<span>${escapeHtml(i.id.substring(13, 28))}..</span>`).join('')}
                 ${items.length > 3 ? `<span class="tag-more">+${items.length - 3} lainnya</span>` : ''}
             </div>
         </div>
@@ -170,7 +178,7 @@ function openRepo(date, items) {
     listContainer.style.display = 'none';
     repoView.style.display = 'block';
 
-    repoTitle.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> Arsip: ${date}`;
+    repoTitle.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> Arsip: ${escapeHtml(date)}`;
     repoSub.textContent = `Memuat metadata untuk ${items.length} rekaman...`;
 
     repoReadme.style.display = 'none';
@@ -180,10 +188,10 @@ function openRepo(date, items) {
         <div class="repofile-row" data-audio="true">
             <div class="repofile-left">
                 <i class="fa-solid fa-file-audio repofile-icon" style="color: var(--text-muted);"></i>
-                <span class="repofile-name" data-id="${it.id}" data-title="${it.title.replace(/"/g, '&quot;')}" data-url="${it.url}">${it.title}</span>
+                <span class="repofile-name" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title)}" data-url="${escapeHtml(it.url)}">${escapeHtml(it.title)}</span>
             </div>
             <div class="repofile-actions">
-                <button class="repofile-btn repofile-play-btn" data-id="${it.id}" data-title="${it.title.replace(/"/g, '&quot;')}" data-url="${it.url}">
+                <button class="repofile-btn repofile-play-btn" data-id="${escapeHtml(it.id)}" data-title="${escapeHtml(it.title)}" data-url="${escapeHtml(it.url)}">
                     <i class="fa-solid fa-play"></i>
                 </button>
             </div>
@@ -198,7 +206,7 @@ function openRepo(date, items) {
     });
 
     const firstId = items[0].id;
-    repoSub.innerHTML = `<b>${items.length}</b> rekaman tersedia pada tanggal <b>${date}</b>. <a href="https://archive.org/details/${firstId}" target="_blank" style="color: var(--primary-color);">Buka di Archive.org</a>`;
+    repoSub.innerHTML = `<b>${items.length}</b> rekaman tersedia pada tanggal <b>${escapeHtml(date)}</b>. <a href="https://archive.org/details/${escapeHtml(firstId)}" target="_blank" style="color: var(--primary-color);">Buka di Archive.org</a>`;
 
     fetch(`https://archive.org/download/${firstId}/${firstId}_files.xml`)
         .then(r => r.text())
@@ -248,11 +256,11 @@ function renderReadme(data) {
                         </button>
                         <div class="segment-info">
                             <h5 class="segment-title">
-                                ${prog.program || 'Segmen ' + (idx + 1)}
-                                ${prog.announcer ? `<span class="segment-announcer"><i class="fa-solid fa-microphone-lines"></i> ${prog.announcer}</span>` : ''}
+                                ${escapeHtml(prog.program || 'Segmen ' + (idx + 1))}
+                                ${prog.announcer ? `<span class="segment-announcer"><i class="fa-solid fa-microphone-lines"></i> ${escapeHtml(prog.announcer)}</span>` : ''}
                             </h5>
-                            ${prog.topic ? `<p class="segment-topic"><i class="fa-solid fa-hashtag" style="opacity: 0.7;"></i> <strong>Topik:</strong> ${prog.topic}</p>` : ''}
-                            <p class="segment-desc">${prog.description || ''}</p>
+                            ${prog.topic ? `<p class="segment-topic"><i class="fa-solid fa-hashtag" style="opacity: 0.7;"></i> <strong>Topik:</strong> ${escapeHtml(prog.topic)}</p>` : ''}
+                            <p class="segment-desc">${escapeHtml(prog.description || '')}</p>
                         </div>
                     </div>
                 </div>
@@ -443,7 +451,7 @@ mainAudio.addEventListener('timeupdate', () => {
                 const sub = currentSubtitles[i];
                 if (ct >= sub.start && ct <= sub.end) {
                     activeSubtitleIndex = i;
-                    subText.innerHTML = sub.text;
+                    subText.textContent = sub.text;
                     subContainer.style.display = 'block';
                     break;
                 }
@@ -594,8 +602,8 @@ async function loadRepoFromIdentifier(identifier) {
         const date = formatDate(publicdate);
         const files = meta.files || [];
 
-        repoTitle.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> ${title}`;
-        repoSub.innerHTML = `Diupload pada <b>${date}</b> &nbsp;·&nbsp; <a href="https://archive.org/details/${identifier}" target="_blank" style="color:var(--primary-color);">Buka di Archive.org <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75em;"></i></a>`;
+        repoTitle.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> ${escapeHtml(title)}`;
+        repoSub.innerHTML = `Diupload pada <b>${escapeHtml(date)}</b> &nbsp;·&nbsp; <a href="https://archive.org/details/${escapeHtml(identifier)}" target="_blank" style="color:var(--primary-color);">Buka di Archive.org <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75em;"></i></a>`;
 
         // 1. Fetch and render description FIRST
         const descFile = files.find(f => f.name === 'description.json');
@@ -613,7 +621,9 @@ async function loadRepoFromIdentifier(identifier) {
         } else if (meta.metadata?.description) {
             repoReadme.style.display = 'block';
             readmeTitle.textContent = title;
-            readmeText.innerHTML = meta.metadata.description;
+            // Deskripsi = data eksternal (Archive.org) — escape total, hanya
+            // newline yang diizinkan kembali (tampil sebagai <br>).
+            readmeText.innerHTML = escapeHtml(meta.metadata.description).replace(/\n/g, '<br>');
             document.getElementById('readmePrograms').parentElement.style.display = 'none';
         } else {
             repoReadme.style.display = 'none';
@@ -644,12 +654,12 @@ async function loadRepoFromIdentifier(identifier) {
                 <div class="repofile-row" data-audio="${isAudio}" data-is-simple="${isSimple}">
                     <div class="repofile-left">
                         <i class="fa-solid ${icon} repofile-icon" style="color:${iclr};"></i>
-                        <span class="repofile-name" title="${f.name}">${f.name}</span>
+                        <span class="repofile-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
                         ${srcBadge}
                         <span class="repofile-meta">${sizeStr}${durStr}</span>
                     </div>
                     <div class="repofile-actions">
-                        ${isAudio ? `<button class="repofile-btn repofile-play-btn" data-url="${fileUrl}" data-title="${title.replace(/"/g, '&quot;')}" data-archive="https://archive.org/details/${identifier}"><i class="fa-solid fa-play"></i></button>` : ''}
+                        ${isAudio ? `<button class="repofile-btn repofile-play-btn" data-url="${escapeHtml(fileUrl)}" data-title="${escapeHtml(title)}" data-archive="https://archive.org/details/${escapeHtml(identifier)}"><i class="fa-solid fa-play"></i></button>` : ''}
                         <a href="${fileUrl}" target="_blank" class="repofile-btn" title="Unduh"><i class="fa-solid fa-download"></i></a>
                     </div>
                 </div>`;
@@ -747,7 +757,7 @@ if (initIdentifier) {
             loadAllForSearch(initQ);
         }
     }).catch(e => {
-        listEl.innerHTML = `<div class="empty-state">⚠️<br>${e.message}</div>`;
+        listEl.innerHTML = `<div class="empty-state">⚠️<br>${escapeHtml(e.message)}</div>`;
     });
 }
 
@@ -760,17 +770,17 @@ function showDatePopup(date, items) {
     const sub = document.getElementById('datePopupSub');
     const list = document.getElementById('datePopupList');
 
-    title.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> Arsip: ${date}`;
+    title.innerHTML = `<i class="fa-solid fa-book-bookmark"></i> Arsip: ${escapeHtml(date)}`;
     const firstId = items[0].id;
-    sub.innerHTML = `Repository contains <b>${items.length} audio files</b> uploaded on <b>${date}</b>. <a href="https://archive.org/details/${firstId}" target="_blank" style="color: var(--primary-color);">View on Archive.org</a>`;
+    sub.innerHTML = `Repository contains <b>${items.length} audio files</b> uploaded on <b>${escapeHtml(date)}</b>. <a href="https://archive.org/details/${escapeHtml(firstId)}" target="_blank" style="color: var(--primary-color);">View on Archive.org</a>`;
 
     list.innerHTML = items.map((it) => `
         <div class="repofile-row" data-audio="true">
             <div class="repofile-left">
                 <i class="fa-solid fa-file-audio repofile-icon" style="color: var(--text-muted);"></i>
-                <span class="repofile-name" data-id="${it.id}">${it.title}</span>
+                <span class="repofile-name" data-id="${escapeHtml(it.id)}">${escapeHtml(it.title)}</span>
             </div>
-            <button class="repofile-btn repofile-play-btn" data-id="${it.id}">
+            <button class="repofile-btn repofile-play-btn" data-id="${escapeHtml(it.id)}">
                 <i class="fa-solid fa-play"></i>
             </button>
         </div>
