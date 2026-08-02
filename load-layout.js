@@ -171,7 +171,7 @@ svgImages.forEach(img => {
 // dipakai bersama. Data dari Cloudflare Worker (jadwal.json lokal dihapus).
 // ============================================
 (function () {
-    const JADWAL_API = 'https://voiceoftrisma-admin-worker.anandapradnyana68.workers.dev/api/jadwal?t=';
+    const JADWAL_API = 'https://voiceoftrisma.anandapradnyana68.workers.dev/api/jadwal?t=';
     const DAY_NAMES = { 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
 
     let jadwalGrid = null;

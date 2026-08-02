@@ -11,7 +11,7 @@
     'use strict';
 
     // Alamat Worker Cloudflare (sesuaikan dengan wrangler.jsonc worker admin)
-    const API_BASE = 'https://voiceoftrisma-admin-worker.anandapradnyana68.workers.dev';
+    const API_BASE = 'https://voiceoftrisma.anandapradnyana68.workers.dev';
 
     /* ---------- THEME (sinkron dengan halaman utama) ---------- */
     var themeToggleBtn = document.getElementById('themeToggleBtn');

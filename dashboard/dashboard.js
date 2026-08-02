@@ -27,9 +27,9 @@
 (function () {
     'use strict';
 
-    // Alamat Worker Cloudflare (sesuaikan dengan wrangler.jsonc worker admin)
-    var API_BASE = 'https://voiceoftrisma-admin-worker.anandapradnyana68.workers.dev';
-    var STATS_BASE = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev';
+    // Alamat Worker Cloudflare (worker gabungan voiceoftrisma)
+    var API_BASE = 'https://voiceoftrisma.anandapradnyana68.workers.dev';
+    var STATS_BASE = 'https://voiceoftrisma.anandapradnyana68.workers.dev/stats';
     var TOKEN_KEY = 'vot_admin_token';
     var USER_KEY = 'vot_admin_user';
 

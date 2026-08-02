@@ -1,4 +1,4 @@
-const STATS_URL = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev?t=';
+const STATS_URL = 'https://voiceoftrisma.anandapradnyana68.workers.dev/stats?t=';
 const PING_INTERVAL = 5000;
 const TIMEOUT_MS = 10 * 60 * 1000;
 

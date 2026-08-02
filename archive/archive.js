@@ -1,4 +1,4 @@
-const WORKER_URL = 'https://archive-cache-worker.anandapradnyana68.workers.dev/';
+const WORKER_URL = 'https://voiceoftrisma.anandapradnyana68.workers.dev/archive/';
 
 const state = {
     data: [],

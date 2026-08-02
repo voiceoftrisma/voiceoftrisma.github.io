@@ -1,8 +1,8 @@
 // Konfigurasi URL
-const STATS_URL = 'https://voiceoftrisma-stream-stats.anandapradnyana68.workers.dev?t=';
+const STATS_URL = 'https://voiceoftrisma.anandapradnyana68.workers.dev/stats?t=';
 // Jadwal diambil dari Cloudflare Worker (API admin-worker).
 // File lokal jadwal.json sudah dihapus — kelola lewat Dashboard Admin: ./dashboard
-const JADWAL_URL = 'https://voiceoftrisma-admin-worker.anandapradnyana68.workers.dev/api/jadwal?t=';
+const JADWAL_URL = 'https://voiceoftrisma.anandapradnyana68.workers.dev/api/jadwal?t=';
 
 // Elemen DOM
 const liveBadge = document.getElementById('liveBadge');
