@@ -232,11 +232,11 @@
     <!-- Template baris jadwal (dipakai dashboard.js) -->
     <template id="rowTemplate">
         <tr class="jadwal-row">
-            <td class="col-mulai"><input type="time" class="inp mulai" step="60" title="Waktu mulai"></td>
-            <td class="col-selesai"><input type="time" class="inp selesai" step="60" title="Waktu selesai (kosongkan jika tidak ada)"></td>
-            <td class="col-acara"><input type="text" class="inp acara" placeholder="Nama acara" maxlength="80"></td>
-            <td class="col-penyiar"><input type="text" class="inp penyiar" placeholder="Penyiar" maxlength="40"></td>
-            <td class="col-aksi">
+            <td class="col-mulai" data-label="Mulai"><input type="time" class="inp mulai" step="60" title="Waktu mulai"></td>
+            <td class="col-selesai" data-label="Selesai"><input type="time" class="inp selesai" step="60" title="Waktu selesai (kosongkan jika tidak ada)"></td>
+            <td class="col-acara" data-label="Acara"><input type="text" class="inp acara" placeholder="Nama acara" maxlength="80"></td>
+            <td class="col-penyiar" data-label="Penyiar"><input type="text" class="inp penyiar" placeholder="Penyiar" maxlength="40"></td>
+            <td class="col-aksi" data-label="">
                 <button type="button" class="btn-del" title="Hapus baris" aria-label="Hapus baris">
                     <i class="fa-solid fa-trash"></i>
                 </button>

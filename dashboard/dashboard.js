@@ -33,8 +33,8 @@
     var TOKEN_KEY = 'vot_admin_token';
     var USER_KEY = 'vot_admin_user';
 
-    // Hari siaran (key angka hari sesuai getDay(): 1=Senin ... 6=Sabtu)
-    var DAYS = { 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+    // Hari siaran (key angka hari sesuai getDay(): 0=Minggu ... 6=Sabtu)
+    var DAYS = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
 
     var state = {
         jadwal: {},      // { "1": [{waktu_mulai, waktu_selesai, acara, penyiar}, ...], ... }
@@ -387,7 +387,7 @@
 
         var now = new Date();
         var uidCounter = 0;
-        // Untuk tiap hari siaran (1=Senin .. 6=Sabtu), buat event 8 minggu ke depan
+        // Untuk tiap hari siaran (0=Minggu .. 6=Sabtu), buat event 8 minggu ke depan
         for (var d in DAYS) {
             var dayNum = Number(d);
             var items = (doc[d] || []).filter(function (it) { return it.waktu_mulai && it.acara; });

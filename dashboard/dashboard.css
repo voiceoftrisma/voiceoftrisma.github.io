@@ -26,6 +26,9 @@
 
     --font-family: 'Outfit', sans-serif;
     --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Kontrol native (dropdown select, time picker, scrollbar) ikut tema gelap */
+    color-scheme: dark;
 }
 
 /* Light theme overrides (sinkron dengan tema utama) */
@@ -41,6 +44,16 @@ body.light-theme {
 
     --input-bg: rgba(0, 0, 0, 0.04);
     --input-border: rgba(0, 0, 0, 0.12);
+
+    /* Kontrol native ikut tema terang */
+    color-scheme: light;
+}
+
+/* Dropdown native (select): warna option cadangan agar terbaca di tiap
+   tema (color-scheme menangani browser modern; aturan ini fallback). */
+select option {
+    color: var(--text-main);
+    background: var(--bg-dark);
 }
 
 * {
@@ -470,6 +483,58 @@ body > * {
     }
 
     .btn-logout span {
+        display: none;
+    }
+}
+
+/* ---------- Mobile: tabel jadwal → kartu bertumpuk ----------
+   Di layar sempit kolom Acara & Penyiar keluar viewport (tabel
+   min-width 560px). Solusi: baris jadi kartu, label tiap kolom
+   (data-label) muncul di ATAS input-nya. */
+@media (max-width: 640px) {
+    .jadwal-table {
+        min-width: 0;
+    }
+
+    .jadwal-table thead {
+        display: none;
+    }
+
+    .jadwal-table tbody tr {
+        display: block;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        background: var(--glass-bg);
+    }
+
+    .jadwal-table tbody tr:last-child {
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .jadwal-table td {
+        display: block;
+        width: 100%;
+        padding: 5px 0;
+    }
+
+    .jadwal-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .jadwal-table .col-aksi {
+        padding-top: 8px;
+        text-align: right;
+    }
+
+    .jadwal-table .col-aksi::before {
         display: none;
     }
 }
