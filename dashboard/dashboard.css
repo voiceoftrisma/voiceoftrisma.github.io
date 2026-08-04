@@ -998,8 +998,21 @@ body > * {
 
 .log-login { background: rgba(34, 197, 94, 0.15); color: var(--success); }
 .log-login_failed { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.log-login_locked { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+.log-logout { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+.log-dashboard_access { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.log-history_view { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .log-jadwal_update { background: rgba(225, 29, 72, 0.15); color: var(--accent); }
 .log-jadwal_restore { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.log-access_denied { background: rgba(239, 68, 68, 0.18); color: #ef4444; }
+
+.log-meta {
+    display: block;
+    margin-bottom: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+}
 
 /* ---------- Modal riwayat (undo) ---------- */
 .modal-backdrop {

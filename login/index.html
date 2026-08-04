@@ -18,6 +18,14 @@
 
     <!-- Login Page Stylesheet -->
     <link rel="stylesheet" href="login.css">
+
+    <!-- Anti-clickjacking (login): tolak dimuat di dalam iframe oleh situs
+         lain. GitHub Pages tak dukung X-Frame-Options, pakai JS. -->
+    <script>
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+    </script>
 </head>
 
 <body>

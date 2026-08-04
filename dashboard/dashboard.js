@@ -100,6 +100,9 @@
     }
 
     document.getElementById('logoutBtn').addEventListener('click', function () {
+        // Backend: catat aktivitas logout + info akses (best-effort; tetap logout
+        // lokal walau panggilan gagal).
+        api('/api/logout', { method: 'POST' }).catch(function () {});
         clearToken();
         redirectToLogin();
     });
@@ -486,7 +489,7 @@
                 list.appendChild(item);
             });
         }).catch(function (e) {
-            list.innerHTML = '<p class="log-empty">Gagal memuat riwayat: ' + e.message + '</p>';
+            list.innerHTML = '<p class="log-empty">Gagal memuat riwayat: ' + escapeHtml(e.message) + '</p>';
         });
     }
 
@@ -940,15 +943,27 @@
             logs.forEach(function (log) {
                 var tr = document.createElement('tr');
                 var when = new Date(log.t).toLocaleString('id-ID', { timeZone: 'Asia/Makassar' });
+                // Info akses (IP · ASN · ISP · negara) ditampilkan di baris kecil di atas detail,
+                // User-Agent ada di tooltip.
+                var metaBits = [];
+                if (log.ip) metaBits.push(escapeHtml(log.ip));
+                if (log.asn) metaBits.push('AS' + escapeHtml(log.asn));
+                if (log.org) metaBits.push(escapeHtml(log.org));
+                if (log.country) metaBits.push('(' + escapeHtml(log.country) + ')');
+                var agentTitle = log.ua ? ' title="' + escapeHtml(log.ua) + '"' : '';
+                var detailCell = escapeHtml(JSON.stringify(log.detail || ''));
+                if (metaBits.length) {
+                    detailCell = '<div class="log-meta"' + agentTitle + '>' + metaBits.join(' \u00b7 ') + '</div>' + detailCell;
+                }
                 tr.innerHTML =
                     '<td class="log-time">' + when + '</td>' +
                     '<td><span class="log-action log-' + (log.action || 'other') + '">' +
                     logActionLabel(log.action) + '</span></td>' +
-                    '<td class="log-detail">' + escapeHtml(JSON.stringify(log.detail || '')) + '</td>';
+                    '<td class="log-detail">' + detailCell + '</td>';
                 body.appendChild(tr);
             });
         }).catch(function (e) {
-            body.innerHTML = '<tr><td colspan="3" class="log-empty">Gagal memuat log: ' + e.message + '</td></tr>';
+            body.innerHTML = '<tr><td colspan="3" class="log-empty">Gagal memuat log: ' + escapeHtml(e.message) + '</td></tr>';
         });
     }
 
@@ -956,8 +971,13 @@
         switch (action) {
             case 'login': return 'Login';
             case 'login_failed': return 'Login Gagal';
+            case 'login_locked': return 'Login Terkunci';
+            case 'logout': return 'Logout';
+            case 'dashboard_access': return 'Dashboard Dibuka';
+            case 'history_view': return 'Riwayat Dibuka';
             case 'jadwal_update': return 'Jadwal Diubah';
             case 'jadwal_restore': return 'Jadwal Dipulihkan';
+            case 'access_denied': return 'Akses Ditolak';
             default: return action || '-';
         }
     }

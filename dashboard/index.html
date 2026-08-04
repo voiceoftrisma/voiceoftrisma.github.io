@@ -18,6 +18,15 @@
 
     <!-- Dashboard Stylesheet -->
     <link rel="stylesheet" href="dashboard.css">
+
+    <!-- Anti-clickjacking: tolak halaman dimuat di dalam <iframe> /
+         <frame> oleh situs lain. (GitHub Pages tidak mendukung header
+         X-Frame-Options / CSP frame-ancestors, jadi pakai JS.) -->
+    <script>
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+    </script>
 </head>
 
 <body>
