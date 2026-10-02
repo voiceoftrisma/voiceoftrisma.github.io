@@ -383,12 +383,19 @@ async function resolveMp3(id) {
     if (!res.ok) return null;
     const xmlDoc = new DOMParser().parseFromString(await res.text(), 'text/xml');
     const files = [...xmlDoc.querySelectorAll('file')];
-    const original = files.find(f => {
+    // Prioritaskan file master di root (luar folder raw/)
+    const master = files.find(f => {
+        const name = f.getAttribute('name') || '';
         const fmt = f.querySelector('format')?.textContent || '';
-        return fmt.toLowerCase().includes('mp3') && f.getAttribute('source') === 'original';
+        return !name.startsWith('raw/') && name.toLowerCase().endsWith('.mp3') &&
+            (fmt.toLowerCase().includes('mp3') || f.getAttribute('source') === 'original');
     });
-    const fallback = files.find(f => (f.getAttribute('name') || '').toLowerCase().endsWith('.mp3'));
-    const chosen = original || fallback;
+    const fallback = files.find(f => {
+        const name = f.getAttribute('name') || '';
+        return !name.startsWith('raw/') && name.toLowerCase().endsWith('.mp3');
+    });
+    const anyMp3 = files.find(f => (f.getAttribute('name') || '').toLowerCase().endsWith('.mp3'));
+    const chosen = master || fallback || anyMp3;
     return chosen ? `https://archive.org/download/${id}/${encodeURIComponent(chosen.getAttribute('name'))}` : null;
 }
 
