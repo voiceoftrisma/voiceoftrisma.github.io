@@ -165,7 +165,11 @@ function render() {
             </div>
         </div>
         `;
-        card.addEventListener('click', () => showDatePopup(date, items));
+        if (items.length === 1) {
+            card.addEventListener('click', () => navigateToRepo(items[0].id));
+        } else {
+            card.addEventListener('click', () => showDatePopup(date, items));
+        }
         listEl.appendChild(card);
     }
 }
