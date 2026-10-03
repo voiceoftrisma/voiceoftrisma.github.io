@@ -228,9 +228,20 @@
 }
 
 .repofolder-icon {
-    font-size: 1.1rem;
-    color: #f59e0b;
+    font-size: 1.05rem;
+    color: var(--text-main, #ffffff);
+    opacity: 0.9;
     flex-shrink: 0;
+}
+
+.repofolder-row:hover .repofolder-icon {
+    opacity: 1;
+}
+
+.repofolder-toggle-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .repofolder-name {

@@ -383,17 +383,19 @@ body.sidebar-toggled .audio-player-bar {
 .player-info {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     flex: 1;
+    min-width: 0;
 }
 
 .img-thumb-container {
     position: relative;
+    flex-shrink: 0;
 }
 
 .img-thumb {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -401,7 +403,7 @@ body.sidebar-toggled .audio-player-bar {
     font-size: 20px;
     color: var(--accent);
     background: rgba(225, 29, 72, 0.05);
-    /* very light accent bg */
+    flex-shrink: 0;
 }
 
 .pulse-soft {
@@ -421,17 +423,26 @@ body.sidebar-toggled .audio-player-bar {
 .song-title-wrapper {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
 }
 
 .song-title {
     font-size: 15px;
     font-weight: 600;
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .song-program {
     font-size: 12px;
     color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Player Controls Section */
@@ -682,43 +693,34 @@ body.light-theme .play-pause-btn.connecting {
 
 @media screen and (max-width: 1024px) {
     .main-content {
-        padding: 0 30px 50px 30px;
+        padding: 0 30px 160px 30px;
     }
-
-
 
     .hero-section h1 {
         font-size: 2.8rem;
     }
-}
 
-@media screen and (max-width: 768px) {
-
-    .main-content {
-        padding: 0 20px 140px 20px;
-    }
-
-    /* Stack player bar elements */
+    /* Stack player bar elements: pindahkan song-title-wrapper & info ke atas controls agar judul tidak terjepit */
     .audio-player-bar,
     body.sidebar-toggled .audio-player-bar {
-        left: 0;
-        width: 100%;
         height: auto;
-        padding: 15px 20px;
+        padding: 12px 24px;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
     }
 
     .player-info {
         flex: unset;
         width: 100%;
         justify-content: flex-start;
+        min-width: 0;
     }
 
     .player-controls {
         flex: unset;
         width: 100%;
         justify-content: center;
+        gap: 20px;
     }
 
     .player-tools {
@@ -729,6 +731,20 @@ body.light-theme .play-pause-btn.connecting {
 
     .time-text {
         font-size: 12px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .main-content {
+        padding: 0 20px 160px 20px;
+    }
+
+    /* Mobile: audio player bar full width (sidebar tersembunyi) */
+    .audio-player-bar,
+    body.sidebar-toggled .audio-player-bar {
+        left: 0;
+        width: 100%;
+        padding: 12px 16px;
     }
 }
 
