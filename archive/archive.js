@@ -636,41 +636,133 @@ async function loadRepoFromIdentifier(identifier) {
             repoReadme.style.display = 'none';
         }
 
-        // 2. Render files
+        // 2. Render files dengan hirarki folder
         const HIDE = ['.torrent', '_meta.xml', '_files.xml', '_meta.sqlite', '.btree'];
         const shown = files.filter(f => !HIDE.some(s => f.name.endsWith(s)));
 
         if (!shown.length) {
-            repoFilesList.innerHTML = '<div style="padding:30px;text-align:center;opacity:0.5;">Tidak ada file yang dapat ditampilkan.</div>';
+            repoFilesList.innerHTML = '<div style="padding:30px;text-align:center;opacity:0.5;">Tidak ada berkas yang dapat ditampilkan.</div>';
+            const toggleAllBtn = document.getElementById('toggleAllFoldersBtn');
+            if (toggleAllBtn) toggleAllBtn.style.display = 'none';
         } else {
-            repoFilesList.innerHTML = shown.map(f => {
+            // Pisahkan antara berkas root dan berkas dalam subfolder (misal: raw/)
+            const rootFiles = [];
+            const folderMap = new Map();
+
+            shown.forEach(f => {
+                const slashIdx = f.name.lastIndexOf('/');
+                if (slashIdx === -1) {
+                    rootFiles.push({ ...f, basename: f.name, isRoot: true });
+                } else {
+                    const folderName = f.name.slice(0, slashIdx);
+                    const basename = f.name.slice(slashIdx + 1);
+                    if (!folderMap.has(folderName)) {
+                        folderMap.set(folderName, []);
+                    }
+                    folderMap.get(folderName).push({ ...f, basename, isRoot: false, folderName });
+                }
+            });
+
+            // Urutkan berkas root: Master MP3 selalu paling atas
+            rootFiles.sort((a, b) => {
+                const aAudio = (a.format || '').toLowerCase().includes('audio') || a.name.toLowerCase().endsWith('.mp3');
+                const bAudio = (b.format || '').toLowerCase().includes('audio') || b.name.toLowerCase().endsWith('.mp3');
+                if (aAudio && !bAudio) return -1;
+                if (!aAudio && bAudio) return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            function renderFileRow(f, isInsideFolder) {
                 const lname = f.name.toLowerCase();
                 const isAudio = (f.format || '').toLowerCase().includes('audio') || (f.format || '').toLowerCase().includes('mp3') || lname.match(/\.(mp3|aac|wav|ogg|flac|m4a)$/);
                 const isImg = /\.(png|jpg|jpeg|gif|webp)$/.test(lname);
                 const isJson = lname.endsWith('.json');
                 const isSub = lname.endsWith('.json') || lname.endsWith('.srt') || lname.endsWith('.txt');
-                const isSimple = isAudio || isSub;
+                const isMaster = f.isRoot && isAudio;
+                const isRawPart = isInsideFolder && isAudio;
+                const isEkor = lname.includes('ekor_');
+                const isManifest = lname.includes('manifest_');
+
+                const isSimple = isMaster || (f.isRoot && !lname.endsWith('.json'));
                 const fileUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`;
                 const sizeStr = f.size ? formatBytes(parseInt(f.size)) : '';
                 const durStr = f.length ? ` · ${formatTime(parseFloat(f.length))}` : '';
-                const srcBadge = f.source === 'derivative' ? `<span class="repofile-badge">deriv.</span>` : '';
+
+                let typeBadge = '';
+                if (isMaster) {
+                    typeBadge = `<span class="repofile-badge repofile-badge-master">Master Siaran</span>`;
+                } else if (isRawPart) {
+                    typeBadge = `<span class="repofile-badge repofile-badge-part">Segmen Mentah</span>`;
+                } else if (isEkor) {
+                    typeBadge = `<span class="repofile-badge repofile-badge-meta">Sidik Suara</span>`;
+                } else if (isManifest) {
+                    typeBadge = `<span class="repofile-badge repofile-badge-meta">Manifest Estafet</span>`;
+                } else if (f.source === 'derivative') {
+                    typeBadge = `<span class="repofile-badge">deriv.</span>`;
+                }
+
                 const icon = isAudio ? 'fa-file-audio' : isImg ? 'fa-file-image' : isJson ? 'fa-file-code' : isSub ? 'fa-file-lines' : 'fa-file';
-                const iclr = isAudio ? 'var(--primary-color)' : 'var(--text-muted)';
+                const iclr = isMaster ? 'var(--primary-color)' : isAudio ? '#38bdf8' : 'var(--text-muted)';
+                const displayName = f.basename || f.name;
 
                 return `
-                <div class="repofile-row" data-audio="${isAudio}" data-is-simple="${isSimple}">
+                <div class="repofile-row" data-audio="${isAudio}" data-is-simple="${isSimple}" data-is-master="${isMaster}" data-is-inside-folder="${isInsideFolder}">
                     <div class="repofile-left">
                         <i class="fa-solid ${icon} repofile-icon" style="color:${iclr};"></i>
-                        <span class="repofile-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
-                        ${srcBadge}
+                        <span class="repofile-name" title="${escapeHtml(f.name)}">${escapeHtml(displayName)}</span>
+                        ${typeBadge}
                         <span class="repofile-meta">${sizeStr}${durStr}</span>
                     </div>
                     <div class="repofile-actions">
-                        ${isAudio ? `<button class="repofile-btn repofile-play-btn" data-url="${escapeHtml(fileUrl)}" data-title="${escapeHtml(title)}" data-archive="https://archive.org/details/${escapeHtml(identifier)}"><i class="fa-solid fa-play"></i></button>` : ''}
-                        <a href="${fileUrl}" target="_blank" class="repofile-btn" title="Unduh"><i class="fa-solid fa-download"></i></a>
+                        ${isAudio ? `<button class="repofile-btn repofile-play-btn" data-url="${escapeHtml(fileUrl)}" data-title="${escapeHtml(isMaster ? title : displayName)}" data-archive="https://archive.org/details/${escapeHtml(identifier)}" title="Putar"><i class="fa-solid fa-play"></i></button>` : ''}
+                        <a href="${fileUrl}" target="_blank" class="repofile-btn" title="Unduh" download><i class="fa-solid fa-download"></i></a>
                     </div>
                 </div>`;
-            }).join('');
+            }
+
+            let html = '';
+
+            // 1. Render Berkas Root (Master Audio dll)
+            rootFiles.forEach(f => {
+                html += renderFileRow(f, false);
+            });
+
+            // 2. Render Folder (misal: raw/)
+            const toggleAllBtn = document.getElementById('toggleAllFoldersBtn');
+            if (folderMap.size > 0 && toggleAllBtn) {
+                toggleAllBtn.style.display = 'inline-flex';
+            } else if (toggleAllBtn) {
+                toggleAllBtn.style.display = 'none';
+            }
+
+            folderMap.forEach((folderFiles, folderName) => {
+                const totalInFolder = folderFiles.length;
+                const folderHint = folderName === 'raw' ? 'Folder Segmen Mentah &amp; Metadata' : 'Folder Berkas';
+                const folderTargetId = `folder-body-${folderName.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+
+                html += `
+                <div class="repofolder-wrapper" data-folder-name="${escapeHtml(folderName)}">
+                    <div class="repofolder-row" data-folder-target="${folderTargetId}" role="button" tabindex="0" aria-expanded="false" title="Klik untuk membuka atau menutup folder ${escapeHtml(folderName)}/">
+                        <div class="repofolder-left">
+                            <i class="fa-solid fa-chevron-right repofolder-chevron"></i>
+                            <i class="fa-solid fa-folder repofolder-icon"></i>
+                            <span class="repofolder-name">${escapeHtml(folderName)}/</span>
+                            <span class="repofolder-count">${totalInFolder} berkas</span>
+                        </div>
+                        <div class="repofolder-right">
+                            <span class="repofolder-tag">${folderHint}</span>
+                        </div>
+                    </div>
+                    <div id="${folderTargetId}" class="repofolder-body" style="display: none;">
+                        ${folderFiles.map(f => renderFileRow(f, true)).join('')}
+                    </div>
+                </div>`;
+            });
+
+            repoFilesList.innerHTML = html;
+
+            // Pasang event toggle folder
+            initFolderToggles();
         }
 
         setRepoViewMode('simple');
@@ -685,8 +777,10 @@ async function loadRepoFromIdentifier(identifier) {
             btn.addEventListener('click', e => { e.stopPropagation(); playDirectUrl(btn.dataset.url, btn.dataset.title, btn.dataset.archive, btn); });
         });
 
-        // HANYA PERSIAPKAN KE STATE STANDBY (TIDAK AUTOPLAY)
-        const firstAudioBtn = document.querySelector('#repoFilesList .repofile-row[data-audio="true"][data-is-simple="true"] .repofile-play-btn') || document.querySelector('#repoFilesList .repofile-row[data-audio="true"] .repofile-play-btn');
+        // HANYA PERSIAPKAN KE STATE STANDBY (TIDAK AUTOPLAY) - Utamakan Master Audio
+        const firstAudioBtn = document.querySelector('#repoFilesList .repofile-row[data-audio="true"][data-is-master="true"] .repofile-play-btn') ||
+            document.querySelector('#repoFilesList .repofile-row[data-audio="true"][data-is-simple="true"] .repofile-play-btn') ||
+            document.querySelector('#repoFilesList .repofile-row[data-audio="true"] .repofile-play-btn');
 
         if (firstAudioBtn) {
             cueStandbyTrack(firstAudioBtn.dataset.url, firstAudioBtn.dataset.title, firstAudioBtn.dataset.archive);
@@ -700,19 +794,121 @@ async function loadRepoFromIdentifier(identifier) {
     }
 }
 
+function initFolderToggles() {
+    document.querySelectorAll('.repofolder-row').forEach(row => {
+        const toggle = () => {
+            const targetId = row.dataset.folderTarget;
+            const body = document.getElementById(targetId);
+            if (!body) return;
+            const isOpen = body.style.display !== 'none';
+            const chevron = row.querySelector('.repofolder-chevron');
+            const icon = row.querySelector('.repofolder-icon');
+
+            if (isOpen) {
+                body.style.display = 'none';
+                row.classList.remove('is-open');
+                row.setAttribute('aria-expanded', 'false');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-right repofolder-chevron';
+                if (icon) icon.className = 'fa-solid fa-folder repofolder-icon';
+            } else {
+                body.style.display = 'block';
+                row.classList.add('is-open');
+                row.setAttribute('aria-expanded', 'true');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-down repofolder-chevron';
+                if (icon) icon.className = 'fa-solid fa-folder-open repofolder-icon';
+            }
+        };
+
+        row.addEventListener('click', toggle);
+        row.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    });
+
+    const toggleAllBtn = document.getElementById('toggleAllFoldersBtn');
+    if (toggleAllBtn) {
+        toggleAllBtn.onclick = () => {
+            const folderRows = document.querySelectorAll('.repofolder-row');
+            const anyOpen = Array.from(folderRows).some(r => r.classList.contains('is-open'));
+            folderRows.forEach(row => {
+                const targetId = row.dataset.folderTarget;
+                const body = document.getElementById(targetId);
+                const chevron = row.querySelector('.repofolder-chevron');
+                const icon = row.querySelector('.repofolder-icon');
+                if (!body) return;
+
+                if (anyOpen) {
+                    body.style.display = 'none';
+                    row.classList.remove('is-open');
+                    row.setAttribute('aria-expanded', 'false');
+                    if (chevron) chevron.className = 'fa-solid fa-chevron-right repofolder-chevron';
+                    if (icon) icon.className = 'fa-solid fa-folder repofolder-icon';
+                } else {
+                    body.style.display = 'block';
+                    row.classList.add('is-open');
+                    row.setAttribute('aria-expanded', 'true');
+                    if (chevron) chevron.className = 'fa-solid fa-chevron-down repofolder-chevron';
+                    if (icon) icon.className = 'fa-solid fa-folder-open repofolder-icon';
+                }
+            });
+            toggleAllBtn.innerHTML = anyOpen ?
+                '<i class="fa-solid fa-folder"></i> Buka Semua Folder' :
+                '<i class="fa-solid fa-folder-open"></i> Tutup Semua Folder';
+        };
+    }
+}
+
 function setRepoViewMode(mode) {
     const sBtn = document.getElementById('viewSimpleBtn');
     const dBtn = document.getElementById('viewDetailBtn');
+    const toggleAllBtn = document.getElementById('toggleAllFoldersBtn');
+
     if (mode === 'simple') {
         sBtn.style.background = 'var(--primary-color)'; sBtn.style.color = 'white'; sBtn.style.opacity = '1';
         dBtn.style.background = 'transparent'; dBtn.style.color = 'var(--text-main)'; dBtn.style.opacity = '0.6';
+
+        // Di mode Simple: Folder arsip mentah (raw/) otomatis di-collapse agar tampilan bersih dan fokus ke Master Audio
+        document.querySelectorAll('.repofolder-row').forEach(row => {
+            const targetId = row.dataset.folderTarget;
+            const body = document.getElementById(targetId);
+            const chevron = row.querySelector('.repofolder-chevron');
+            const icon = row.querySelector('.repofolder-icon');
+            if (body) {
+                body.style.display = 'none';
+                row.classList.remove('is-open');
+                row.setAttribute('aria-expanded', 'false');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-right repofolder-chevron';
+                if (icon) icon.className = 'fa-solid fa-folder repofolder-icon';
+            }
+        });
+        if (toggleAllBtn) {
+            toggleAllBtn.innerHTML = '<i class="fa-solid fa-folder"></i> Buka Semua Folder';
+        }
     } else {
         dBtn.style.background = 'var(--primary-color)'; dBtn.style.color = 'white'; dBtn.style.opacity = '1';
         sBtn.style.background = 'transparent'; sBtn.style.color = 'var(--text-main)'; sBtn.style.opacity = '0.6';
+
+        // Di mode Detail: Seluruh folder di-expand otomatis agar teknikal berkas terlihat
+        document.querySelectorAll('.repofolder-row').forEach(row => {
+            const targetId = row.dataset.folderTarget;
+            const body = document.getElementById(targetId);
+            const chevron = row.querySelector('.repofolder-chevron');
+            const icon = row.querySelector('.repofolder-icon');
+            if (body) {
+                body.style.display = 'block';
+                row.classList.add('is-open');
+                row.setAttribute('aria-expanded', 'true');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-down repofolder-chevron';
+                if (icon) icon.className = 'fa-solid fa-folder-open repofolder-icon';
+            }
+        });
+        if (toggleAllBtn) {
+            toggleAllBtn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Tutup Semua Folder';
+        }
     }
-    document.querySelectorAll('#repoFilesList .repofile-row').forEach(row => {
-        row.style.display = (mode === 'simple' && row.dataset.isSimple !== 'true') ? 'none' : 'flex';
-    });
 }
 
 function formatBytes(b) {
